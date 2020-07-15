@@ -127,6 +127,7 @@
             type: rowTypes.PROGRAM_INDICATOR,
           },
           {
+            // Note: there seems to be a typo on this name in the DB (extra space at the end)
             name: "IUs eligible for pre-TAS surveys",
             type: rowTypes.PROGRAM_INDICATOR,
           },
@@ -256,7 +257,11 @@
 
             // TODO: Use indicators / programIndicators / other
             const dimension = programIndicators.find(
-              (dim) => dim.displayName === dimensionName
+              (dim) => {
+                // Regex matching to be more flexible (case insensitive, works w/o spaces)
+                const re = new RegExp(dimensionName, "i");
+                return re.test(dim.displayName);
+              }
             );
 
             // If dimension found, make new cell and prep it for data
@@ -311,6 +316,10 @@
 
 <div>
   <!-- Put your HTML mark-up here -->
+
+  <h4>Notes:</h4>
+  <p>"Dimension not found" shows fields that weren't found in the list of program indicators or indicators so we can make sure we're querying the right things.</p>
+  <p>A cell showing "-" means that the dimension <em>was</em> found, but no data was found for it in the database.</p>
 
   <h1>MDA Treatment Summary</h1>
 
