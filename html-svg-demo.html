@@ -1,4 +1,4 @@
-<script type="text/javascript">
+<!-- <script type="text/javascript">
   dhis2.util.namespace("dhis2.report");
 
   dhis2.report.organisationUnit = {
@@ -101,7 +101,7 @@
   dhis2.report.date = "";
 
   dhis2.report.periods = [];
-</script>
+</script> -->
 
 <div>
   <style type="text/css">
@@ -122,6 +122,8 @@
     $(document).ready(function () {
       var orgUnit = dhis2.report.organisationUnit;
       $("#orgUnit").html(orgUnit.name);
+      // Notice api calls: pe:___ (period) and ou:___ (org.unit)
+      // `dimension=dx:0000000` refers to data being queried
       $.get(
         "../api/analytics?dimension=dx:FnYCr2EAzWS;eTDtyyaSA7f;FbKK4ofIv5R;tUIlpyeeX9N;n5nS0SmkUpq;JoEzWYGdX7s&dimension=pe:THIS_YEAR&filter=ou:" +
           orgUnit.id,
