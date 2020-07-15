@@ -66,12 +66,12 @@
           },
           {
             name: "Lymphatic Filariasis MDA",
-            shortName: "LF",
+            shortName: "L.F.",
             prefix: "LFMDA",
             subcategories: null,
           },
           {
-            name: "Onchopsoriasis MDA",
+            name: "Onchocerciasis MDA",
             shortName: "Oncho.",
             prefix: "OMDA",
             subcategories: [
@@ -79,7 +79,7 @@
               columnSubcategories.ROUND_2,
               columnSubcategories.TOTAL,
             ],
-          }, // Maybe use `.subcategories: [...]`
+          },
           {
             name: "Schistosomiasis MDA",
             shortName: "Schisto.",
@@ -91,7 +91,7 @@
             ],
           },
           {
-            name: "Soil-transmitted Helminth MDA",
+            name: "Soil-transmitted Helminthiasis MDA",
             shortName: "STH",
             prefix: "STMDA",
             subcategories: [
@@ -279,6 +279,8 @@
             skipMeta: true,
           },
           (json) => {
+            console.log(json.rows);
+
             // Fill cells that returned data; put "-" in ones that didn't
             dimensionsToQuery.forEach((dim) => {
               const cellContent =
@@ -303,7 +305,7 @@
 <div>
   <!-- Put your HTML mark-up here -->
 
-  <h1>Table test</h1>
+  <h1>MDA Treatment Summary</h1>
 
   <table id="table1" class="table">
     <thead id="thead">
