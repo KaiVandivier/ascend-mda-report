@@ -135,6 +135,7 @@
             name: "IUs eligible for TAS/IA surveys",
             type: rowTypes.PROGRAM_INDICATOR,
           },
+
           // Targets
           { name: "Targets", type: rowTypes.CATEGORY },
           { name: "Total Population of IUs", type: rowTypes.PROGRAM_INDICATOR },
@@ -146,11 +147,38 @@
             name: "Estimated size of populations with high risk of infection",
             type: rowTypes.PROGRAM_INDICATOR,
           },
-          // ... more to come
+
+          // Coverage
+          { name: "Coverage", type: rowTypes.CATEGORY },
+          // {
+          //   // Causes "division by zero" error in database
+          //   name: "Epidemiological Coverage",
+          //   type: rowTypes.PROGRAM_INDICATOR,
+          // },
+          { name: "Geographic Coverage", type: rowTypes.PROGRAM_INDICATOR },
+          { name: "Program Coverage", type: rowTypes.PROGRAM_INDICATOR },
+          // {
+          //   // Duplicate?
+          //   name: "Epidemiological Coverage",
+          //   type: rowTypes.PROGRAM_INDICATOR,
+          // },
+          {
+            name: "IUs reaching targeted program coverage",
+            type: rowTypes.PROGRAM_INDICATOR,
+          },
+          {
+            name:
+              "IUs reaching target therapeutic coverage within populations with high risk of infection",
+            type: rowTypes.PROGRAM_INDICATOR,
+          },
+          {
+            name: "IUs where MDA treatment has been provided",
+            type: rowTypes.PROGRAM_INDICATOR,
+          },
         ];
 
         // Set up column headers and subheaders
-        $("#header-row-top").append(`<th scope="col">Category</th>`);
+        $("#header-row-top").append(`<th scope="col"></th>`);
         $("#header-row-bottom").append(`<th scope="col"></th>`);
         columns.forEach((col) => {
           if (col.subcategories) {
@@ -247,7 +275,9 @@
                 }
 
                 // Dimension not found; add cell with message
-                newRow.append(`<td>(dimension not found: "${subcatDimensionName}")</td>`);
+                newRow.append(
+                  `<td>(dimension not found: "${subcatDimensionName}")</td>`
+                );
               });
               return; // Done with subcategories
             }
@@ -256,13 +286,11 @@
             const dimensionName = `${col.prefix} - ${row.name}`; // e.g. "TCMDA - Endemic IUs"
 
             // TODO: Use indicators / programIndicators / other
-            const dimension = programIndicators.find(
-              (dim) => {
-                // Regex matching to be more flexible (case insensitive, works w/o spaces)
-                const re = new RegExp(dimensionName, "i");
-                return re.test(dim.displayName);
-              }
-            );
+            const dimension = programIndicators.find((dim) => {
+              // Regex matching to be more flexible (case insensitive, works w/o spaces)
+              const re = new RegExp(dimensionName, "i");
+              return re.test(dim.displayName);
+            });
 
             // If dimension found, make new cell and prep it for data
             if (dimension) {
@@ -276,7 +304,6 @@
 
             // If dimension not found, add cell saying so:
             newRow.append(`<td>(dimension not found: "${dimensionName}")</td>`);
-
 
             // TODO: Maybe, if data is not found, check /api/programIndicators with case insensitivity to see if field exists
           });
@@ -318,8 +345,17 @@
   <!-- Put your HTML mark-up here -->
 
   <h4>Notes:</h4>
-  <p>"Dimension not found" shows fields that weren't found in the list of program indicators or indicators so we can make sure we're querying the right things.</p>
-  <p>A cell showing "-" means that the dimension <em>was</em> found, but no data was found for it in the database.</p>
+  <p>
+    So we can make sure we're querying the right things, "dimension not found"
+    indicates fields that weren't found in the lists of indicators or program
+    indicators. Of course, some of them should be blank in the end.
+  </p>
+  <p>
+    A cell showing "-" means that the dimension <em>was</em> found, but no data
+    was found for it in the database.
+  </p>
+
+  <hr />
 
   <h1>MDA Treatment Summary</h1>
 
