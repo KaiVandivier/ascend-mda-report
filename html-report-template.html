@@ -35,301 +35,300 @@
     const period = "THIS_MONTH";
     const orgUnit = "GdH306UQ8L8"; // This is the global org-unit
 
-    // Fetch programIndicator list
-    $.get(
-      "../api/programIndicators.json?filter=displayName:like:MDA&paging=false",
-      (json) => {
-        const { programIndicators } = json;
+    // Parallel promises to fetch indicators and programIndicators
+    Promise.all([
+      $.get(
+        "../api/programIndicators.json?filter=displayName:like:MDA&paging=false"
+      ),
+      $.get("../api/indicators.json?filter=displayName:like:MDA&paging=false"),
+    ]).then((values) => {
+      const [{ programIndicators }, { indicators }] = values;
+      const allDimensions = [...programIndicators, ...indicators];
 
-        /* Setting up table */
-        // Some enums I might use
-        const columnSubcategories = Object.freeze({
-          ROUND_1: "Round 1",
-          ROUND_2: "Round 2",
-          TOTAL: "Total",
-        });
-        const rowTypes = Object.freeze({
-          CATEGORY: "category",
-          PROGRAM_INDICATOR: "programIndicator",
-          INDICATOR: "indicator",
-        });
-        // Enum for program indicator names? -- Maybe not, just put it in `rows`
+      /* Setting up table */
+      // Some enums I might use
+      const columnSubcategories = Object.freeze({
+        ROUND_1: "Round 1",
+        ROUND_2: "Round 2",
+        TOTAL: "Total",
+      });
+      const rowTypes = Object.freeze({
+        CATEGORY: "category",
+        PROGRAM_INDICATOR: "programIndicator",
+        INDICATOR: "indicator",
+      });
+      // Enum for program indicator names? -- Maybe not, just put it in `rows`
 
-        // Column and row values
-        // TODO: Add short names
-        const columns = [
-          {
-            name: "Trachoma MDA",
-            shortName: "Trach.",
-            prefix: "TCMDA",
-            subcategories: null,
-          },
-          {
-            name: "Lymphatic Filariasis MDA",
-            shortName: "L.F.",
-            prefix: "LFMDA",
-            subcategories: null,
-          },
-          {
-            name: "Onchocerciasis MDA",
-            shortName: "Oncho.",
-            prefix: "OMDA",
-            subcategories: [
-              columnSubcategories.ROUND_1,
-              columnSubcategories.ROUND_2,
-              columnSubcategories.TOTAL,
-            ],
-          },
-          {
-            name: "Schistosomiasis MDA",
-            shortName: "Schisto.",
-            prefix: "SCMDA",
-            subcategories: [
-              columnSubcategories.ROUND_1,
-              columnSubcategories.ROUND_2,
-              columnSubcategories.TOTAL,
-            ],
-          },
-          {
-            name: "Soil-transmitted Helminthiasis MDA",
-            shortName: "STH",
-            prefix: "STMDA",
-            subcategories: [
-              columnSubcategories.ROUND_1,
-              columnSubcategories.ROUND_2,
-              columnSubcategories.TOTAL,
-            ],
-          },
-        ];
+      // Column and row values
+      // TODO: Add short names
+      const columns = [
+        {
+          name: "Trachoma MDA",
+          shortName: "Trach.",
+          prefix: "TCMDA",
+          subcategories: null,
+        },
+        {
+          name: "Lymphatic Filariasis MDA",
+          shortName: "L.F.",
+          prefix: "LFMDA",
+          subcategories: null,
+        },
+        {
+          name: "Onchocerciasis MDA",
+          shortName: "Oncho.",
+          prefix: "OMDA",
+          subcategories: [
+            columnSubcategories.ROUND_1,
+            columnSubcategories.ROUND_2,
+            columnSubcategories.TOTAL,
+          ],
+        },
+        {
+          name: "Schistosomiasis MDA",
+          shortName: "Schisto.",
+          prefix: "SCMDA",
+          subcategories: [
+            columnSubcategories.ROUND_1,
+            columnSubcategories.ROUND_2,
+            columnSubcategories.TOTAL,
+          ],
+        },
+        {
+          name: "Soil-transmitted Helminthiasis MDA",
+          shortName: "STH",
+          prefix: "STMDA",
+          subcategories: [
+            columnSubcategories.ROUND_1,
+            columnSubcategories.ROUND_2,
+            columnSubcategories.TOTAL,
+          ],
+        },
+      ];
 
-        const rows = [
-          // Endemicity
-          { name: "Endemicity", type: rowTypes.CATEGORY },
-          { name: "Endemic IUs", type: rowTypes.PROGRAM_INDICATOR },
-          {
-            name: "IUs which reached the criteria to stop MDA",
-            type: rowTypes.PROGRAM_INDICATOR,
-          },
-          {
-            name: "IUs in post-treatment surveillance",
-            type: rowTypes.PROGRAM_INDICATOR,
-          },
-          {
-            name: "IUs eligible for post MDA surveillance phase",
-            type: rowTypes.PROGRAM_INDICATOR,
-          },
-          {
-            name: "IUs where NTD endemicity is unknown",
-            type: rowTypes.PROGRAM_INDICATOR,
-          },
-          {
-            name: "Population in NTD affected IUs",
-            type: rowTypes.PROGRAM_INDICATOR,
-          },
-          {
-            // Note: there seems to be a typo on this name in the DB (extra space at the end)
-            name: "IUs eligible for pre-TAS surveys",
-            type: rowTypes.PROGRAM_INDICATOR,
-          },
-          {
-            name: "IUs eligible for TAS/IA surveys",
-            type: rowTypes.PROGRAM_INDICATOR,
-          },
+      const rows = [
+        // Endemicity
+        { name: "Endemicity", type: rowTypes.CATEGORY },
+        { name: "Endemic IUs", type: rowTypes.PROGRAM_INDICATOR },
+        {
+          name: "IUs which reached the criteria to stop MDA",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
+        {
+          name: "IUs in post-treatment surveillance",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
+        {
+          name: "IUs eligible for post MDA surveillance phase",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
+        {
+          name: "IUs where NTD endemicity is unknown",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
+        {
+          name: "Population in NTD affected IUs",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
+        {
+          // Note: there seems to be a typo on this name in the DB (extra space at the end)
+          name: "IUs eligible for pre-TAS surveys",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
+        {
+          name: "IUs eligible for TAS/IA surveys",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
 
-          // Targets
-          { name: "Targets", type: rowTypes.CATEGORY },
-          { name: "Total Population of IUs", type: rowTypes.PROGRAM_INDICATOR },
-          {
-            name: "Population eligible for MDA treatment",
-            type: rowTypes.PROGRAM_INDICATOR,
-          },
-          {
-            name: "Estimated size of populations with high risk of infection",
-            type: rowTypes.PROGRAM_INDICATOR,
-          },
+        // Targets
+        { name: "Targets", type: rowTypes.CATEGORY },
+        { name: "Total Population of IUs", type: rowTypes.PROGRAM_INDICATOR },
+        {
+          name: "Population eligible for MDA treatment",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
+        {
+          name: "Estimated size of populations with high risk of infection",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
 
-          // Coverage
-          { name: "Coverage", type: rowTypes.CATEGORY },
-          // {
-          //   // Causes "division by zero" error in database
-          //   name: "Epidemiological Coverage",
-          //   type: rowTypes.PROGRAM_INDICATOR,
-          // },
-          { name: "Geographic Coverage", type: rowTypes.PROGRAM_INDICATOR },
-          { name: "Program Coverage", type: rowTypes.PROGRAM_INDICATOR },
-          // {
-          //   // Duplicate?
-          //   name: "Epidemiological Coverage",
-          //   type: rowTypes.PROGRAM_INDICATOR,
-          // },
-          {
-            name: "IUs reaching targeted program coverage",
-            type: rowTypes.PROGRAM_INDICATOR,
-          },
-          {
-            name:
-              "IUs reaching target therapeutic coverage within populations with high risk of infection",
-            type: rowTypes.PROGRAM_INDICATOR,
-          },
-          {
-            name: "IUs where MDA treatment has been provided",
-            type: rowTypes.PROGRAM_INDICATOR,
-          },
-        ];
+        // Coverage
+        { name: "Coverage", type: rowTypes.CATEGORY },
+        // {
+        //   // Causes "division by zero" error in database, specifically from TCMDA (uses "Epidemiological")
+        //   name: "National Coverage",
+        //   type: rowTypes.PROGRAM_INDICATOR,
+        // },
+        { name: "Program Coverage", type: rowTypes.PROGRAM_INDICATOR },
+        // {
+        //   // Same "division" error as above b/c TCMDA and LFMDA 
+        //   name: "Epidemiological Coverage",
+        //   type: rowTypes.PROGRAM_INDICATOR,
+        // },
+        {
+          name: "IUs reaching targeted program coverage",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
+        {
+          name:
+            "IUs reaching target therapeutic coverage within populations with high risk of infection",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
+        {
+          name: "IUs where MDA treatment has been provided",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
+      ];
 
-        // Set up column headers and subheaders
-        $("#header-row-top").append(`<th scope="col"></th>`);
-        $("#header-row-bottom").append(`<th scope="col"></th>`);
-        columns.forEach((col) => {
-          if (col.subcategories) {
-            // 1. Make the top row th colspan = col.subcategories.length
-            $("#header-row-top").append(
-              `<th scope="col" colspan="${col.subcategories.length}">${col.name}</th>`
-            );
-            // 2. Make a bottom row th for each subcategory
-            col.subcategories.forEach((sc) => {
-              $("#header-row-bottom").append(`<th scope="col">${sc}</th>`);
-            });
-            return;
-          }
-          // Else, th with col name on top header row, empty cell on bottom
-          $("#header-row-top").append(`<th scope=col>${col.shortName}</th>`);
-          $("#header-row-bottom").append(`<th scope="col"></th>`);
-        });
-
-        // Set up table body to be populated
-        const totalColumns =
-          1 +
-          columns.reduce(
-            (sum, column) =>
-              sum + (column.subcategories ? column.subcategories.length : 1),
-            0
+      // Set up column headers and subheaders
+      $("#header-row-top").append(`<th scope="col"></th>`);
+      $("#header-row-bottom").append(`<th scope="col"></th>`);
+      columns.forEach((col) => {
+        if (col.subcategories) {
+          // 1. Make the top row th colspan = col.subcategories.length
+          $("#header-row-top").append(
+            `<th scope="col" colspan="${col.subcategories.length}">${col.name}</th>`
           );
-        const dimensionsToQuery = [];
-        const tbody = $("#tbody");
+          // 2. Make a bottom row th for each subcategory
+          col.subcategories.forEach((sc) => {
+            $("#header-row-bottom").append(`<th scope="col">${sc}</th>`);
+          });
+          return;
+        }
+        // Else, th with col name on top header row, empty cell on bottom
+        $("#header-row-top").append(`<th scope=col>${col.shortName}</th>`);
+        $("#header-row-bottom").append(`<th scope="col"></th>`);
+      });
 
-        rows.forEach((row) => {
-          // Make new row object
-          const newRow = $(`<tr id=${row.name}></tr>`);
-          // Add new row to DOM
-          tbody.append(newRow);
+      // Set up table body to be populated
+      const totalColumns =
+        1 +
+        columns.reduce(
+          (sum, column) =>
+            sum + (column.subcategories ? column.subcategories.length : 1),
+          0
+        );
+      const dimensionsToQuery = [];
+      const tbody = $("#tbody");
 
-          if (row.type === rowTypes.CATEGORY) {
-            // If row is just a category, make one wide cell and return
-            newRow.append(
-              `<th scope="row" colspan="${totalColumns}">${row.name}</th>`
+      rows.forEach((row) => {
+        // Make new row object
+        const newRow = $(`<tr id=${row.name}></tr>`);
+        // Add new row to DOM
+        tbody.append(newRow);
+
+        if (row.type === rowTypes.CATEGORY) {
+          // If row is just a category, make one wide cell and return
+          newRow.append(
+            `<th scope="row" colspan="${totalColumns}">${row.name}</th>`
+          );
+          return;
+        }
+
+        // Add row header with name
+        newRow.append(`<th scope="row">${row.name}</th>`);
+
+        // Add data cells
+        columns.forEach((col) => {
+          // 1. Check if column has subcategories
+          if (col.subcategories) {
+            // Subcategory strategy:
+            // A. Check for aggregate dimension (without suffix)
+            // If present, add empty cells for "rounds" and a cell with data in "total"; return
+            const dimensionName = `${col.prefix} - ${row.name}`; // e.g. "TMDA - Endemic IUs"
+            const dimension = allDimensions.find(
+              (dim) => dim.displayName === dimensionName
             );
-            return;
-          }
-
-          // Add row header with name
-          newRow.append(`<th scope="row">${row.name}</th>`);
-
-          // Add data cells
-          columns.forEach((col) => {
-            // 1. Check if column has subcategories
-            if (col.subcategories) {
-              // Subcategory strategy:
-              // A. Check for aggregate dimension (without suffix)
-              // If present, add empty cells for "rounds" and a cell with data in "total"; return
-              const dimensionName = `${col.prefix} - ${row.name}`; // e.g. "TMDA - Endemic IUs"
-              const dimension = programIndicators.find(
-                (dim) => dim.displayName === dimensionName
-              );
-              if (dimension) {
-                col.subcategories.forEach((subcategory) => {
-                  // Empty cells if not in "Total" column
-                  if (subcategory !== columnSubcategories.TOTAL) {
-                    newRow.append("<td></td>");
-                    return;
-                  }
-                  // Data for "total" column
-                  newRow.append(
-                    `<td data-dim-id=${dimension.id}>Loading...</td>`
-                  );
-                  // Add dimension to list to query
-                  dimensionsToQuery.push(dimension.id);
-                });
-                return;
-              }
-
-              // B. Check for subcategory dimension
-              // If present, add filled cells for each subcat
+            if (dimension) {
               col.subcategories.forEach((subcategory) => {
-                const subcatDimensionName = `${dimensionName} ${subcategory}`; // e.g. "OMDA - Population in NTD affected IUs Round 2"
-
-                const subcatDimension = programIndicators.find(
-                  (dim) => dim.displayName === subcatDimensionName
-                );
-
-                if (subcatDimension) {
-                  // Dimension found: make new cell and return
-                  const dimensionId = subcatDimension.id;
-                  // Make cell; give it a target to be filled with data
-                  newRow.append(
-                    `<td data-dim-id=${dimensionId}>Loading...</td>`
-                  );
-                  // Add dimension to list to query
-                  dimensionsToQuery.push(dimensionId);
+                // Empty cells if not in "Total" column
+                if (subcategory !== columnSubcategories.TOTAL) {
+                  newRow.append("<td></td>");
                   return;
                 }
-
-                // Dimension not found; add cell with message
+                // Data for "total" column
                 newRow.append(
-                  `<td>(dimension not found: "${subcatDimensionName}")</td>`
+                  `<td data-dim-id=${dimension.id}>Loading...</td>`
                 );
+                // Add dimension to list to query
+                dimensionsToQuery.push(dimension.id);
               });
-              return; // Done with subcategories
-            }
-
-            // 2. If no subcategories, look for data for cell (use row name & col prefix)
-            const dimensionName = `${col.prefix} - ${row.name}`; // e.g. "TCMDA - Endemic IUs"
-
-            // TODO: Use indicators / programIndicators / other
-            const dimension = programIndicators.find((dim) => {
-              // Regex matching to be more flexible (case insensitive, works w/o spaces)
-              const re = new RegExp(dimensionName, "i");
-              return re.test(dim.displayName);
-            });
-
-            // If dimension found, make new cell and prep it for data
-            if (dimension) {
-              const dimensionId = dimension.id;
-              // Make cell; give it a target to be filled with data
-              newRow.append(`<td data-dim-id=${dimensionId}>Loading...</td>`);
-              // Add dimension to list to query
-              dimensionsToQuery.push(dimensionId);
               return;
             }
 
-            // If dimension not found, add cell saying so:
-            newRow.append(`<td>(dimension not found: "${dimensionName}")</td>`);
+            // B. Check for subcategory dimension
+            // If present, add filled cells for each subcat
+            col.subcategories.forEach((subcategory) => {
+              const subcatDimensionName = `${dimensionName} ${subcategory}`; // e.g. "OMDA - Population in NTD affected IUs Round 2"
 
-            // TODO: Maybe, if data is not found, check /api/programIndicators with case insensitivity to see if field exists
-          });
-        }); // End table body row population
+              const subcatDimension = allDimensions.find(
+                (dim) => dim.displayName === subcatDimensionName
+              );
 
-        // API call to fetch analytics data
-        $.get(
-          "../api/analytics",
-          {
-            dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
-            filter: `ou:${orgUnit}`,
-            skipMeta: true,
-          },
-          (json) => {
-            console.log(json.rows);
+              if (subcatDimension) {
+                // Dimension found: make new cell and return
+                const dimensionId = subcatDimension.id;
+                // Make cell; give it a target to be filled with data
+                newRow.append(`<td data-dim-id=${dimensionId}>Loading...</td>`);
+                // Add dimension to list to query
+                dimensionsToQuery.push(dimensionId);
+                return;
+              }
 
-            // Fill cells that returned data; put "-" in ones that didn't
-            dimensionsToQuery.forEach((dim) => {
-              const cellContent =
-                json.rows.find((row) => row[0] === dim)?.[2] || "-";
-              $(`td[data-dim-id=${dim}`).text(cellContent);
+              // Dimension not found; add cell with message
+              newRow.append(
+                `<td>(dimension not found: "${subcatDimensionName}")</td>`
+              );
             });
+            return; // Done with subcategories
           }
-        );
-      }
-    ); // End $.get
+
+          // 2. If no subcategories, look for data for cell (use row name & col prefix)
+          const dimensionName = `${col.prefix} - ${row.name}`; // e.g. "TCMDA - Endemic IUs"
+
+          const dimension = allDimensions.find((dim) => {
+            // Regex matching to be more flexible (case insensitive, works w/o spaces)
+            const re = new RegExp(dimensionName, "i");
+            return re.test(dim.displayName);
+          });
+
+          // If dimension found, make new cell and prep it for data
+          if (dimension) {
+            const dimensionId = dimension.id;
+            // Make cell; give it a target to be filled with data
+            newRow.append(`<td data-dim-id=${dimensionId}>Loading...</td>`);
+            // Add dimension to list to query
+            dimensionsToQuery.push(dimensionId);
+            return;
+          }
+
+          // If dimension not found, add cell saying so:
+          newRow.append(`<td>(dimension not found: "${dimensionName}")</td>`);
+
+          // TODO: Maybe, if data is not found, check /api/programIndicators with case insensitivity to see if field exists
+        });
+      }); // End table body row population
+
+      // API call to fetch analytics data
+      $.get(
+        "../api/analytics",
+        {
+          dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
+          filter: `ou:${orgUnit}`,
+          skipMeta: true,
+        },
+        (json) => {
+          console.log("Analytics results: ", json.rows);
+
+          // Fill cells that returned data; put "-" in ones that didn't
+          dimensionsToQuery.forEach((dim) => {
+            const cellContent =
+              json.rows.find((row) => row[0] === dim)?.[2] || "-";
+            $(`td[data-dim-id=${dim}`).text(cellContent);
+          });
+        }
+      );
+    }); // End $.get
   });
 </script>
 
