@@ -30,22 +30,13 @@
     const period = "THIS_MONTH";
     const orgUnit = "GdH306UQ8L8"; // This is the global org-unit
 
-    // Test out fetching with query params as an object
-    // $.get(
-    //   "../api/programIndicators.json",
-    //   {
-    //     filter: "displayName:like:TCMDA",
-    //   },
-    //   console.log
-    // );
-
-    // Test out fetching programIndicator list
+    // Fetch programIndicator list
     $.get(
       "../api/programIndicators.json?filter=displayName:like:MDA&paging=false",
       (json) => {
         const { programIndicators } = json;
 
-        /* Setting up a table */
+        /* Setting up table */
         // Some enums I might use
         const columnSubcategories = Object.freeze({
           ROUND_1: "Round 1",
@@ -322,49 +313,4 @@
       <!-- Script will populate rows here -->
     </tbody>
   </table>
-
-  <!-- Remove all content after this line after reading it -->
-
-  <h3>This is a template for HTML/javascript based reports</h3>
-
-  <p>
-    You have the jQuery javascript library at your disposal when writing
-    reports. It can be accessed with the usual jQuery or $ symbols.
-  </p>
-
-  <p>
-    You can embed javascript through the usual &lt;script
-    type="text/javascript"&gt;&lt;script&gt; tag. You can embed CSS styling
-    through the usual &lt;style type="text/css"&gt;&lt;style&gt; tag. You should
-    not include &lt;html&gt;, &lt;body&gt; or &lt;head&gt; tags in your report.
-  </p>
-
-  <p>
-    You can utilize the DHIS 2 Web API to render meta-data and data in your
-    report. The Web API can be accessed from ../api. For instance, to retrieve
-    the first page of data elements in JSON format you can link to
-    ../api/dataElements.json. To get access to aggregate data you can utilize
-    the analytics resource at ../api/analytics.
-  </p>
-
-  <p>
-    HTML-based standard reports can use relative periods and report parameters
-    in the same way as other types of standard reports. If you select relative
-    periods or report parameters for period and organisation unit, you can
-    access the resulting periods and organisation unit in the dhis2.report
-    javascript namespace like below:
-  </p>
-
-  <p>
-    Right-click and view page source to see the structure of this template. You
-    can upload your HTML report through the "add new report" screen in DHIS 2
-    under "design file".
-  </p>
-
-  <p>
-    jQuery documentation can be found
-    <a href="http://docs.jquery.com/">here</a>. DHIS 2 Web API documentation can
-    be found
-    <a href="http://dhis2.org/doc/snapshot/en/user/html/ch23.html">here</a>.
-  </p>
 </div>
