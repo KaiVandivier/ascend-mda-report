@@ -195,6 +195,7 @@
 
           // Add row header with name
           newRow.append(`<th scope="row">${row.name}</th>`);
+
           // Add data cells
           columns.forEach((col) => {
             // 1. Check if column has subcategories
@@ -245,7 +246,7 @@
                 }
 
                 // Dimension not found; add cell with message
-                newRow.append(`<td>(dimension not found)</td>`);
+                newRow.append(`<td>(dimension not found: "${subcatDimensionName}")</td>`);
               });
               return; // Done with subcategories
             }
@@ -258,13 +259,19 @@
               (dim) => dim.displayName === dimensionName
             );
 
+            // If dimension found, make new cell and prep it for data
             if (dimension) {
               const dimensionId = dimension.id;
               // Make cell; give it a target to be filled with data
               newRow.append(`<td data-dim-id=${dimensionId}>Loading...</td>`);
               // Add dimension to list to query
               dimensionsToQuery.push(dimensionId);
+              return;
             }
+
+            // If dimension not found, add cell saying so:
+            newRow.append(`<td>(dimension not found: "${dimensionName}")</td>`);
+
 
             // TODO: Maybe, if data is not found, check /api/programIndicators with case insensitivity to see if field exists
           });
