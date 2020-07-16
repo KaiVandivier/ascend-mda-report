@@ -45,6 +45,9 @@
       const [{ programIndicators }, { indicators }] = values;
       const allDimensions = [...programIndicators, ...indicators];
 
+      // Remove "loading"
+      $("#loading").remove();
+
       /* Setting up table */
       // Some enums I might use
       const columnSubcategories = Object.freeze({
@@ -178,6 +181,22 @@
           name: "IUs where MDA treatment has been provided",
           type: rowTypes.PROGRAM_INDICATOR,
         },
+        { name: "MDA treatments distributed to high risk populations", type: rowTypes.PROGRAM_INDICATOR },
+        // Display name: "Number of PC treatments provided per IU (per disease)"
+        { name: "Total Persons Treated", type: rowTypes.PROGRAM_INDICATOR },
+        { name: "IUs where MDA campaigns were conducted", type: rowTypes.PROGRAM_INDICATOR },
+        { name: "IUs reaching required therapeutic coverage", type: rowTypes.PROGRAM_INDICATOR },
+        // Similar to above, so displayName: "Number of people, in population eligible for treatment, receiving MDA treatment"
+        { name: "Total Persons Treated", type: rowTypes.PROGRAM_INDICATOR },
+        // This one seems off
+        { name: "People, in population eligible for treatment, not receiving MDA treatment", type: rowTypes.PROGRAM_INDICATOR },
+        { name: "IU supported with NTD MDA treatment planning and coordination", type: rowTypes.PROGRAM_INDICATOR },
+
+        // Coverage evaluation
+        { name: "Coverage Evaluation", type: rowTypes.CATEGORY },
+        { name: "IUs where MDA treatment coverage was verified and addressed using SCT", type: rowTypes.PROGRAM_INDICATOR },
+        { name: "IUs not meeting the cut-off value for SCT", type: rowTypes.PROGRAM_INDICATOR },
+
       ];
 
       // Set up column headers and subheaders
@@ -357,6 +376,8 @@
   <hr />
 
   <h1>MDA Treatment Summary</h1>
+
+  <p id="loading">Loading...</p>
 
   <table id="table1" class="table">
     <thead id="thead">
