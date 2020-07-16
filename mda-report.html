@@ -13,27 +13,9 @@
   jQuery(document).ready(function () {
     // Put javascript to be executed after page is loaded here
 
-    /* Start boilerplate */
-    // This is not working b/c orgunit/period error in forms
-    // const orgUnit = dhis2.report.organisationUnit; // An object
-    // const id = orgUnit.id;
-    // const name = orgUnit.name;
-    // const code = orgUnit.code;
-
-    // const orgUnitHierarchy = dhis2.report.organisationUnitHierarchy; // An array with org unit objects for the hierarchy (current org unit first)
-    // const name = orgUnitHierarchy[0].name;
-
-    // const orgUnitChildren = dhis2.report.organisationUnitChildren; // An array with child org unit objects
-
-    // const date = dhis2.report.date; // A date in yyyy-MM-dd format
-
-    // const periods = dhis2.report.periods; // An array with period identifiers
-    // const period = periods[0];
-    /** End boilerplate */
-
     // Defining these values here because form creation error isn't saving report parameter settings
     const period = "THIS_MONTH";
-    const orgUnit = "GdH306UQ8L8"; // This is the global org-unit
+    const orgUnit = { id: "GdH306UQ8L8", name: "ASCEND", code: "" }; // This is the global org-unit
 
     // Parallel promises to fetch indicators and programIndicators
     Promise.all([
@@ -115,6 +97,7 @@
         },
       ];
 
+      // If cell definitions are not manually defined, they are estimated based on row / title info
       const rows = [
         // Endemicity
         { name: "Endemicity", type: rowTypes.CATEGORY },
@@ -130,6 +113,32 @@
         {
           name: "IUs eligible for post MDA surveillance phase",
           type: rowTypes.PROGRAM_INDICATOR,
+          // An example of manually-defined cells: `null` for empty cells, "Grand total" at the end
+          cellDimensions: [
+            {
+              dimensionName:
+                "TCMDA - IUs eligible for post MDA surveillance phase",
+              // "Subtotal" specifies whether to add this value to the grand total
+              subtotal: true,
+            },
+            {
+              dimensionName:
+                "LFMDA - IUs eligible for post MDA surveillance phase",
+              subtotal: true,
+            },
+            // Empty cells:
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            // Grand total cell will receive sum of subtotals
+            { dimensionName: "Grand Total", subtotal: false },
+          ],
         },
         {
           name: "IUs where NTD endemicity is unknown",
@@ -140,13 +149,49 @@
           type: rowTypes.PROGRAM_INDICATOR,
         },
         {
-          // Note: there seems to be a typo on this name in the DB (extra space at the end)
           name: "IUs eligible for pre-TAS surveys",
           type: rowTypes.PROGRAM_INDICATOR,
+          cellDimensions: [
+            null,
+            {
+              dimensionName: "LFMDA - IUs eligible for pre-TAS surveys",
+              subtotal: true,
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            { dimensionName: "Grand Total" },
+          ],
         },
         {
           name: "IUs eligible for TAS/IA surveys",
           type: rowTypes.PROGRAM_INDICATOR,
+          cellDimensions: [
+            {
+              dimensionName: "TCMDA - IUs eligible for TAS/IA surveys",
+              subtotal: true,
+            },
+            {
+              dimensionName: "LFMDA - IUs eligible for TAS/IA surveys",
+              subtotal: true,
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            { dimensionName: "Grand Total" },
+          ],
         },
 
         // Targets
@@ -278,17 +323,46 @@
         // Add row header with name
         newRow.append(`<th scope="row">${row.name}</th>`);
 
-        /* Brainstorming for "manual columns"
-          if (row.manualDimensions) {
-            row.manualDimensions.forEach(dimensionName)
-            // 1. Find dimension ID from allDimensions
-            // 2. Make a <td> cell w/ data-dimension-id=${dimension.id}
-            // 3. Add dimension.id to list to query
-            // 4. If dimension not found, make cell saying so
-          }
-          */
+        // Handling manually-defined dimension names
+        if (row.cellDimensions) {
+          // Cells are manually defined. Iterate over dimension definitions to make row
+          row.cellDimensions.forEach((cell) => {
+            // If dimension name is empty, make empty cell
+            if (!cell) return newRow.append(`<td></td>`);
 
-        // Add data cells
+            const { dimensionName, subtotal } = cell;
+
+            if (dimensionName === "Grand Total") {
+              newRow.append(`<td class="total">Loading...</td>`);
+              return;
+            }
+
+            // Look up dimension ID from `allDimensions`
+            const dimension = allDimensions.find(
+              (dim) => dim.displayName === dimensionName
+            );
+
+            if (!dimension) {
+              // Dimension not found. Add cell saying so:
+              newRow.append(
+                `<td>(dimension not found: "${dimensionName}")</td>`
+              );
+              return;
+            }
+
+            // Dimension found. Make cell; give it a target to be filled with data
+            newRow.append(
+              `<td ${subtotal ? 'class="subtotal"' : null} data-dim-id=${
+                dimension.id
+              }>Loading...</td>`
+            );
+            // Add dimension to list to query
+            dimensionsToQuery.push(dimension.id);
+          });
+          return;
+        }
+
+        // Cells are not manually defined; create them based on column definiitions
         columns.forEach((col) => {
           // 0. If column is "grand total", set up cell to receive sum later
           if (col.name === "Grand Total") {
@@ -388,7 +462,7 @@
         "../api/analytics",
         {
           dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
-          filter: `ou:${orgUnit}`,
+          filter: `ou:${orgUnit.id}`,
           skipMeta: true,
         },
         (json) => {
