@@ -27,7 +27,7 @@
         "../api/programIndicators.json?filter=displayName:like:MDA&paging=false"
       ),
       $.get("../api/indicators.json?filter=displayName:like:MDA&paging=false"),
-    ]).then(values => {
+    ]).then((values) => {
       const [{ programIndicators }, { indicators }] = values;
       const allDimensions = [...programIndicators, ...indicators];
       return allDimensions;
@@ -39,8 +39,6 @@
 
     // Parallel promises to fetch indicators and programIndicators
     getAllDimensions().then((allDimensions) => {
-      console.log("All dimensions: ", allDimensions);
-
       // Remove "loading"
       $("#loading").remove();
 
@@ -132,13 +130,10 @@
             {
               dimensionName:
                 "TCMDA - IUs eligible for post MDA surveillance phase",
-              // "Subtotal" specifies whether to add this value to the grand total
-              subtotal: true,
             },
             {
               dimensionName:
                 "LFMDA - IUs eligible for post MDA surveillance phase",
-              subtotal: true,
             },
             // Empty cells:
             null,
@@ -150,8 +145,7 @@
             null,
             null,
             null,
-            // Grand total cell will receive sum of subtotals
-            { dimensionName: "Grand Total", subtotal: false },
+            { dimensionName: "Grand Total", },
           ],
         },
         {
@@ -167,10 +161,7 @@
           type: rowTypes.PROGRAM_INDICATOR,
           cellDimensions: [
             null,
-            {
-              dimensionName: "LFMDA - IUs eligible for pre-TAS surveys",
-              subtotal: true,
-            },
+            { dimensionName: "LFMDA - IUs eligible for pre-TAS surveys", },
             null,
             null,
             null,
@@ -187,14 +178,8 @@
           name: "IUs eligible for TAS/IA surveys",
           type: rowTypes.PROGRAM_INDICATOR,
           cellDimensions: [
-            {
-              dimensionName: "TCMDA - IUs eligible for TAS/IA surveys",
-              subtotal: true,
-            },
-            {
-              dimensionName: "LFMDA - IUs eligible for TAS/IA surveys",
-              subtotal: true,
-            },
+            { dimensionName: "TCMDA - IUs eligible for TAS/IA surveys", },
+            { dimensionName: "LFMDA - IUs eligible for TAS/IA surveys", },
             null,
             null,
             null,
@@ -339,17 +324,13 @@
 
         // Handling manually-defined dimension names
         if (row.cellDimensions) {
+          // TODO: Refactor into `populateManuallyDefinedRow(row, newRow)`;
           // Cells are manually defined. Iterate over dimension definitions to make row
           row.cellDimensions.forEach((cell) => {
             // If dimension name is empty, make empty cell
             if (!cell) return newRow.append(`<td></td>`);
 
-            const { dimensionName, subtotal } = cell;
-
-            if (dimensionName === "Grand Total") {
-              newRow.append(`<td class="total">Loading...</td>`);
-              return;
-            }
+            const { dimensionName } = cell;
 
             // Look up dimension ID from `allDimensions`
             const dimension = allDimensions.find(
@@ -366,24 +347,16 @@
 
             // Dimension found. Make cell; give it a target to be filled with data
             newRow.append(
-              `<td ${subtotal ? 'class="subtotal"' : null} data-dim-id=${
-                dimension.id
-              }>Loading...</td>`
+              `<td data-dimension-id=${dimension.id}>Loading...</td>`
             );
             // Add dimension to list to query
             dimensionsToQuery.push(dimension.id);
           });
           return;
-        }
+        } // End manually-defined row
 
         // Cells are not manually defined; create them based on column definiitions
         columns.forEach((col) => {
-          // 0. If column is "grand total", set up cell to receive sum later
-          if (col.name === "Grand Total") {
-            newRow.append(`<td class="total">Loading...</td>`);
-            return;
-          }
-
           // 1. Check if column has subcategories
           if (col.subcategories) {
             // Subcategory strategy:
@@ -402,7 +375,7 @@
                 }
                 // Data for "total" column
                 newRow.append(
-                  `<td class="subtotal" data-dim-id=${dimension.id}>Loading...</td>`
+                  `<td data-dimension-id=${dimension.id}>Loading...</td>`
                 );
                 // Add dimension to list to query
                 dimensionsToQuery.push(dimension.id);
@@ -424,11 +397,7 @@
                 const dimensionId = subcatDimension.id;
                 // Make cell; give it a target to be filled with data
                 newRow.append(
-                  `<td ${
-                    subcategory === columnSubcategories.TOTAL
-                      ? 'class="subtotal"'
-                      : null
-                  } data-dim-id=${dimensionId}>Loading...</td>`
+                  `<td data-dimension-id=${dimensionId}>Loading...</td>`
                 );
                 // Add dimension to list to query
                 dimensionsToQuery.push(dimensionId);
@@ -445,22 +414,21 @@
 
           // 2. If no subcategories, look for data for cell (use row name & col prefix)
           const dimensionName = `${col.prefix} - ${row.name}`; // e.g. "TCMDA - Endemic IUs"
+          const re = new RegExp(dimensionName, "i");
 
           const dimension = allDimensions.find((dim) => {
             // Regex matching to be more flexible (case insensitive, works w/o spaces)
-            const re = new RegExp(dimensionName, "i");
             return re.test(dim.displayName);
           });
 
           // If dimension found, make new cell and prep it for data
           if (dimension) {
-            const dimensionId = dimension.id;
             // Make cell; give it a target to be filled with data
             newRow.append(
-              `<td class="subtotal" data-dim-id=${dimensionId}>Loading...</td>`
+              `<td data-dimension-id=${dimension.id}>Loading...</td>`
             );
             // Add dimension to list to query
-            dimensionsToQuery.push(dimensionId);
+            dimensionsToQuery.push(dimension.id);
             return;
           }
 
@@ -468,9 +436,10 @@
           newRow.append(`<td>(dimension not found: "${dimensionName}")</td>`);
 
           // TODO: Maybe, if data is not found, check /api/programIndicators with case insensitivity to see if field exists
-        });
+        }); // End automated population
       }); // End table body row population
 
+      // TODO: Refactor into `getAnalyticsData(dimensionsToQuery, period, orgUnit)`
       // API call to fetch analytics data
       $.get(
         "../api/analytics",
@@ -486,28 +455,7 @@
           dimensionsToQuery.forEach((dim) => {
             const cellContent =
               json.rows.find((row) => row[0] === dim)?.[2] || "-";
-            $(`td[data-dim-id=${dim}]`).text(cellContent);
-          });
-
-          // Sum up subtotals for "Grand Total" column
-          // 0. Get all non-category rows
-          const tableRows = $(
-            `tbody > tr:not([data-type="${rowTypes.CATEGORY}"])`
-          ).toArray();
-          // 1. For each row, find all cells with class .subtotal
-          tableRows.forEach((row) => {
-            const jqRow = $(row);
-            const subtotalCells = jqRow.find(".subtotal").toArray();
-
-            // 2. Sum up contents of those cells
-            const sum = subtotalCells.reduce((sum, node) => {
-              if (isNaN(node.textContent)) return sum;
-              return sum + Number(node.textContent);
-            }, 0);
-
-            // 3. Plug in that sum to the cell with class .total
-            const formattedSum = sum.toFixed(1).replace(".0", "");
-            jqRow.find(".total").text(formattedSum);
+            $(`td[data-dimension-id=${dim}]`).text(cellContent);
           });
         }
       ); // End $.get()
@@ -527,11 +475,6 @@
   <!-- Put your HTML mark-up here -->
 
   <h4>Notes:</h4>
-  <p>
-    To avoid double-counting the values in the "Round 1/2" columns, the grand
-    total currently adds up values in the subtotal columns (or columns without
-    rounds)
-  </p>
   <p>
     So we can make sure we're querying the right things, "dimension not found"
     indicates fields that weren't found in the lists of indicators or program
