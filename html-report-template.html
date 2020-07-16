@@ -107,6 +107,12 @@
             columnSubcategories.TOTAL,
           ],
         },
+        {
+          name: "Grand Total",
+          shortName: "Grand Total",
+          prefix: null,
+          subcategories: null,
+        },
       ];
 
       const rows = [
@@ -164,7 +170,7 @@
         // },
         { name: "Program Coverage", type: rowTypes.PROGRAM_INDICATOR },
         // {
-        //   // Same "division" error as above b/c TCMDA and LFMDA 
+        //   // Same "division" error as above b/c TCMDA and LFMDA
         //   name: "Epidemiological Coverage",
         //   type: rowTypes.PROGRAM_INDICATOR,
         // },
@@ -181,22 +187,44 @@
           name: "IUs where MDA treatment has been provided",
           type: rowTypes.PROGRAM_INDICATOR,
         },
-        { name: "MDA treatments distributed to high risk populations", type: rowTypes.PROGRAM_INDICATOR },
+        {
+          name: "MDA treatments distributed to high risk populations",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
         // Display name: "Number of PC treatments provided per IU (per disease)"
         { name: "Total Persons Treated", type: rowTypes.PROGRAM_INDICATOR },
-        { name: "IUs where MDA campaigns were conducted", type: rowTypes.PROGRAM_INDICATOR },
-        { name: "IUs reaching required therapeutic coverage", type: rowTypes.PROGRAM_INDICATOR },
+        {
+          name: "IUs where MDA campaigns were conducted",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
+        {
+          name: "IUs reaching required therapeutic coverage",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
         // Similar to above, so displayName: "Number of people, in population eligible for treatment, receiving MDA treatment"
         { name: "Total Persons Treated", type: rowTypes.PROGRAM_INDICATOR },
         // This one seems off
-        { name: "People, in population eligible for treatment, not receiving MDA treatment", type: rowTypes.PROGRAM_INDICATOR },
-        { name: "IU supported with NTD MDA treatment planning and coordination", type: rowTypes.PROGRAM_INDICATOR },
+        {
+          name:
+            "People, in population eligible for treatment, not receiving MDA treatment",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
+        {
+          name: "IU supported with NTD MDA treatment planning and coordination",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
 
         // Coverage evaluation
         { name: "Coverage Evaluation", type: rowTypes.CATEGORY },
-        { name: "IUs where MDA treatment coverage was verified and addressed using SCT", type: rowTypes.PROGRAM_INDICATOR },
-        { name: "IUs not meeting the cut-off value for SCT", type: rowTypes.PROGRAM_INDICATOR },
-
+        {
+          name:
+            "IUs where MDA treatment coverage was verified and addressed using SCT",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
+        {
+          name: "IUs not meeting the cut-off value for SCT",
+          type: rowTypes.PROGRAM_INDICATOR,
+        },
       ];
 
       // Set up column headers and subheaders
@@ -230,14 +258,17 @@
       const dimensionsToQuery = [];
       const tbody = $("#tbody");
 
+      // Set up table body
       rows.forEach((row) => {
         // Make new row object
-        const newRow = $(`<tr id=${row.name}></tr>`);
+        const newRow = $(
+          `<tr data-name="${row.name}" data-type="${row.type}"></tr>`
+        );
         // Add new row to DOM
         tbody.append(newRow);
 
         if (row.type === rowTypes.CATEGORY) {
-          // If row is just a category, make one wide cell and return
+          // Row is just a category label (like "Coverage Evaluation"): make one wide cell and return
           newRow.append(
             `<th scope="row" colspan="${totalColumns}">${row.name}</th>`
           );
@@ -247,8 +278,24 @@
         // Add row header with name
         newRow.append(`<th scope="row">${row.name}</th>`);
 
+        /* Brainstorming for "manual columns"
+          if (row.manualDimensions) {
+            row.manualDimensions.forEach(dimensionName)
+            // 1. Find dimension ID from allDimensions
+            // 2. Make a <td> cell w/ data-dimension-id=${dimension.id}
+            // 3. Add dimension.id to list to query
+            // 4. If dimension not found, make cell saying so
+          }
+          */
+
         // Add data cells
         columns.forEach((col) => {
+          // 0. If column is "grand total", set up cell to receive sum later
+          if (col.name === "Grand Total") {
+            newRow.append(`<td class="total">Loading...</td>`);
+            return;
+          }
+
           // 1. Check if column has subcategories
           if (col.subcategories) {
             // Subcategory strategy:
@@ -267,7 +314,7 @@
                 }
                 // Data for "total" column
                 newRow.append(
-                  `<td data-dim-id=${dimension.id}>Loading...</td>`
+                  `<td class="subtotal" data-dim-id=${dimension.id}>Loading...</td>`
                 );
                 // Add dimension to list to query
                 dimensionsToQuery.push(dimension.id);
@@ -288,7 +335,13 @@
                 // Dimension found: make new cell and return
                 const dimensionId = subcatDimension.id;
                 // Make cell; give it a target to be filled with data
-                newRow.append(`<td data-dim-id=${dimensionId}>Loading...</td>`);
+                newRow.append(
+                  `<td ${
+                    subcategory === columnSubcategories.TOTAL
+                      ? 'class="subtotal"'
+                      : null
+                  } data-dim-id=${dimensionId}>Loading...</td>`
+                );
                 // Add dimension to list to query
                 dimensionsToQuery.push(dimensionId);
                 return;
@@ -315,7 +368,9 @@
           if (dimension) {
             const dimensionId = dimension.id;
             // Make cell; give it a target to be filled with data
-            newRow.append(`<td data-dim-id=${dimensionId}>Loading...</td>`);
+            newRow.append(
+              `<td class="subtotal" data-dim-id=${dimensionId}>Loading...</td>`
+            );
             // Add dimension to list to query
             dimensionsToQuery.push(dimensionId);
             return;
@@ -337,17 +392,38 @@
           skipMeta: true,
         },
         (json) => {
-          console.log("Analytics results: ", json.rows);
+          // console.log("Analytics results: ", json.rows);
 
           // Fill cells that returned data; put "-" in ones that didn't
           dimensionsToQuery.forEach((dim) => {
             const cellContent =
               json.rows.find((row) => row[0] === dim)?.[2] || "-";
-            $(`td[data-dim-id=${dim}`).text(cellContent);
+            $(`td[data-dim-id=${dim}]`).text(cellContent);
+          });
+
+          // Sum up subtotals for "Grand Total" column
+          // 0. Get all non-category rows
+          const tableRows = $(
+            `tbody > tr:not([data-type="${rowTypes.CATEGORY}"])`
+          ).toArray();
+          // 1. For each row, find all cells with class .subtotal
+          tableRows.forEach((row) => {
+            const jqRow = $(row);
+            const subtotalCells = jqRow.find(".subtotal").toArray();
+
+            // 2. Sum up contents of those cells
+            const sum = subtotalCells.reduce((sum, node) => {
+              if (isNaN(node.textContent)) return sum;
+              return sum + Number(node.textContent);
+            }, 0);
+
+            // 3. Plug in that sum to the cell with class .total
+            const formattedSum = sum.toFixed(1).replace(".0", "");
+            jqRow.find(".total").text(formattedSum);
           });
         }
-      );
-    }); // End $.get
+      ); // End $.get()
+    }); // End Promise.all()
   });
 </script>
 
@@ -363,6 +439,11 @@
   <!-- Put your HTML mark-up here -->
 
   <h4>Notes:</h4>
+  <p>
+    To avoid double-counting the values in the "Round 1/2" columns, the grand
+    total currently adds up values in the subtotal columns (or columns without
+    rounds)
+  </p>
   <p>
     So we can make sure we're querying the right things, "dimension not found"
     indicates fields that weren't found in the lists of indicators or program
