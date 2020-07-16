@@ -10,22 +10,36 @@
 <script type="text/javascript">
   // Put your javascript functions here
 
-  jQuery(document).ready(function () {
-    // Put javascript to be executed after page is loaded here
+  // Defining these values here because form creation error isn't saving report parameter settings
+  const period = dhis2.report.periods[0] || "THIS_YEAR";
+  const orgUnit = dhis2.report.organisationUnit.length
+    ? dhis2.report.organisationUnit
+    : {
+        id: "GdH306UQ8L8", // This is the global org-unit
+        name: "ASCEND",
+        code: "",
+      };
 
-    // Defining these values here because form creation error isn't saving report parameter settings
-    const period = "THIS_MONTH";
-    const orgUnit = { id: "GdH306UQ8L8", name: "ASCEND", code: "" }; // This is the global org-unit
-
-    // Parallel promises to fetch indicators and programIndicators
-    Promise.all([
+  function getAllDimensions() {
+    // Gets a list of all indicators' and program indicators' names and IDs
+    return Promise.all([
       $.get(
         "../api/programIndicators.json?filter=displayName:like:MDA&paging=false"
       ),
       $.get("../api/indicators.json?filter=displayName:like:MDA&paging=false"),
-    ]).then((values) => {
+    ]).then(values => {
       const [{ programIndicators }, { indicators }] = values;
       const allDimensions = [...programIndicators, ...indicators];
+      return allDimensions;
+    });
+  }
+
+  jQuery(document).ready(function () {
+    // Put javascript to be executed after page is loaded here
+
+    // Parallel promises to fetch indicators and programIndicators
+    getAllDimensions().then((allDimensions) => {
+      console.log("All dimensions: ", allDimensions);
 
       // Remove "loading"
       $("#loading").remove();
