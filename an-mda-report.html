@@ -10,11 +10,15 @@
 <script type="text/javascript">
   // Put your javascript functions here
 
-  function greaterOf(a, b) {
-    if (isNaN(a) && isNaN(b)) return "-";
-    if (isNaN(a)) return b;
-    if (isNaN(b)) return a;
-    return Math.max(a, b);
+  function greatestOf(...args) {
+    const nums = args.filter(n => !isNaN(n));
+    if (!nums.length) return "-";
+    return Math.max(...nums);
+
+    // if (isNaN(a) && isNaN(b)) return "-";
+    // if (isNaN(a)) return b;
+    // if (isNaN(b)) return a;
+    // return Math.max(a, b);
   }
 
   // Defining these values here because form creation error isn't saving report parameter settings
@@ -694,7 +698,7 @@
           dn:
             "OMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
         },
-        { customLogic: (idx, row) => greaterOf(row[idx-1].value, row[idx-2].value) },
+        { customLogic: (idx, row) => greatestOf(row[idx-1].value, row[idx-2].value) },
         {
           dn:
             "SCMDA - IU supported with NTD MDA treatment planning and coordination Round 1",
@@ -703,7 +707,7 @@
           dn:
             "SCMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
         },
-        { customLogic: (idx, row) => greaterOf(row[idx-1].value, row[idx-2].value) },
+        { customLogic: (idx, row) => greatestOf(row[idx-1].value, row[idx-2].value) },
         {
           dn:
             "STMDA - IU supported with NTD MDA treatment planning and coordination Round 1",
@@ -712,7 +716,7 @@
           dn:
             "STMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
         },
-        { customLogic: (idx, row) => greaterOf(row[idx-1].value, row[idx-2].value) },
+        { customLogic: (idx, row) => greatestOf(row[idx-1].value, row[idx-2].value) },
         null,
       ],
     },
