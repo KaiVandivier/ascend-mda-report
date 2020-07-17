@@ -819,8 +819,9 @@
     });
   }
 
-  function populateCellDimensionIds(rows, allDimensions) {
+  function populateCellDimensionIds(allDimensions) {
     const dimensionsToQuery = [];
+
     // Look up dimension ids by name and add ids to cells
     rows.forEach(({ cells }) => {
       if (!cells) return;
@@ -844,7 +845,7 @@
       });
     });
 
-    return { rows, dimensionsToQuery };
+    return dimensionsToQuery;
   }
 
   function populateHtmlTableHeader() {
@@ -913,12 +914,13 @@
   function populateHtmlTableBodyWithValues() {
     // Clear tbody for fresh rows
     const tbody = $("#tbody").empty();
-    
+
     // Set up table body to be populated
     const totalColumns =
       1 +
       columns.reduce(
-        (sum, column) => sum + (column.subcategories?.length || 1), 0
+        (sum, column) => sum + (column.subcategories?.length || 1),
+        0
       );
 
     // Set up table body
@@ -960,20 +962,15 @@
   jQuery(document).ready(function () {
     // Javascript to be executed after page is loaded here
 
-    getAllDimensions().then((allDimensions) => {
-      const { rows: rows2, dimensionsToQuery } = populateCellDimensionIds(
-        rows,
-        allDimensions
-      );
-
-      populateHtmlTableHeader();
-
-      getAnalyticsData(dimensionsToQuery, period, orgUnit).then(
-        populateCellValues
-      ).then(
-        populateHtmlTableBodyWithValues
-      );
-    });
+    getAllDimensions()
+      .then(populateCellDimensionIds)
+      .then((dimensionsToQuery) =>
+        getAnalyticsData(dimensionsToQuery, period, orgUnit)
+      )
+      .then(populateCellValues)
+      .then(populateHtmlTableHeader)
+      .then(populateHtmlTableBodyWithValues)
+      .catch(console.error);
   });
 </script>
 
