@@ -10,12 +10,22 @@
 <script type="text/javascript">
   // Put your javascript functions here
 
+  // Defining these values here because form creation error isn't saving report parameter settings
+  const period = dhis2.report.periods[0] || "THIS_YEAR";
+  const orgUnit = dhis2.report.organisationUnit.length
+    ? dhis2.report.organisationUnit
+    : {
+        id: "GdH306UQ8L8", // This is the global org-unit
+        name: "ASCEND",
+        code: "",
+      };
+
   /* Setting up table */
-  // Some enums I might use
-  const columnSubcategories = Object.freeze({
-    ROUND_1: "Round 1",
-    ROUND_2: "Round 2",
-    TOTAL: "Total",
+  // column subcategories
+  const colSubcats = Object.freeze({
+    ROUND_1: { name: "Round 1", shortName: "R1" },
+    ROUND_2: { name: "Round 2", shortName: "R2" },
+    TOTAL: { name: "Total", shortName: "Tot." },
   });
   const rowTypes = Object.freeze({
     CATEGORY: "category",
@@ -28,46 +38,34 @@
   // TODO: Add short names
   const columns = [
     {
-      name: "Trachoma MDA",
+      name: "Trachoma",
       shortName: "Trach.",
       prefix: "TCMDA",
       subcategories: null,
     },
     {
-      name: "Lymphatic Filariasis MDA",
+      name: "Lymphatic Filariasis",
       shortName: "L.F.",
       prefix: "LFMDA",
       subcategories: null,
     },
     {
-      name: "Onchocerciasis MDA",
+      name: "Onchocerciasis",
       shortName: "Oncho.",
       prefix: "OMDA",
-      subcategories: [
-        columnSubcategories.ROUND_1,
-        columnSubcategories.ROUND_2,
-        columnSubcategories.TOTAL,
-      ],
+      subcategories: [colSubcats.ROUND_1, colSubcats.ROUND_2, colSubcats.TOTAL],
     },
     {
-      name: "Schistosomiasis MDA",
+      name: "Schistosomiasis",
       shortName: "Schisto.",
       prefix: "SCMDA",
-      subcategories: [
-        columnSubcategories.ROUND_1,
-        columnSubcategories.ROUND_2,
-        columnSubcategories.TOTAL,
-      ],
+      subcategories: [colSubcats.ROUND_1, colSubcats.ROUND_2, colSubcats.TOTAL],
     },
     {
-      name: "Soil-transmitted Helminthiasis MDA",
+      name: "S.T. Helminthiasis",
       shortName: "STH",
       prefix: "STMDA",
-      subcategories: [
-        columnSubcategories.ROUND_1,
-        columnSubcategories.ROUND_2,
-        columnSubcategories.TOTAL,
-      ],
+      subcategories: [colSubcats.ROUND_1, colSubcats.ROUND_2, colSubcats.TOTAL],
     },
     {
       name: "Grand Total",
@@ -616,35 +614,95 @@
         "Number of People, in population eligible for treatment, not receiving MDA treatment",
       type: rowTypes.PROGRAM_INDICATOR,
       cells: [
-        { dn: "TCMDA - People, in population eligible for treatment, not receiving MDA treatment" },
-        { dn: "LFMDA - People, in population eligible for treatment, not receiving MDA treatment" },
-        { dn: "OMDA - People, in population eligible for treatment, not receiving MDA treatment Round 1" },
-        { dn: "OMDA - People, in population eligible for treatment, not receiving MDA treatment Round 2" },
-        { dn: "OMDA - Total People, in population eligible for treatment, not receiving MDA treatment" },
-        { dn: "SCMDA - People, in population eligible for treatment, not receiving MDA treatment Round 1" },
-        { dn: "SCMDA - People, in population eligible for treatment, not receiving MDA treatment Round 2" },
-        { dn: "SCMDA - Total People, in population eligible for treatment, not receiving MDA treatment" },
-        { dn: "STMDA - People, in population eligible for treatment, not receiving MDA treatment Round 1" },
-        { dn: "STMDA - People, in population eligible for treatment, not receiving MDA treatment Round 2" },
-        { dn: "STMDA - Total People, in population eligible for treatment, not receiving MDA treatment" },
+        {
+          dn:
+            "TCMDA - People, in population eligible for treatment, not receiving MDA treatment",
+        },
+        {
+          dn:
+            "LFMDA - People, in population eligible for treatment, not receiving MDA treatment",
+        },
+        {
+          dn:
+            "OMDA - People, in population eligible for treatment, not receiving MDA treatment Round 1",
+        },
+        {
+          dn:
+            "OMDA - People, in population eligible for treatment, not receiving MDA treatment Round 2",
+        },
+        {
+          dn:
+            "OMDA - Total People, in population eligible for treatment, not receiving MDA treatment",
+        },
+        {
+          dn:
+            "SCMDA - People, in population eligible for treatment, not receiving MDA treatment Round 1",
+        },
+        {
+          dn:
+            "SCMDA - People, in population eligible for treatment, not receiving MDA treatment Round 2",
+        },
+        {
+          dn:
+            "SCMDA - Total People, in population eligible for treatment, not receiving MDA treatment",
+        },
+        {
+          dn:
+            "STMDA - People, in population eligible for treatment, not receiving MDA treatment Round 1",
+        },
+        {
+          dn:
+            "STMDA - People, in population eligible for treatment, not receiving MDA treatment Round 2",
+        },
+        {
+          dn:
+            "STMDA - Total People, in population eligible for treatment, not receiving MDA treatment",
+        },
         // Additional space here
-        { dn: "MDA - Total People, in population eligible for treatment, not receiving MDA treatment" },
+        {
+          dn:
+            "MDA - Total People, in population eligible for treatment, not receiving MDA treatment",
+        },
       ],
     },
     {
       name: "IU supported with NTD MDA treatment planning and coordination",
       type: rowTypes.PROGRAM_INDICATOR,
       cells: [
-        { dn: "TCMDA - IU supported with NTD MDA treatment planning and coordination" },
-        { dn: "LFMDA - IU supported with NTD MDA treatment planning and coordination" },
-        { dn: "OMDA - IU supported with NTD MDA treatment planning and coordination Round 1" },
-        { dn: "OMDA - IU supported with NTD MDA treatment planning and coordination Round 2" },
+        {
+          dn:
+            "TCMDA - IU supported with NTD MDA treatment planning and coordination",
+        },
+        {
+          dn:
+            "LFMDA - IU supported with NTD MDA treatment planning and coordination",
+        },
+        {
+          dn:
+            "OMDA - IU supported with NTD MDA treatment planning and coordination Round 1",
+        },
+        {
+          dn:
+            "OMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
+        },
         { customLogic: () => console.log("Hello! I'm custom logic.") },
-        { dn: "SCMDA - IU supported with NTD MDA treatment planning and coordination Round 1" },
-        { dn: "SCMDA - IU supported with NTD MDA treatment planning and coordination Round 2" },
+        {
+          dn:
+            "SCMDA - IU supported with NTD MDA treatment planning and coordination Round 1",
+        },
+        {
+          dn:
+            "SCMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
+        },
         { customLogic: () => console.log("Hello! I'm custom logic.") },
-        { dn: "STMDA - IU supported with NTD MDA treatment planning and coordination Round 1" },
-        { dn: "STMDA - IU supported with NTD MDA treatment planning and coordination Round 2" },
+        {
+          dn:
+            "STMDA - IU supported with NTD MDA treatment planning and coordination Round 1",
+        },
+        {
+          dn:
+            "STMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
+        },
         { customLogic: () => console.log("Hello! I'm custom logic.") },
         null,
       ],
@@ -657,16 +715,40 @@
         "IUs where MDA treatment coverage was verified and addressed using SCT",
       type: rowTypes.PROGRAM_INDICATOR,
       cells: [
-        { dn: "TCMDA - IUs where MDA treatment coverage was verified and addressed using SCT" },
-        { dn: "LFMDA - IUs where MDA treatment coverage was verified and addressed using SCT" },
-        { dn: "OMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 1" },
-        { dn: "OMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2" },
+        {
+          dn:
+            "TCMDA - IUs where MDA treatment coverage was verified and addressed using SCT",
+        },
+        {
+          dn:
+            "LFMDA - IUs where MDA treatment coverage was verified and addressed using SCT",
+        },
+        {
+          dn:
+            "OMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 1",
+        },
+        {
+          dn:
+            "OMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2",
+        },
         { customLogic: () => console.log("Hello! I'm custom logic.") },
-        { dn: "SCMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 1" },
-        { dn: "SCMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2" },
+        {
+          dn:
+            "SCMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 1",
+        },
+        {
+          dn:
+            "SCMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2",
+        },
         { customLogic: () => console.log("Hello! I'm custom logic.") },
-        { dn: "STMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 1" },
-        { dn: "STMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2" },
+        {
+          dn:
+            "STMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 1",
+        },
+        {
+          dn:
+            "STMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2",
+        },
         { customLogic: () => console.log("Hello! I'm custom logic.") },
         { customLogic: () => console.log("Hello! I'm custom logic.") }, // TODO: sum
       ],
@@ -690,13 +772,15 @@
       ],
     },
     {
-      name: "Number of evaluation areas where mob-up activites were conducted following a SCT",
+      name:
+        "Number of evaluation areas where mob-up activites were conducted following a SCT",
       dnBase: "",
       type: rowTypes.PROGRAM_INDICATOR,
       cells: [], // Todo
     },
     {
-      name: "Number of IUs for which independent representative coverage surveys according to WHO guidelines were completed",
+      name:
+        "Number of IUs for which independent representative coverage surveys according to WHO guidelines were completed",
       dnBase: "",
       type: rowTypes.PROGRAM_INDICATOR,
       cells: [], // Todo
@@ -705,23 +789,14 @@
     // LNOB
     { name: "LNOB", type: rowTypes.CATEGORY },
     {
-      name: "Number of people from marginilized groups (LNOB) who received NTD MDA treatment",
+      name:
+        "Number of people from marginilized groups (LNOB) who received NTD MDA treatment",
       dnBase: "",
       type: rowTypes.PROGRAM_INDICATOR,
       cells: [], // TODO
       // Grand total: { dn: "MDA - Total people from marginalized groups (LNOB) who received NTD MDA treatment"}
-    }
+    },
   ]; // End row definitions
-
-  // Defining these values here because form creation error isn't saving report parameter settings
-  const period = dhis2.report.periods[0] || "THIS_YEAR";
-  const orgUnit = dhis2.report.organisationUnit.length
-    ? dhis2.report.organisationUnit
-    : {
-        id: "GdH306UQ8L8", // This is the global org-unit
-        name: "ASCEND",
-        code: "",
-      };
 
   function getAllDimensions() {
     // Gets a list of all indicators' and program indicators' names and IDs
@@ -745,7 +820,7 @@
   }
 
   function populateDimensionIds(rows, allDimensions) {
-    const dimensionsToQuery = []
+    const dimensionsToQuery = [];
     // Look up dimension ids by name and add ids to cells
     rows.forEach(({ cells }) => {
       if (!cells) return;
@@ -757,19 +832,57 @@
 
         const dimension = allDimensions.find(
           (dim) => dim.displayName === dimensionName
-        )
+        );
         if (!dimension) {
           cell.value = `(dimension not found: ${dimensionName})`;
           return;
-        };
+        }
 
         // Dimension found: populate `id` on cell and add it to list to query
         dimensionsToQuery.push(dimension.id);
         cell.dId = dimension.id;
-      })
+      });
     });
 
     return { rows, dimensionsToQuery };
+  }
+
+  function buildHtmlTable(rows, columns) {
+    // Should these really be here?
+    // Remove "loading"
+    $("#loading").remove();
+
+    // Set up column headers and subheaders
+    $("#header-row-top").append(`<th scope="col"></th>`);
+    $("#header-row-bottom").append(`<th scope="col"></th>`);
+    columns.forEach((col) => {
+      if (col.subcategories) {
+        // 1. Make the top row th colspan = col.subcategories.length
+        $("#header-row-top").append(
+          `<th scope="col" colspan="${col.subcategories.length}">${col.name}</th>`
+        );
+        // 2. Make a bottom row th for each subcategory
+        col.subcategories.forEach((subcat) => {
+          $("#header-row-bottom").append(
+            `<th scope="col">${subcat.shortName}</th>`
+          );
+        });
+        return;
+      }
+      // Else, th with col name on top header row, empty cell on bottom
+      $("#header-row-top").append(`<th scope=col>${col.shortName}</th>`);
+      $("#header-row-bottom").append(`<th scope="col"></th>`);
+    });
+
+    // Set up table body to be populated
+    const totalColumns =
+      1 +
+      columns.reduce(
+        (sum, column) =>
+          sum + (column.subcategories ? column.subcategories.length : 1),
+        0
+      );
+    const tbody = $("#tbody");
   }
 
   jQuery(document).ready(function () {
@@ -777,12 +890,8 @@
 
     // Parallel promises to fetch indicators and programIndicators
     getAllDimensions().then((allDimensions) => {
-      const res = populateDimensionIds(rows, allDimensions);
-      console.log(res);
-
-
-
-
+      // const { rows, dimensionsToQuery } = populateDimensionIds(rows, allDimensions);
+      // console.log(res);
 
       // Remove "loading"
       $("#loading").remove();
@@ -797,8 +906,10 @@
             `<th scope="col" colspan="${col.subcategories.length}">${col.name}</th>`
           );
           // 2. Make a bottom row th for each subcategory
-          col.subcategories.forEach((sc) => {
-            $("#header-row-bottom").append(`<th scope="col">${sc}</th>`);
+          col.subcategories.forEach((subcat) => {
+            $("#header-row-bottom").append(
+              `<th scope="col">${subcat.shortName}</th>`
+            );
           });
           return;
         }
@@ -885,7 +996,7 @@
             if (dimension) {
               col.subcategories.forEach((subcategory) => {
                 // Empty cells if not in "Total" column
-                if (subcategory !== columnSubcategories.TOTAL) {
+                if (subcategory !== colSubcats.TOTAL) {
                   newRow.append("<td></td>");
                   return;
                 }
