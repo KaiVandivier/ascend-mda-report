@@ -10,6 +10,709 @@
 <script type="text/javascript">
   // Put your javascript functions here
 
+  /* Setting up table */
+  // Some enums I might use
+  const columnSubcategories = Object.freeze({
+    ROUND_1: "Round 1",
+    ROUND_2: "Round 2",
+    TOTAL: "Total",
+  });
+  const rowTypes = Object.freeze({
+    CATEGORY: "category",
+    PROGRAM_INDICATOR: "programIndicator",
+    INDICATOR: "indicator",
+  });
+  // Enum for program indicator names? -- Maybe not, just put it in `rows`
+
+  // Column and row values
+  // TODO: Add short names
+  const columns = [
+    {
+      name: "Trachoma MDA",
+      shortName: "Trach.",
+      prefix: "TCMDA",
+      subcategories: null,
+    },
+    {
+      name: "Lymphatic Filariasis MDA",
+      shortName: "L.F.",
+      prefix: "LFMDA",
+      subcategories: null,
+    },
+    {
+      name: "Onchocerciasis MDA",
+      shortName: "Oncho.",
+      prefix: "OMDA",
+      subcategories: [
+        columnSubcategories.ROUND_1,
+        columnSubcategories.ROUND_2,
+        columnSubcategories.TOTAL,
+      ],
+    },
+    {
+      name: "Schistosomiasis MDA",
+      shortName: "Schisto.",
+      prefix: "SCMDA",
+      subcategories: [
+        columnSubcategories.ROUND_1,
+        columnSubcategories.ROUND_2,
+        columnSubcategories.TOTAL,
+      ],
+    },
+    {
+      name: "Soil-transmitted Helminthiasis MDA",
+      shortName: "STH",
+      prefix: "STMDA",
+      subcategories: [
+        columnSubcategories.ROUND_1,
+        columnSubcategories.ROUND_2,
+        columnSubcategories.TOTAL,
+      ],
+    },
+    {
+      name: "Grand Total",
+      shortName: "Grand Total",
+      prefix: null,
+      subcategories: null,
+    },
+  ];
+
+  // If cell definitions are not manually defined, they are estimated based on row / title info
+  // `dn` is "dimensionName"
+  const rows = [
+    // Endemicity
+    { name: "Endemicity", type: rowTypes.CATEGORY },
+    {
+      name: "Endemic IUs",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - Endemic IUs" },
+        { dn: "LFMDA - Endemic IUs" },
+        null,
+        null,
+        { dn: "OMDA - Endemic IUs" },
+        null,
+        null,
+        { dn: "SCMDA - Endemic IUs" },
+        null,
+        null,
+        { dn: "STMDA - Endemic IUs" },
+        null,
+      ],
+    },
+    {
+      name: "IUs which reached the criteria to stop MDA",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        {
+          dn: "TCMDA - IUs which reached the criteria to stop MDA",
+        },
+        {
+          dn: "LFMDA - IUs which reached the criteria to stop MDA",
+        },
+        null,
+        null,
+        {
+          dn: "OMDA - IUs which reached the criteria to stop MDA",
+        },
+        null,
+        null,
+        {
+          dn: "SCMDA - IUs which reached the criteria to stop MDA",
+        },
+        null,
+        null,
+        {
+          dn: "STMDA - IUs which reached the criteria to stop MDA",
+        },
+        null,
+      ],
+    },
+    {
+      name: "IUs in post-treatment surveillance",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - IUs in post-treatment surveillance" },
+        { dn: "LFMDA - IUs in post-treatment surveillance" },
+        null,
+        null,
+        { dn: "OMDA - IUs in post-treatment surveillance" },
+        null,
+        null,
+        { dn: "SCMDA - IUs in post-treatment surveillance" },
+        null,
+        null,
+        { dn: "STMDA - IUs in post-treatment surveillance" },
+        null,
+      ],
+    },
+    {
+      name: "IUs eligible for post MDA surveillance phase",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        {
+          dn: "TCMDA - IUs eligible for post MDA surveillance phase",
+        },
+        {
+          dn: "LFMDA - IUs eligible for post MDA surveillance phase",
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+    },
+    {
+      name: "IUs where NTD endemicity is unknown",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - IUs where NTD endemicity is unknown" },
+        { dn: "LFMDA - IUs where NTD endemicity is unknown" },
+        null,
+        null,
+        { dn: "OMDA - IUs where NTD endemicity is unknown" },
+        null,
+        null,
+        { dn: "SCMDA - IUs where NTD endemicity is unknown" },
+        null,
+        null,
+        { dn: "STMDA - IUs where NTD endemicity is unknown" },
+        null,
+      ],
+    },
+    {
+      name: "Population in NTD affected IUs",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - Population in NTD affected IUs" },
+        { dn: "LFMDA - Population in NTD affected IUs" },
+        { dn: "OMDA - Population in NTD affected IUs Round 1" },
+        { dn: "OMDA - Population in NTD affected IUs Round 2" },
+        { dn: "OMDA - Population in NTD affected IUs Total" },
+        { dn: "SCMDA - Population in NTD affected IUs Round 1" },
+        { dn: "SCMDA - Population in NTD affected IUs Round 2" },
+        { dn: "SCMDA - Population in NTD affected IUs Total" },
+        { dn: "STMDA - Population in NTD affected IUs Round 1" },
+        { dn: "STMDA - Population in NTD affected IUs Round 2" },
+        { dn: "STMDA - Population in NTD affected IUs Total" },
+        null,
+      ],
+    },
+    {
+      name: "IUs eligible for pre-TAS surveys",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        null,
+        { dn: "LFMDA - IUs eligible for pre-TAS surveys" },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+    },
+    {
+      name: "IUs eligible for TAS/IA surveys",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - IUs eligible for TAS/IA surveys" },
+        { dn: "LFMDA - IUs eligible for TAS/IA surveys" },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+    },
+
+    // Targets
+    { name: "Targets", type: rowTypes.CATEGORY },
+    {
+      name: "Total Population of IUs",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - Total Population of IUs" },
+        { dn: "LFMDA - Total Population of IUs" },
+        null,
+        null,
+        { dn: "OMDA - Total Population of IUs" },
+        null,
+        null,
+        { dn: "SCMDA - Total Population of IUs" },
+        null,
+        null,
+        { dn: "STMDA - Total Population of IUs" },
+        { dn: "MDA - Total Population in Endemic IUs" },
+      ],
+    },
+    {
+      name: "Population eligible for MDA treatment",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - Population eligible for MDA treatment" },
+        { dn: "LFMDA - Population eligible for MDA treatment" },
+        {
+          dn: "OMDA - Population eligible for MDA treatment Round 1",
+        },
+        {
+          dn: "OMDA - Population eligible for MDA treatment Round 2",
+        },
+        { dn: "OMDA - Population eligible for MDA treatment Total" },
+        {
+          dn: "SCMDA - Population eligible for MDA treatment Round 1",
+        },
+        {
+          dn: "SCMDA - Population eligible for MDA treatment Round 2",
+        },
+        {
+          dn: "SCMDA - Population eligible for MDA treatment Total",
+        },
+        {
+          dn: "STMDA - Population eligible for MDA treatment Round 1",
+        },
+        {
+          dn: "STMDA - Population eligible for MDA treatment Round 2",
+        },
+        {
+          dn: "STMDA - Population eligible for MDA treatment Total",
+        },
+        {
+          dn: "MDA - Total population eligible for MDA treatment of IU",
+        },
+      ],
+    },
+    {
+      name: "Estimated size of populations with high risk of infection",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        {
+          dn:
+            "TCMDA - Estimated size of populations with high risk of infection",
+        },
+        {
+          dn:
+            "LFMDA - Estimated size of populations with high risk of infection",
+        },
+        {
+          dn:
+            "OMDA - Estimated size of populations with high risk of infection Round 1",
+        },
+        {
+          dn:
+            "OMDA - Estimated size of populations with high risk of infection Round 2",
+        },
+        {
+          dn:
+            "OMDA - Total estimated size of populations with high risk of infection",
+        },
+        {
+          dn:
+            "SCMDA - Estimated size of populations with high risk of infection Round 1",
+        },
+        {
+          dn:
+            "SCMDA - Estimated size of populations with high risk of infection Round 2",
+        },
+        {
+          dn:
+            "SCMDA - Total estimated size of populations with high risk of infection",
+        },
+        {
+          dn:
+            "STMDA - Estimated size of populations with high risk of infection Round 1",
+        },
+        {
+          dn:
+            "STMDA - Estimated size of populations with high risk of infection Round 2",
+        },
+        {
+          dn:
+            "STMDA - Total estimated size of populations with high risk of infection",
+        },
+        {
+          dn:
+            "MDA - Total Estimated size of populations with high risk of infection",
+        },
+      ],
+    },
+
+    // Coverage
+    { name: "Coverage", type: rowTypes.CATEGORY },
+    {
+      name: "Geographic Coverage",
+      type: rowTypes.INDICATOR,
+      cells: [
+        { dn: "TCMDA - Geographic Coverage" },
+        { dn: "LFMDA - Geographic Coverage" },
+        null,
+        null,
+        { dn: "OMDA - Geographic Coverage" },
+        null,
+        null,
+        { dn: "SCMDA - Geographic Coverage" },
+        null,
+        null,
+        { dn: "STMDA - Geographic Coverage" },
+        null,
+      ],
+    },
+    {
+      name: "Program Coverage",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - Program Coverage" },
+        { dn: "LFMDA - Program Coverage" },
+        { dn: "OMDA - Program Coverage Round 1" },
+        { dn: "OMDA - Program Coverage Round 2" },
+        null,
+        { dn: "SCMDA - Program Coverage Round 1" },
+        { dn: "SCMDA - Program Coverage Round 2" },
+        null,
+        { dn: "STMDA - Program Coverage Round 1" },
+        { dn: "STMDA - Program Coverage Round 2" },
+        null,
+        null,
+      ],
+    },
+    {
+      // Same "division" error as above b/c TCMDA and LFMDA
+      name: "Epidemiological Coverage",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "Oops! I cause a division by zero error." },
+        { dn: "LFMDA - Epidemiological Coverage" },
+        { dn: "OMDA - Epidemiological Coverage Round 1" },
+        { dn: "OMDA - Epidemiological Coverage Round 2" },
+        null,
+        { dn: "SCMDA - Epidemiological Coverage Round 1" },
+        { dn: "SCMDA - Epidemiological Coverage Round 2" },
+        null,
+        { dn: "STMDA - Epidemiological Coverage Round 1" },
+        { dn: "STMDA - Epidemiological Coverage Round 2" },
+        null,
+        null,
+      ],
+    },
+    {
+      name: "IUs reaching targeted program coverage",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - IUs reaching targeted program coverage" },
+        { dn: "LFMDA - IUs reaching targeted program coverage" },
+        { dn: "OMDA - IUs reaching targeted program coverage Round 1" },
+        { dn: "OMDA - IUs reaching targeted program coverage Round 2" },
+        null,
+        { dn: "SCMDA - IUs reaching targeted program coverage Round 1" },
+        { dn: "SCMDA - IUs reaching targeted program coverage Round 2" },
+        null,
+        { dn: "STMDA - IUs reaching targeted program coverage Round 1" },
+        { dn: "STMDA - IUs reaching targeted program coverage Round 2" },
+        null,
+        null,
+      ],
+    },
+    {
+      name:
+        "IUs reaching target therapeutic coverage within populations with high risk of infection",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        {
+          dn:
+            "TCMDA - IUs reaching target therapeutic coverage within populations with high risk of infection",
+        },
+        {
+          dn:
+            "LFMDA - IUs reaching target therapeutic coverage within populations with high risk of infection",
+        },
+        {
+          dn:
+            "OMDA - IUs reaching target therapeutic coverage within populations with high risk of infection Round 1",
+        },
+        {
+          dn:
+            "OMDA - IUs reaching target therapeutic coverage within populations with high risk of infection Round 2",
+        },
+        null,
+        {
+          dn:
+            "SCMDA - IUs reaching target therapeutic coverage within populations with high risk of infection Round 1",
+        },
+        {
+          dn:
+            "SCMDA - IUs reaching target therapeutic coverage within populations with high risk of infection Round 2",
+        },
+        null,
+        {
+          dn:
+            "STMDA - IUs reaching target therapeutic coverage within populations with high risk of infection Round 1",
+        },
+        {
+          dn:
+            "STMDA - IUs reaching target therapeutic coverage within populations with high risk of infection Round 2",
+        },
+        null,
+        null,
+      ],
+    },
+    {
+      name: "IUs where MDA treatment has been provided",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - IUs where MDA treatment has been provided" },
+        { dn: "LFMDA - IUs where MDA treatment has been provided" },
+        { dn: "OMDA - IUs where MDA treatment has been provided Round 1" },
+        { dn: "OMDA - IUs where MDA treatment has been provided Round 2" },
+        null,
+        { dn: "SCMDA - IUs where MDA treatment has been provided Round 1" },
+        { dn: "SCMDA - IUs where MDA treatment has been provided Round 2" },
+        null,
+        { dn: "STMDA - IUs where MDA treatment has been provided Round 1" },
+        { dn: "STMDA - IUs where MDA treatment has been provided Round 2" },
+        null,
+        null,
+      ],
+    },
+    {
+      name: "MDA treatments distributed to high risk populations",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        null,
+        {
+          dn: "LFMDA - MDA treatments distributed to high risk populations",
+        },
+        {
+          dn:
+            "OMDA - MDA treatments distributed to high risk populations Round 1",
+        },
+        {
+          dn:
+            "OMDA - MDA treatments distributed to high risk populations Round 2",
+        },
+        {
+          dn:
+            "OMDA - Total MDA treatments distributed to high risk populations",
+        },
+        {
+          dn:
+            "SCMDA - MDA treatments distributed to high risk populations Round 1",
+        },
+        {
+          dn:
+            "SCMDA - MDA treatments distributed to high risk populations Round 2",
+        },
+        {
+          dn:
+            "SCMDA - Total MDA treatments distributed to high risk populations",
+        },
+        {
+          dn:
+            "STMDA - MDA treatments distributed to high risk populations Round 1",
+        },
+        {
+          dn:
+            "STMDA - MDA treatments distributed to high risk populations Round 2",
+        },
+        {
+          dn:
+            "STMDA - Total MDA treatments distributed to high risk populations",
+        },
+        {
+          dn: "MDA - Total MDA treatments distributed to high risk populations",
+        },
+      ],
+    },
+    // Display name: "Number of PC treatments provided per IU (per disease)"
+    {
+      name: "Number of PC treatments provided per IU",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - Total Persons Treated" },
+        { dn: "LFMDA - Total Persons Treated" },
+        { dn: "OMDA - Total Persons Treated Round 1" },
+        { dn: "OMDA - Total Persons Treated Round 2" },
+        { dn: "OMDA - Total Persons Treated Round 1 AND 2" },
+        { dn: "SCMDA - Total Persons Treated Round 1" },
+        { dn: "SCMDA - Total Persons Treated Round 2" },
+        { dn: "SCMDA - Total Persons Treated Round 1 AND 2" },
+        { dn: "STMDA - Total Persons Treated Round 1" },
+        { dn: "STMDA - Total Persons Treated Round 2" },
+        { dn: "STMDA - Total Persons Treated Round 1 AND 2" },
+        { dn: "MDA - Total PC treatments provided" },
+      ],
+    },
+    {
+      name: "IUs where MDA campaigns were conducted",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - IUs where MDA campaigns were conducted" },
+        { dn: "LFMDA - IUs where MDA campaigns were conducted" },
+        { dn: "OMDA - IUs where MDA campaigns were conducted Round 1" },
+        { dn: "OMDA - IUs where MDA campaigns were conducted Round 2" },
+        { dn: "OMDA - Total IUs where MDA campaigns were conducted" },
+        { dn: "SCMDA - IUs where MDA campaigns were conducted Round 1" },
+        { dn: "SCMDA - IUs where MDA campaigns were conducted Round 2" },
+        { dn: "SCMDA - Total IUs where MDA campaigns were conducted" },
+        { dn: "STMDA - IUs where MDA campaigns were conducted Round 1" },
+        { dn: "STMDA - IUs where MDA campaigns were conducted Round 2" },
+        { dn: "STMDA - Total IUs where MDA campaigns were conducted" },
+        null,
+      ],
+    },
+    {
+      name: "IUs reaching required therapeutic coverage",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - IUs reaching required therapeutic coverage" },
+        { dn: "LFMDA - IUs reaching required therapeutic coverage" },
+        { dn: "OMDA - IUs reaching required therapeutic coverage Round 1" },
+        { dn: "OMDA - IUs reaching required therapeutic coverage Round 2" },
+        null,
+        { dn: "SCMDA - IUs reaching required therapeutic coverage Round 1" },
+        { dn: "SCMDA - IUs reaching required therapeutic coverage Round 2" },
+        null,
+        { dn: "STMDA - IUs reaching required therapeutic coverage Round 1" },
+        { dn: "STMDA - IUs reaching required therapeutic coverage Round 2" },
+        null,
+        null,
+      ],
+    },
+    {
+      name:
+        "Number of people, in population eligible for treatment, receiving MDA treatment",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - Total Persons Treated" },
+        { dn: "LFMDA - Total Persons Treated" },
+        { dn: "OMDA - Total Persons Treated Round 1" },
+        { dn: "OMDA - Total Persons Treated Round 2" },
+        { dn: "OMDA - Total Persons Treated Round 1 AND 2" },
+        { dn: "SCMDA - Total Persons Treated Round 1" },
+        { dn: "SCMDA - Total Persons Treated Round 2" },
+        { dn: "SCMDA - Total Persons Treated Round 1 AND 2" },
+        { dn: "STMDA - Total Persons Treated Round 1" },
+        { dn: "STMDA - Total Persons Treated Round 2" },
+        { dn: "STMDA - Total Persons Treated Round 1 AND 2" },
+        null,
+      ],
+    },
+    {
+      name:
+        "Number of People, in population eligible for treatment, not receiving MDA treatment",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - People, in population eligible for treatment, not receiving MDA treatment" },
+        { dn: "LFMDA - People, in population eligible for treatment, not receiving MDA treatment" },
+        { dn: "OMDA - People, in population eligible for treatment, not receiving MDA treatment Round 1" },
+        { dn: "OMDA - People, in population eligible for treatment, not receiving MDA treatment Round 2" },
+        { dn: "OMDA - Total People, in population eligible for treatment, not receiving MDA treatment" },
+        { dn: "SCMDA - People, in population eligible for treatment, not receiving MDA treatment Round 1" },
+        { dn: "SCMDA - People, in population eligible for treatment, not receiving MDA treatment Round 2" },
+        { dn: "SCMDA - Total People, in population eligible for treatment, not receiving MDA treatment" },
+        { dn: "STMDA - People, in population eligible for treatment, not receiving MDA treatment Round 1" },
+        { dn: "STMDA - People, in population eligible for treatment, not receiving MDA treatment Round 2" },
+        { dn: "STMDA - Total People, in population eligible for treatment, not receiving MDA treatment" },
+        // Additional space here
+        { dn: "MDA - Total People, in population eligible for treatment, not receiving MDA treatment" },
+      ],
+    },
+    {
+      name: "IU supported with NTD MDA treatment planning and coordination",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - IU supported with NTD MDA treatment planning and coordination" },
+        { dn: "LFMDA - IU supported with NTD MDA treatment planning and coordination" },
+        { dn: "OMDA - IU supported with NTD MDA treatment planning and coordination Round 1" },
+        { dn: "OMDA - IU supported with NTD MDA treatment planning and coordination Round 2" },
+        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        { dn: "SCMDA - IU supported with NTD MDA treatment planning and coordination Round 1" },
+        { dn: "SCMDA - IU supported with NTD MDA treatment planning and coordination Round 2" },
+        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        { dn: "STMDA - IU supported with NTD MDA treatment planning and coordination Round 1" },
+        { dn: "STMDA - IU supported with NTD MDA treatment planning and coordination Round 2" },
+        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        null,
+      ],
+    },
+
+    // Coverage evaluation
+    { name: "Coverage Evaluation", type: rowTypes.CATEGORY },
+    {
+      name:
+        "IUs where MDA treatment coverage was verified and addressed using SCT",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - IUs where MDA treatment coverage was verified and addressed using SCT" },
+        { dn: "LFMDA - IUs where MDA treatment coverage was verified and addressed using SCT" },
+        { dn: "OMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 1" },
+        { dn: "OMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2" },
+        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        { dn: "SCMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 1" },
+        { dn: "SCMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2" },
+        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        { dn: "STMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 1" },
+        { dn: "STMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2" },
+        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        { customLogic: () => console.log("Hello! I'm custom logic.") }, // TODO: sum
+      ],
+    },
+    {
+      name: "IUs not meeting the cut-off value for SCT",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [
+        { dn: "TCMDA - IUs not meeting the cut-off value for SCT" },
+        { dn: "LFMDA - IUs not meeting the cut-off value for SCT" },
+        { dn: "OMDA - IUs not meeting the cut-off value for SCT Round 1" },
+        { dn: "OMDA - IUs not meeting the cut-off value for SCT Round 2" },
+        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        { dn: "SCMDA - IUs not meeting the cut-off value for SCT Round 1" },
+        { dn: "SCMDA - IUs not meeting the cut-off value for SCT Round 2" },
+        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        { dn: "STMDA - IUs not meeting the cut-off value for SCT Round 1" },
+        { dn: "STMDA - IUs not meeting the cut-off value for SCT Round 2" },
+        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        { customLogic: () => console.log("Hello! I'm custom logic.") }, // No sum?
+      ],
+    },
+    {
+      name: "Number of evaluation areas where mob-up activites were conducted following a SCT",
+      dnBase: "",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [], // Todo
+    },
+    {
+      name: "Number of IUs for which independent representative coverage surveys according to WHO guidelines were completed",
+      dnBase: "",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [], // Todo
+    },
+
+    // LNOB
+    { name: "LNOB", type: rowTypes.CATEGORY },
+    {
+      name: "Number of people from marginilized groups (LNOB) who received NTD MDA treatment",
+      dnBase: "",
+      type: rowTypes.PROGRAM_INDICATOR,
+      cells: [], // TODO
+      // Grand total: { dn: "MDA - Total people from marginalized groups (LNOB) who received NTD MDA treatment"}
+    }
+  ]; // End row definitions
+
   // Defining these values here because form creation error isn't saving report parameter settings
   const period = dhis2.report.periods[0] || "THIS_YEAR";
   const orgUnit = dhis2.report.organisationUnit.length
@@ -30,8 +733,43 @@
     ]).then((values) => {
       const [{ programIndicators }, { indicators }] = values;
       const allDimensions = [...programIndicators, ...indicators];
+
+      // Convert to a Map where keys are names and values are ids for lookup
+      // const keyValuePairs = allDimensions.map(dimension => {
+      //   return [dimension.displayName, dimension.id];
+      // })
+      // const dimensionsMap = new Map(keyValuePairs);
+
       return allDimensions;
     });
+  }
+
+  function populateDimensionIds(rows, allDimensions) {
+    const dimensionsToQuery = []
+    // Look up dimension ids by name and add ids to cells
+    rows.forEach(({ cells }) => {
+      if (!cells) return;
+
+      cells.forEach((cell) => {
+        if (!cell || !cell.dn) return;
+        const { dn: dimensionName } = cell;
+        // if (!dimensionName) return;
+
+        const dimension = allDimensions.find(
+          (dim) => dim.displayName === dimensionName
+        )
+        if (!dimension) {
+          cell.value = `(dimension not found: ${dimensionName})`;
+          return;
+        };
+
+        // Dimension found: populate `id` on cell and add it to list to query
+        dimensionsToQuery.push(dimension.id);
+        cell.dId = dimension.id;
+      })
+    });
+
+    return { rows, dimensionsToQuery };
   }
 
   jQuery(document).ready(function () {
@@ -39,237 +777,15 @@
 
     // Parallel promises to fetch indicators and programIndicators
     getAllDimensions().then((allDimensions) => {
+      const res = populateDimensionIds(rows, allDimensions);
+      console.log(res);
+
+
+
+
+
       // Remove "loading"
       $("#loading").remove();
-
-      /* Setting up table */
-      // Some enums I might use
-      const columnSubcategories = Object.freeze({
-        ROUND_1: "Round 1",
-        ROUND_2: "Round 2",
-        TOTAL: "Total",
-      });
-      const rowTypes = Object.freeze({
-        CATEGORY: "category",
-        PROGRAM_INDICATOR: "programIndicator",
-        INDICATOR: "indicator",
-      });
-      // Enum for program indicator names? -- Maybe not, just put it in `rows`
-
-      // Column and row values
-      // TODO: Add short names
-      const columns = [
-        {
-          name: "Trachoma MDA",
-          shortName: "Trach.",
-          prefix: "TCMDA",
-          subcategories: null,
-        },
-        {
-          name: "Lymphatic Filariasis MDA",
-          shortName: "L.F.",
-          prefix: "LFMDA",
-          subcategories: null,
-        },
-        {
-          name: "Onchocerciasis MDA",
-          shortName: "Oncho.",
-          prefix: "OMDA",
-          subcategories: [
-            columnSubcategories.ROUND_1,
-            columnSubcategories.ROUND_2,
-            columnSubcategories.TOTAL,
-          ],
-        },
-        {
-          name: "Schistosomiasis MDA",
-          shortName: "Schisto.",
-          prefix: "SCMDA",
-          subcategories: [
-            columnSubcategories.ROUND_1,
-            columnSubcategories.ROUND_2,
-            columnSubcategories.TOTAL,
-          ],
-        },
-        {
-          name: "Soil-transmitted Helminthiasis MDA",
-          shortName: "STH",
-          prefix: "STMDA",
-          subcategories: [
-            columnSubcategories.ROUND_1,
-            columnSubcategories.ROUND_2,
-            columnSubcategories.TOTAL,
-          ],
-        },
-        {
-          name: "Grand Total",
-          shortName: "Grand Total",
-          prefix: null,
-          subcategories: null,
-        },
-      ];
-
-      // If cell definitions are not manually defined, they are estimated based on row / title info
-      const rows = [
-        // Endemicity
-        { name: "Endemicity", type: rowTypes.CATEGORY },
-        { name: "Endemic IUs", type: rowTypes.PROGRAM_INDICATOR },
-        {
-          name: "IUs which reached the criteria to stop MDA",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-        {
-          name: "IUs in post-treatment surveillance",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-        {
-          name: "IUs eligible for post MDA surveillance phase",
-          type: rowTypes.PROGRAM_INDICATOR,
-          // An example of manually-defined cells: `null` for empty cells, "Grand total" at the end
-          cellDimensions: [
-            {
-              dimensionName:
-                "TCMDA - IUs eligible for post MDA surveillance phase",
-            },
-            {
-              dimensionName:
-                "LFMDA - IUs eligible for post MDA surveillance phase",
-            },
-            // Empty cells:
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            { dimensionName: "Grand Total", },
-          ],
-        },
-        {
-          name: "IUs where NTD endemicity is unknown",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-        {
-          name: "Population in NTD affected IUs",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-        {
-          name: "IUs eligible for pre-TAS surveys",
-          type: rowTypes.PROGRAM_INDICATOR,
-          cellDimensions: [
-            null,
-            { dimensionName: "LFMDA - IUs eligible for pre-TAS surveys", },
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            { dimensionName: "Grand Total" },
-          ],
-        },
-        {
-          name: "IUs eligible for TAS/IA surveys",
-          type: rowTypes.PROGRAM_INDICATOR,
-          cellDimensions: [
-            { dimensionName: "TCMDA - IUs eligible for TAS/IA surveys", },
-            { dimensionName: "LFMDA - IUs eligible for TAS/IA surveys", },
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            { dimensionName: "Grand Total" },
-          ],
-        },
-
-        // Targets
-        { name: "Targets", type: rowTypes.CATEGORY },
-        { name: "Total Population of IUs", type: rowTypes.PROGRAM_INDICATOR },
-        {
-          name: "Population eligible for MDA treatment",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-        {
-          name: "Estimated size of populations with high risk of infection",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-
-        // Coverage
-        { name: "Coverage", type: rowTypes.CATEGORY },
-        // {
-        //   // Causes "division by zero" error in database, specifically from TCMDA (uses "Epidemiological")
-        //   name: "National Coverage",
-        //   type: rowTypes.PROGRAM_INDICATOR,
-        // },
-        { name: "Program Coverage", type: rowTypes.PROGRAM_INDICATOR },
-        // {
-        //   // Same "division" error as above b/c TCMDA and LFMDA
-        //   name: "Epidemiological Coverage",
-        //   type: rowTypes.PROGRAM_INDICATOR,
-        // },
-        {
-          name: "IUs reaching targeted program coverage",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-        {
-          name:
-            "IUs reaching target therapeutic coverage within populations with high risk of infection",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-        {
-          name: "IUs where MDA treatment has been provided",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-        {
-          name: "MDA treatments distributed to high risk populations",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-        // Display name: "Number of PC treatments provided per IU (per disease)"
-        { name: "Total Persons Treated", type: rowTypes.PROGRAM_INDICATOR },
-        {
-          name: "IUs where MDA campaigns were conducted",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-        {
-          name: "IUs reaching required therapeutic coverage",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-        // Similar to above, so displayName: "Number of people, in population eligible for treatment, receiving MDA treatment"
-        { name: "Total Persons Treated", type: rowTypes.PROGRAM_INDICATOR },
-        // This one seems off
-        {
-          name:
-            "People, in population eligible for treatment, not receiving MDA treatment",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-        {
-          name: "IU supported with NTD MDA treatment planning and coordination",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-
-        // Coverage evaluation
-        { name: "Coverage Evaluation", type: rowTypes.CATEGORY },
-        {
-          name:
-            "IUs where MDA treatment coverage was verified and addressed using SCT",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-        {
-          name: "IUs not meeting the cut-off value for SCT",
-          type: rowTypes.PROGRAM_INDICATOR,
-        },
-      ];
 
       // Set up column headers and subheaders
       $("#header-row-top").append(`<th scope="col"></th>`);
@@ -323,14 +839,14 @@
         newRow.append(`<th scope="row">${row.name}</th>`);
 
         // Handling manually-defined dimension names
-        if (row.cellDimensions) {
+        if (row.cells) {
           // TODO: Refactor into `populateManuallyDefinedRow(row, newRow)`;
           // Cells are manually defined. Iterate over dimension definitions to make row
-          row.cellDimensions.forEach((cell) => {
+          row.cells.forEach((cell) => {
             // If dimension name is empty, make empty cell
             if (!cell) return newRow.append(`<td></td>`);
 
-            const { dimensionName } = cell;
+            const { dn: dimensionName } = cell;
 
             // Look up dimension ID from `allDimensions`
             const dimension = allDimensions.find(
