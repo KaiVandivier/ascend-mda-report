@@ -10,30 +10,22 @@
 <script type="text/javascript">
   // Put your javascript functions here
 
-  function greatestOf(...args) {
-    const nums = args.filter((n) => !isNaN(n));
-    if (!nums.length) return 0;
-    return Math.max(...nums);
-  }
-
-  function sumOf(...args) {
-    const nums = args.filter((n) => !isNaN(n));
-    if (!nums.length) return 0;
-    return nums.reduce((sum, n) => sum + Number(n), 0);
-  }
-
-  // Defining these values here because form creation error isn't saving report parameter settings
-  const period = dhis2.report.periods[0] || "THIS_YEAR";
-  const orgUnit = dhis2.report.organisationUnit.length
-    ? dhis2.report.organisationUnit
-    : {
-        id: "GdH306UQ8L8", // This is the global org-unit
-        name: "ASCEND",
-        code: "",
-      };
-
-  /* Setting up table */
-  // column subcategories
+  // Constants
+  const allOrgUnits = [
+    { id: "GdH306UQ8L8", displayName: "ASCEND (Global)" },
+    { id: "NcFgAaXhz7C", displayName: "Bangladesh" },
+    { id: "AE6IvE2jiSd", displayName: "Ethiopia" },
+    { id: "TDzGT1zy5Ay", displayName: "Kenya" },
+    { id: "Ej29Oagyhzo", displayName: "Malawi" },
+    { id: "dDWimYQWqK3", displayName: "Mozambique" },
+    { id: "cDXNddYCdPh", displayName: "South Sudan" },
+    { id: "FqoRMDOhFAp", displayName: "Tanzania" },
+    { id: "IHyDQqsAo7k", displayName: "Tanzania, Zanzibar" },
+    { id: "Yz1I2quJvaQ", displayName: "Uganda" },
+    { id: "AK2b9x2HipG", displayName: "Zambia" },
+    { id: "zzkzrWcJnfM", displayName: "ZZ TEST" },
+  ];
+  // Enums for table
   const colSubcats = Object.freeze({
     ROUND_1: { name: "Round 1", shortName: "R1" },
     ROUND_2: { name: "Round 2", shortName: "R2" },
@@ -44,10 +36,6 @@
     PROGRAM_INDICATOR: "programIndicator",
     INDICATOR: "indicator",
   });
-  // Enum for program indicator names? -- Maybe not, just put it in `rows`
-
-  // Column and row values
-  // TODO: Add short names
   const columns = [
     {
       name: "Trachoma",
@@ -86,6 +74,21 @@
       subcategories: null,
     },
   ];
+
+  // Defining initial values for state
+  const period = dhis2.report.periods[0] || "THIS_YEAR";
+  const orgUnit = dhis2.report.organisationUnit.length
+    ? dhis2.report.organisationUnit.id
+    : "GdH306UQ8L8"; // This is the global org-unit
+  const dimensionsToQuery = [];
+
+  // App state:
+  // TODO: (maybe `rows` should go in here)
+  let state = {
+    period,
+    orgUnit,
+    dimensionsToQuery: [],
+  };
 
   // If cell definitions are not manually defined, they are estimated based on row / title info
   // `dn` is "dimensionName"
@@ -857,6 +860,19 @@
     },
   ]; // End row definitions
 
+  // Functions
+  function greatestOf(...args) {
+    const nums = args.filter((n) => !isNaN(n));
+    if (!nums.length) return 0;
+    return Math.max(...nums);
+  }
+
+  function sumOf(...args) {
+    const nums = args.filter((n) => !isNaN(n));
+    if (!nums.length) return 0;
+    return nums.reduce((sum, n) => sum + Number(n), 0);
+  }
+
   function getAllDimensions() {
     // Gets a list of all indicators' and program indicators' names and IDs
     return Promise.all([
@@ -879,6 +895,7 @@
   }
 
   function populateCellDimensionIds(allDimensions) {
+    // Also populates `state.dimensionsToQuery`
     const dimensionsToQuery = [];
 
     // Look up dimension ids by name and add ids to cells
@@ -904,6 +921,7 @@
       });
     });
 
+    state = { ...state, dimensionsToQuery };
     return dimensionsToQuery;
   }
 
@@ -933,10 +951,11 @@
     });
   }
 
-  function getAnalyticsData(dimensionsToQuery, period, orgUnit) {
+  function getAnalyticsData(/* dimensionsToQuery, period, orgUnit */) {
+    const { dimensionsToQuery, period, orgUnit } = state;
     return $.get("../api/analytics", {
       dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
-      filter: `ou:${orgUnit.id}`,
+      filter: `ou:${orgUnit}`,
       skipMeta: true,
     }).then((json) => {
       // convert to a map for easy lookup by ID:
@@ -1011,11 +1030,25 @@
 
       row.cells.forEach((cell) => {
         // If cell is empty or has no value, make empty cell element
-        if (!cell || typeof cell.value === "undefined") return newRow.append(`<td></td>`);
+        if (!cell || typeof cell.value === "undefined")
+          return newRow.append(`<td></td>`);
         const { value } = cell;
         newRow.append(`<td>${value}</td>`);
       });
     });
+  }
+
+  function handleChange(e) {
+    state = { ...state, [e.target.name]: e.target.value };
+    $("#tbody").empty().text("Loading data...");
+    getAnalyticsData()
+      .then(populateCellValues)
+      .then(populateHtmlTableBodyWithValues);
+  }
+
+  function setUpForm() {
+    $("#periodSelect").on("change", handleChange);
+    $("#orgUnitSelect").on("change", handleChange);
   }
 
   jQuery(document).ready(function () {
@@ -1023,12 +1056,11 @@
 
     getAllDimensions()
       .then(populateCellDimensionIds)
-      .then((dimensionsToQuery) =>
-        getAnalyticsData(dimensionsToQuery, period, orgUnit)
-      )
+      .then(getAnalyticsData)
       .then(populateCellValues)
       .then(populateHtmlTableHeader)
       .then(populateHtmlTableBodyWithValues)
+      .then(setUpForm)
       .catch(console.error);
   });
 </script>
@@ -1058,6 +1090,32 @@
   <hr />
 
   <h1>MDA Treatment Summary</h1>
+
+  <div class="form-group">
+    <label for="periodSelect">Period:</label>
+    <select name="period" id="periodSelect" class="form-control">
+      <option value="2020">2020</option>
+      <option value="2019">2019</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="orgUnitSelect">Organisation Unit:</label>
+    <select name="orgUnit" id="orgUnitSelect" class="form-control">
+      <option value="GdH306UQ8L8">ASCEND (Global)</option>
+      <option value="NcFgAaXhz7C">Bangladesh</option>
+      <option value="AE6IvE2jiSd">Ethiopia</option>
+      <option value="TDzGT1zy5Ay">Kenya</option>
+      <option value="Ej29Oagyhzo">Malawi</option>
+      <option value="dDWimYQWqK3">Mozambique</option>
+      <option value="cDXNddYCdPh">South Sudan</option>
+      <option value="FqoRMDOhFAp">Tanzania</option>
+      <option value="IHyDQqsAo7k">Tanzania, Zanzibar</option>
+      <option value="Yz1I2quJvaQ">Uganda</option>
+      <option value="AK2b9x2HipG">Zambia</option>
+      <option value="zzkzrWcJnfM">ZZ TEST</option>
+    </select>
+  </div>
 
   <p id="loading">Loading...</p>
 
