@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>Download test</title>
+  </head>
+  <body>
+    <a
+      href="https://academy.downloads.dhis2.org/Events/Low-res/3-1-Event-Capture-Web-Based-Demonstration-Part-2-Low.mp4"
+      download="Filename"
+      >Download me!</a
+    >
+    <button id="btn">Download</button>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
+    <script>
+      function download() {
+        axios({
+          url: "https://academy.downloads.dhis2.org/Events/Low-res/3-1-Event-Capture-Web-Based-Demonstration-Part-2-Low.mp4",
+          method: "GET",
+          responseType: "blob",
+        }).then((response) => {
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download");
+          document.body.appendChild(link);
+          link.click();
+        });
+      }
+
+      document.getElementById("btn").addEventListener("click", download);
+    </script>
+  </body>
+</html>
