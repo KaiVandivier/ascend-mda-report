@@ -1,3 +1,5 @@
+<!-- Check out the repository at https://github.com/KaiVandivier/ascend-mda-report -->
+
 <style type="text/css" media="screen">
   /* Put your CSS styling here */
 
@@ -5,23 +7,36 @@
   th[scope="row"]:not([colspan]) {
     font-weight: normal;
   }
+
+  /* THIS IS HARD-CODED AND NEEDS CHANGING IF COLUMNS CHANGE */
+  /* Stripe columns 2, 4-6, 10-12. (simply even for top header row) */
+  tr#header-row-top > *:nth-child(even),
+  tr:not(#header-row-top) > *:nth-child(2),
+  tr:not(#header-row-top) > *:nth-child(n + 4):nth-child(-n + 6),
+  tr:not(#header-row-top) > *:nth-child(n + 10):nth-child(-n + 12) {
+    background-color: #fafafa;
+  }
 </style>
 
 <script type="text/javascript">
   // Put your javascript functions here
 
-  // Defining these values here because form creation error isn't saving report parameter settings
-  const period = dhis2.report.periods[0] || "THIS_YEAR";
-  const orgUnit = dhis2.report.organisationUnit.length
-    ? dhis2.report.organisationUnit
-    : {
-        id: "GdH306UQ8L8", // This is the global org-unit
-        name: "ASCEND",
-        code: "",
-      };
-
-  /* Setting up table */
-  // column subcategories
+  // Constants
+  const allOrgUnits = [
+    { id: "GdH306UQ8L8", displayName: "ASCEND (Global)" },
+    { id: "NcFgAaXhz7C", displayName: "Bangladesh" },
+    { id: "AE6IvE2jiSd", displayName: "Ethiopia" },
+    { id: "TDzGT1zy5Ay", displayName: "Kenya" },
+    { id: "Ej29Oagyhzo", displayName: "Malawi" },
+    { id: "dDWimYQWqK3", displayName: "Mozambique" },
+    { id: "cDXNddYCdPh", displayName: "South Sudan" },
+    { id: "FqoRMDOhFAp", displayName: "Tanzania" },
+    { id: "IHyDQqsAo7k", displayName: "Tanzania, Zanzibar" },
+    { id: "Yz1I2quJvaQ", displayName: "Uganda" },
+    { id: "AK2b9x2HipG", displayName: "Zambia" },
+    { id: "zzkzrWcJnfM", displayName: "ZZ TEST" },
+  ];
+  // Enums for table
   const colSubcats = Object.freeze({
     ROUND_1: { name: "Round 1", shortName: "R1" },
     ROUND_2: { name: "Round 2", shortName: "R2" },
@@ -32,10 +47,6 @@
     PROGRAM_INDICATOR: "programIndicator",
     INDICATOR: "indicator",
   });
-  // Enum for program indicator names? -- Maybe not, just put it in `rows`
-
-  // Column and row values
-  // TODO: Add short names
   const columns = [
     {
       name: "Trachoma",
@@ -75,8 +86,41 @@
     },
   ];
 
-  // If cell definitions are not manually defined, they are estimated based on row / title info
-  // `dn` is "dimensionName"
+  // Defining initial values for state
+  const period = dhis2.report.periods[0] || "THIS_YEAR";
+  const orgUnit = dhis2.report.organisationUnit.length
+    ? dhis2.report.organisationUnit.id
+    : "GdH306UQ8L8"; // This is the global org-unit
+  const dimensionsToQuery = [];
+
+  // App state:
+  // TODO: (maybe `rows` should go in here)
+  let state = {
+    period,
+    orgUnit,
+    dimensionsToQuery: [],
+  };
+
+  /**
+   * Row and cell definitions:
+   * This is where to define the contents of cells in the table.
+   *
+   * The `dn` property is short for `dimensionName`: 
+   * If you provide a dimension name, the dimension ID will be looked up and the cell value will be populated
+   * according to the result of an analytics query.
+   * Currently (17 July 2020), only Indicators and Program Indicators can be looked up by name,
+   * but these can be expanded (see `getAllDimensions()`).
+   *
+   * To populate a cell with custom logic, provide a function for the `customLogic` property:
+   * It will be called during table population with data. It should return the value that will be the final cell value.
+   * The function receives its index and the current row of cells to use for calculations,
+   * e.g. `customLogic: (idx, row) => { console.log(row[idx-1].value) }` -> Logs value of previous cell
+   * `sumOf()` and `greatestOf()` are helper functions that may be useful for custom logic;
+   * they receive any number of arguments and only operate on numbers, ignoring non-number cell values.
+   *
+   * You can also hard-code the value of the cell with the `value` property of the cell.
+   * (But do not include a `dn` property if you want the value hard-coded)
+   */
   const rows = [
     // Endemicity
     { name: "Endemicity", type: rowTypes.CATEGORY },
@@ -291,7 +335,7 @@
           dn: "STMDA - Population eligible for MDA treatment Total",
         },
         {
-          dn: "MDA - Total population eligible for MDA treatment of IU",
+          dn: "MDA - Total Population eligible for MDA treatment of IU",
         },
       ],
     },
@@ -317,7 +361,7 @@
         },
         {
           dn:
-            "OMDA - Total estimated size of populations with high risk of infection",
+            "OMDA - Total Estimated size of populations with high risk of infection",
         },
         {
           dn:
@@ -329,7 +373,7 @@
         },
         {
           dn:
-            "SCMDA - Total estimated size of populations with high risk of infection",
+            "SCMDA - Total Estimated size of populations with high risk of infection",
         },
         {
           dn:
@@ -341,7 +385,7 @@
         },
         {
           dn:
-            "STMDA - Total estimated size of populations with high risk of infection",
+            "STMDA - Total Estimated size of populations with high risk of infection",
         },
         {
           dn:
@@ -389,11 +433,14 @@
       ],
     },
     {
-      // Same "division" error as above b/c TCMDA and LFMDA
       name: "Epidemiological Coverage",
       type: rowTypes.PROGRAM_INDICATOR,
       cells: [
-        { dn: "Oops! I cause a division by zero error." },
+        {
+          // Division by zero error in database:
+          // dn: "TCMDA - Epidemiological Coverage"
+          value: "Oops! I cause a division by zero error.",
+        },
         { dn: "LFMDA - Epidemiological Coverage" },
         { dn: "OMDA - Epidemiological Coverage Round 1" },
         { dn: "OMDA - Epidemiological Coverage Round 2" },
@@ -531,11 +578,12 @@
             "STMDA - Total MDA treatments distributed to high risk populations",
         },
         {
-          dn: "MDA - Total MDA treatments distributed to high risk populations",
+          // dn: "MDA - Total MDA treatments distributed to high risk populations",
+          value:
+            "Oops! I cause a server error: 'java.lang.Long cannot be cast to java.lang.Double' (dimension name 'MDA - Total MDA treatments distributed to high risk populations')",
         },
       ],
     },
-    // Display name: "Number of PC treatments provided per IU (per disease)"
     {
       name: "Number of PC treatments provided per IU",
       type: rowTypes.PROGRAM_INDICATOR,
@@ -658,7 +706,6 @@
           dn:
             "STMDA - Total People, in population eligible for treatment, not receiving MDA treatment",
         },
-        // Additional space here
         {
           dn:
             "MDA - Total People, in population eligible for treatment, not receiving MDA treatment",
@@ -685,7 +732,10 @@
           dn:
             "OMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
         },
-        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         {
           dn:
             "SCMDA - IU supported with NTD MDA treatment planning and coordination Round 1",
@@ -694,7 +744,10 @@
           dn:
             "SCMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
         },
-        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         {
           dn:
             "STMDA - IU supported with NTD MDA treatment planning and coordination Round 1",
@@ -703,7 +756,10 @@
           dn:
             "STMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
         },
-        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         null,
       ],
     },
@@ -731,7 +787,10 @@
           dn:
             "OMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2",
         },
-        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         {
           dn:
             "SCMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 1",
@@ -740,7 +799,10 @@
           dn:
             "SCMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2",
         },
-        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         {
           dn:
             "STMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 1",
@@ -749,8 +811,20 @@
           dn:
             "STMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2",
         },
-        { customLogic: () => console.log("Hello! I'm custom logic.") },
-        { customLogic: () => console.log("Hello! I'm custom logic.") }, // TODO: sum
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
+        {
+          customLogic: (idx, row) =>
+            sumOf(
+              row[0].value,
+              row[1].value,
+              row[4].value,
+              row[7].value,
+              row[10].value
+            ),
+        },
       ],
     },
     {
@@ -761,14 +835,32 @@
         { dn: "LFMDA - IUs not meeting the cut-off value for SCT" },
         { dn: "OMDA - IUs not meeting the cut-off value for SCT Round 1" },
         { dn: "OMDA - IUs not meeting the cut-off value for SCT Round 2" },
-        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         { dn: "SCMDA - IUs not meeting the cut-off value for SCT Round 1" },
         { dn: "SCMDA - IUs not meeting the cut-off value for SCT Round 2" },
-        { customLogic: () => console.log("Hello! I'm custom logic.") },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         { dn: "STMDA - IUs not meeting the cut-off value for SCT Round 1" },
         { dn: "STMDA - IUs not meeting the cut-off value for SCT Round 2" },
-        { customLogic: () => console.log("Hello! I'm custom logic.") },
-        { customLogic: () => console.log("Hello! I'm custom logic.") }, // No sum?
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
+        {
+          customLogic: (idx, row) =>
+            sumOf(
+              row[0].value,
+              row[1].value,
+              row[4].value,
+              row[7].value,
+              row[10].value
+            ),
+        },
       ],
     },
     {
@@ -776,14 +868,68 @@
         "Number of evaluation areas where mob-up activites were conducted following a SCT",
       dnBase: "",
       type: rowTypes.PROGRAM_INDICATOR,
-      cells: [], // Todo
+      // Todo
+      cells: [
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        {
+          customLogic: (idx, row) =>
+            sumOf(
+              row[0].value,
+              row[1].value,
+              row[4].value,
+              row[7].value,
+              row[10].value
+            ),
+        },
+      ],
     },
     {
       name:
         "Number of IUs for which independent representative coverage surveys according to WHO guidelines were completed",
       dnBase: "",
       type: rowTypes.PROGRAM_INDICATOR,
-      cells: [], // Todo
+      cells: [
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
+        {
+          customLogic: (idx, row) =>
+            sumOf(
+              row[0].value,
+              row[1].value,
+              row[4].value,
+              row[7].value,
+              row[10].value
+            ),
+        },
+      ],
     },
 
     // LNOB
@@ -793,10 +939,38 @@
         "Number of people from marginilized groups (LNOB) who received NTD MDA treatment",
       dnBase: "",
       type: rowTypes.PROGRAM_INDICATOR,
-      cells: [], // TODO
-      // Grand total: { dn: "MDA - Total people from marginalized groups (LNOB) who received NTD MDA treatment"}
+      cells: [
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        { dn: null, value: "todo" },
+        {
+          dn:
+            "MDA - Total people from marginalized groups (LNOB) who received NTD MDA treatment",
+        },
+      ],
     },
   ]; // End row definitions
+
+  // Functions
+  function greatestOf(...args) {
+    const nums = args.filter((n) => !isNaN(n));
+    if (!nums.length) return 0;
+    return Math.max(...nums);
+  }
+
+  function sumOf(...args) {
+    const nums = args.filter((n) => !isNaN(n));
+    if (!nums.length) return 0;
+    return nums.reduce((sum, n) => sum + Number(n), 0);
+  }
 
   function getAllDimensions() {
     // Gets a list of all indicators' and program indicators' names and IDs
@@ -810,17 +984,18 @@
       const allDimensions = [...programIndicators, ...indicators];
 
       // Convert to a Map where keys are names and values are ids for lookup
-      // const keyValuePairs = allDimensions.map(dimension => {
-      //   return [dimension.displayName, dimension.id];
-      // })
-      // const dimensionsMap = new Map(keyValuePairs);
-
-      return allDimensions;
+      const keyValuePairs = allDimensions.map(dimension => {
+        return [dimension.displayName, dimension.id];
+      })
+      return new Map(keyValuePairs);
     });
   }
 
-  function populateDimensionIds(rows, allDimensions) {
+  function populateCellDimensionIds(allDimensions) {
+    // Populates dimensionId (`dId`) on cells based on dimensionName
+    // Also populates `state.dimensionsToQuery` for analytics query
     const dimensionsToQuery = [];
+
     // Look up dimension ids by name and add ids to cells
     rows.forEach(({ cells }) => {
       if (!cells) return;
@@ -828,31 +1003,29 @@
       cells.forEach((cell) => {
         if (!cell || !cell.dn) return;
         const { dn: dimensionName } = cell;
-        // if (!dimensionName) return;
 
-        const dimension = allDimensions.find(
-          (dim) => dim.displayName === dimensionName
-        );
-        if (!dimension) {
+        // Find dimension in map:
+        const dimensionId = allDimensions.get(dimensionName);
+
+        if (!dimensionId) {
           cell.value = `(dimension not found: ${dimensionName})`;
           return;
         }
 
-        // Dimension found: populate `id` on cell and add it to list to query
-        dimensionsToQuery.push(dimension.id);
-        cell.dId = dimension.id;
+        // Dimension found - add it to list to query and populate cell
+        dimensionsToQuery.push(dimensionId);
+        cell.dId = dimensionId;
       });
     });
 
-    return { rows, dimensionsToQuery };
+    state = { ...state, dimensionsToQuery };
+    return dimensionsToQuery;
   }
 
-  function buildHtmlTable(rows, columns) {
-    // Should these really be here?
+  function populateHtmlTableHeader() {
     // Remove "loading"
     $("#loading").remove();
 
-    // Set up column headers and subheaders
     $("#header-row-top").append(`<th scope="col"></th>`);
     $("#header-row-bottom").append(`<th scope="col"></th>`);
     columns.forEach((col) => {
@@ -873,224 +1046,123 @@
       $("#header-row-top").append(`<th scope=col>${col.shortName}</th>`);
       $("#header-row-bottom").append(`<th scope="col"></th>`);
     });
+  }
+
+  function getAnalyticsData(/* dimensionsToQuery, period, orgUnit */) {
+    const { dimensionsToQuery, period, orgUnit } = state;
+    return $.get("../api/analytics", {
+      dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
+      filter: `ou:${orgUnit}`,
+      skipMeta: true,
+    }).then((json) => {
+      // convert to a map for easy lookup by ID:
+      const keyValuePairs = json.rows.map((row) => [row[0], row[2]]);
+      const resultsMap = new Map(keyValuePairs);
+      return resultsMap;
+    });
+  }
+
+  function populateCellValues(analyticsResults) {
+    // Use dimensionId or customLogic to populate value
+    rows.forEach(({ cells }) => {
+      if (!cells) return; // Empty row; return
+
+      cells.forEach((cell, idx, arr) => {
+        // (get `idx` and `arr` values for custom logic functions)
+        if (!cell) return;
+        const { dId: dimensionId, customLogic } = cell;
+
+        if (dimensionId) {
+          const data = analyticsResults.get(dimensionId);
+          cell.value = data || "-";
+          return;
+        }
+
+        if (customLogic) {
+          cell.value = customLogic(idx, arr); // for example
+          return;
+        }
+      });
+    });
+  }
+
+  function populateHtmlTableBodyWithValues() {
+    // Clear tbody for fresh rows
+    const tbody = $("#tbody").empty();
 
     // Set up table body to be populated
     const totalColumns =
       1 +
       columns.reduce(
-        (sum, column) =>
-          sum + (column.subcategories ? column.subcategories.length : 1),
+        (sum, column) => sum + (column.subcategories?.length || 1),
         0
       );
-    const tbody = $("#tbody");
+
+    // Set up table body
+    rows.forEach((row) => {
+      // Make new row element
+      const newRow = $(
+        `<tr data-name="${row.name}" data-type="${row.type}"></tr>`
+      );
+      // Add new row to DOM
+      tbody.append(newRow);
+
+      if (row.type === rowTypes.CATEGORY) {
+        // Row is just a category label (like "Coverage Evaluation"): make one wide cell and return
+        newRow.append(
+          `<th scope="row" colspan="${totalColumns}">${row.name}</th>`
+        );
+        return;
+      }
+
+      // Add row header with name
+      newRow.append(`<th scope="row">${row.name}</th>`);
+
+      if (!row.cells || !row.cells.length) {
+        newRow.append(
+          `<td colspan="${totalColumns - 1}">No dimensions specified</td>`
+        );
+        return;
+      }
+
+      row.cells.forEach((cell) => {
+        // If cell is empty or has no value, make empty cell element
+        if (!cell || typeof cell.value === "undefined")
+          return newRow.append(`<td></td>`);
+        const { value } = cell;
+        newRow.append(`<td>${value}</td>`);
+      });
+    });
+  }
+
+  function handleChange(e) {
+    state = { ...state, [e.target.name]: e.target.value };
+    $("#tbody").empty().text("Loading data...");
+    getAnalyticsData()
+      .then(populateCellValues)
+      .then(populateHtmlTableBodyWithValues);
+  }
+
+  function setUpForm() {
+    $("#periodSelect").on("change", handleChange);
+    $("#orgUnitSelect").on("change", handleChange);
   }
 
   jQuery(document).ready(function () {
-    // Put javascript to be executed after page is loaded here
+    // Javascript to be executed after page is loaded here
 
-    // Parallel promises to fetch indicators and programIndicators
-    getAllDimensions().then((allDimensions) => {
-      // const { rows, dimensionsToQuery } = populateDimensionIds(rows, allDimensions);
-      // console.log(res);
-
-      // Remove "loading"
-      $("#loading").remove();
-
-      // Set up column headers and subheaders
-      $("#header-row-top").append(`<th scope="col"></th>`);
-      $("#header-row-bottom").append(`<th scope="col"></th>`);
-      columns.forEach((col) => {
-        if (col.subcategories) {
-          // 1. Make the top row th colspan = col.subcategories.length
-          $("#header-row-top").append(
-            `<th scope="col" colspan="${col.subcategories.length}">${col.name}</th>`
-          );
-          // 2. Make a bottom row th for each subcategory
-          col.subcategories.forEach((subcat) => {
-            $("#header-row-bottom").append(
-              `<th scope="col">${subcat.shortName}</th>`
-            );
-          });
-          return;
-        }
-        // Else, th with col name on top header row, empty cell on bottom
-        $("#header-row-top").append(`<th scope=col>${col.shortName}</th>`);
-        $("#header-row-bottom").append(`<th scope="col"></th>`);
-      });
-
-      // Set up table body to be populated
-      const totalColumns =
-        1 +
-        columns.reduce(
-          (sum, column) =>
-            sum + (column.subcategories ? column.subcategories.length : 1),
-          0
-        );
-      const dimensionsToQuery = [];
-      const tbody = $("#tbody");
-
-      // Set up table body
-      rows.forEach((row) => {
-        // Make new row object
-        const newRow = $(
-          `<tr data-name="${row.name}" data-type="${row.type}"></tr>`
-        );
-        // Add new row to DOM
-        tbody.append(newRow);
-
-        if (row.type === rowTypes.CATEGORY) {
-          // Row is just a category label (like "Coverage Evaluation"): make one wide cell and return
-          newRow.append(
-            `<th scope="row" colspan="${totalColumns}">${row.name}</th>`
-          );
-          return;
-        }
-
-        // Add row header with name
-        newRow.append(`<th scope="row">${row.name}</th>`);
-
-        // Handling manually-defined dimension names
-        if (row.cells) {
-          // TODO: Refactor into `populateManuallyDefinedRow(row, newRow)`;
-          // Cells are manually defined. Iterate over dimension definitions to make row
-          row.cells.forEach((cell) => {
-            // If dimension name is empty, make empty cell
-            if (!cell) return newRow.append(`<td></td>`);
-
-            const { dn: dimensionName } = cell;
-
-            // Look up dimension ID from `allDimensions`
-            const dimension = allDimensions.find(
-              (dim) => dim.displayName === dimensionName
-            );
-
-            if (!dimension) {
-              // Dimension not found. Add cell saying so:
-              newRow.append(
-                `<td>(dimension not found: "${dimensionName}")</td>`
-              );
-              return;
-            }
-
-            // Dimension found. Make cell; give it a target to be filled with data
-            newRow.append(
-              `<td data-dimension-id=${dimension.id}>Loading...</td>`
-            );
-            // Add dimension to list to query
-            dimensionsToQuery.push(dimension.id);
-          });
-          return;
-        } // End manually-defined row
-
-        // Cells are not manually defined; create them based on column definiitions
-        columns.forEach((col) => {
-          // 1. Check if column has subcategories
-          if (col.subcategories) {
-            // Subcategory strategy:
-            // A. Check for aggregate dimension (without suffix)
-            // If present, add empty cells for "rounds" and a cell with data in "total"; return
-            const dimensionName = `${col.prefix} - ${row.name}`; // e.g. "TMDA - Endemic IUs"
-            const dimension = allDimensions.find(
-              (dim) => dim.displayName === dimensionName
-            );
-            if (dimension) {
-              col.subcategories.forEach((subcategory) => {
-                // Empty cells if not in "Total" column
-                if (subcategory !== colSubcats.TOTAL) {
-                  newRow.append("<td></td>");
-                  return;
-                }
-                // Data for "total" column
-                newRow.append(
-                  `<td data-dimension-id=${dimension.id}>Loading...</td>`
-                );
-                // Add dimension to list to query
-                dimensionsToQuery.push(dimension.id);
-              });
-              return;
-            }
-
-            // B. Check for subcategory dimension
-            // If present, add filled cells for each subcat
-            col.subcategories.forEach((subcategory) => {
-              const subcatDimensionName = `${dimensionName} ${subcategory}`; // e.g. "OMDA - Population in NTD affected IUs Round 2"
-
-              const subcatDimension = allDimensions.find(
-                (dim) => dim.displayName === subcatDimensionName
-              );
-
-              if (subcatDimension) {
-                // Dimension found: make new cell and return
-                const dimensionId = subcatDimension.id;
-                // Make cell; give it a target to be filled with data
-                newRow.append(
-                  `<td data-dimension-id=${dimensionId}>Loading...</td>`
-                );
-                // Add dimension to list to query
-                dimensionsToQuery.push(dimensionId);
-                return;
-              }
-
-              // Dimension not found; add cell with message
-              newRow.append(
-                `<td>(dimension not found: "${subcatDimensionName}")</td>`
-              );
-            });
-            return; // Done with subcategories
-          }
-
-          // 2. If no subcategories, look for data for cell (use row name & col prefix)
-          const dimensionName = `${col.prefix} - ${row.name}`; // e.g. "TCMDA - Endemic IUs"
-          const re = new RegExp(dimensionName, "i");
-
-          const dimension = allDimensions.find((dim) => {
-            // Regex matching to be more flexible (case insensitive, works w/o spaces)
-            return re.test(dim.displayName);
-          });
-
-          // If dimension found, make new cell and prep it for data
-          if (dimension) {
-            // Make cell; give it a target to be filled with data
-            newRow.append(
-              `<td data-dimension-id=${dimension.id}>Loading...</td>`
-            );
-            // Add dimension to list to query
-            dimensionsToQuery.push(dimension.id);
-            return;
-          }
-
-          // If dimension not found, add cell saying so:
-          newRow.append(`<td>(dimension not found: "${dimensionName}")</td>`);
-
-          // TODO: Maybe, if data is not found, check /api/programIndicators with case insensitivity to see if field exists
-        }); // End automated population
-      }); // End table body row population
-
-      // TODO: Refactor into `getAnalyticsData(dimensionsToQuery, period, orgUnit)`
-      // API call to fetch analytics data
-      $.get(
-        "../api/analytics",
-        {
-          dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
-          filter: `ou:${orgUnit.id}`,
-          skipMeta: true,
-        },
-        (json) => {
-          // console.log("Analytics results: ", json.rows);
-
-          // Fill cells that returned data; put "-" in ones that didn't
-          dimensionsToQuery.forEach((dim) => {
-            const cellContent =
-              json.rows.find((row) => row[0] === dim)?.[2] || "-";
-            $(`td[data-dimension-id=${dim}]`).text(cellContent);
-          });
-        }
-      ); // End $.get()
-    }); // End Promise.all()
+    getAllDimensions()
+      .then(populateCellDimensionIds)
+      .then(getAnalyticsData)
+      .then(populateCellValues)
+      .then(populateHtmlTableHeader)
+      .then(populateHtmlTableBodyWithValues)
+      .then(setUpForm)
+      .catch(console.error);
   });
 </script>
 
-<!-- Bootstrap test -->
+<!-- Bootstrap stylesheet -->
 <link
   rel="stylesheet"
   href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
@@ -1099,22 +1171,41 @@
 />
 
 <div>
-  <!-- Put your HTML mark-up here -->
-
-  <h4>Notes:</h4>
-  <p>
-    So we can make sure we're querying the right things, "dimension not found"
-    indicates fields that weren't found in the lists of indicators or program
-    indicators. Of course, some of them should be blank in the end.
-  </p>
-  <p>
-    A cell showing "-" means that the dimension <em>was</em> found, but no data
-    was found for it in the database.
-  </p>
-
-  <hr />
-
+  <!-- HTML Markup to make up report -->
   <h1>MDA Treatment Summary</h1>
+
+  <div class="form-group">
+    <label for="periodSelect">Period:</label>
+    <select name="period" id="periodSelect" class="form-control">
+      <option value="2020">2020</option>
+      <option value="2019">2019</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="orgUnitSelect">Organisation Unit:</label>
+    <select name="orgUnit" id="orgUnitSelect" class="form-control">
+      <option value="GdH306UQ8L8">ASCEND (Global)</option>
+      <option value="NcFgAaXhz7C">Bangladesh</option>
+      <option value="AE6IvE2jiSd">Ethiopia</option>
+      <option value="TDzGT1zy5Ay">Kenya</option>
+      <option value="Ej29Oagyhzo">Malawi</option>
+      <option value="dDWimYQWqK3">Mozambique</option>
+      <option value="cDXNddYCdPh">South Sudan</option>
+      <option value="FqoRMDOhFAp">Tanzania</option>
+      <option value="IHyDQqsAo7k">Tanzania, Zanzibar</option>
+      <option value="Yz1I2quJvaQ">Uganda</option>
+      <option value="AK2b9x2HipG">Zambia</option>
+      <option value="zzkzrWcJnfM">ZZ TEST</option>
+    </select>
+  </div>
+
+  <p>
+    <em
+      >A cell showing "-" means that no value exists in the database for that
+      dimension.</em
+    >
+  </p>
 
   <p id="loading">Loading...</p>
 
