@@ -11,14 +11,15 @@
   // Put your javascript functions here
 
   function greatestOf(...args) {
-    const nums = args.filter(n => !isNaN(n));
-    if (!nums.length) return "-";
+    const nums = args.filter((n) => !isNaN(n));
+    if (!nums.length) return 0;
     return Math.max(...nums);
+  }
 
-    // if (isNaN(a) && isNaN(b)) return "-";
-    // if (isNaN(a)) return b;
-    // if (isNaN(b)) return a;
-    // return Math.max(a, b);
+  function sumOf(...args) {
+    const nums = args.filter((n) => !isNaN(n));
+    if (!nums.length) return 0;
+    return nums.reduce((sum, n) => sum + Number(n), 0);
   }
 
   // Defining these values here because form creation error isn't saving report parameter settings
@@ -698,7 +699,10 @@
           dn:
             "OMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
         },
-        { customLogic: (idx, row) => greatestOf(row[idx-1].value, row[idx-2].value) },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         {
           dn:
             "SCMDA - IU supported with NTD MDA treatment planning and coordination Round 1",
@@ -707,7 +711,10 @@
           dn:
             "SCMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
         },
-        { customLogic: (idx, row) => greatestOf(row[idx-1].value, row[idx-2].value) },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         {
           dn:
             "STMDA - IU supported with NTD MDA treatment planning and coordination Round 1",
@@ -716,7 +723,10 @@
           dn:
             "STMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
         },
-        { customLogic: (idx, row) => greatestOf(row[idx-1].value, row[idx-2].value) },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         null,
       ],
     },
@@ -744,7 +754,10 @@
           dn:
             "OMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2",
         },
-        { customLogic: (idx, row) => "Hello! Custom logic goes here." },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         {
           dn:
             "SCMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 1",
@@ -753,7 +766,10 @@
           dn:
             "SCMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2",
         },
-        { customLogic: (idx, row) => "Hello! Custom logic goes here." },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         {
           dn:
             "STMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 1",
@@ -762,8 +778,20 @@
           dn:
             "STMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2",
         },
-        { customLogic: (idx, row) => "Hello! Custom logic goes here." },
-        { customLogic: (idx, row) => "Hello! Custom logic goes here." }, // TODO: sum
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
+        {
+          customLogic: (idx, row) =>
+            sumOf(
+              row[0].value,
+              row[1].value,
+              row[4].value,
+              row[7].value,
+              row[10].value
+            ),
+        }, // TODO: sum
       ],
     },
     {
@@ -774,14 +802,32 @@
         { dn: "LFMDA - IUs not meeting the cut-off value for SCT" },
         { dn: "OMDA - IUs not meeting the cut-off value for SCT Round 1" },
         { dn: "OMDA - IUs not meeting the cut-off value for SCT Round 2" },
-        { customLogic: (idx, row) => "Hello! Custom logic goes here." },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         { dn: "SCMDA - IUs not meeting the cut-off value for SCT Round 1" },
         { dn: "SCMDA - IUs not meeting the cut-off value for SCT Round 2" },
-        { customLogic: (idx, row) => "Hello! Custom logic goes here." },
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
         { dn: "STMDA - IUs not meeting the cut-off value for SCT Round 1" },
         { dn: "STMDA - IUs not meeting the cut-off value for SCT Round 2" },
-        { customLogic: (idx, row) => "Hello! Custom logic goes here." },
-        { customLogic: (idx, row) => "Hello! Custom logic goes here." }, // No sum?
+        {
+          customLogic: (idx, row) =>
+            greatestOf(row[idx - 1].value, row[idx - 2].value),
+        },
+        {
+          customLogic: (idx, row) =>
+            sumOf(
+              row[0].value,
+              row[1].value,
+              row[4].value,
+              row[7].value,
+              row[10].value
+            ),
+        }, // No sum?
       ],
     },
     {
@@ -965,7 +1011,7 @@
 
       row.cells.forEach((cell) => {
         // If cell is empty or has no value, make empty cell element
-        if (!cell || !cell.value) return newRow.append(`<td></td>`);
+        if (!cell || typeof cell.value === "undefined") return newRow.append(`<td></td>`);
         const { value } = cell;
         newRow.append(`<td>${value}</td>`);
       });
