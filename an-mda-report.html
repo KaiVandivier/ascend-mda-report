@@ -819,7 +819,7 @@
     });
   }
 
-  function populateDimensionIds(rows, allDimensions) {
+  function populateCellDimensionIds(rows, allDimensions) {
     const dimensionsToQuery = [];
     // Look up dimension ids by name and add ids to cells
     rows.forEach(({ cells }) => {
@@ -847,13 +847,10 @@
     return { rows, dimensionsToQuery };
   }
 
-  function buildHtmlTable(rows, columns) {
-    // Should parameters these really be here?
-    console.log("I'm in the new html table build!");
+  function populateHtmlTableHeader() {
     // Remove "loading"
     $("#loading").remove();
 
-    // Set up column headers and subheaders
     $("#header-row-top").append(`<th scope="col"></th>`);
     $("#header-row-bottom").append(`<th scope="col"></th>`);
     columns.forEach((col) => {
@@ -873,62 +870,6 @@
       // Else, th with col name on top header row, empty cell on bottom
       $("#header-row-top").append(`<th scope=col>${col.shortName}</th>`);
       $("#header-row-bottom").append(`<th scope="col"></th>`);
-    });
-
-    // Set up table body to be populated
-    const totalColumns =
-      1 +
-      columns.reduce(
-        (sum, column) =>
-          sum + (column.subcategories ? column.subcategories.length : 1),
-        0
-      );
-    const tbody = $("#tbody");
-
-    // Set up table body
-    rows.forEach((row) => {
-      // Make new row element
-      const newRow = $(
-        `<tr data-name="${row.name}" data-type="${row.type}"></tr>`
-      );
-      // Add new row to DOM
-      tbody.append(newRow);
-
-      if (row.type === rowTypes.CATEGORY) {
-        // Row is just a category label (like "Coverage Evaluation"): make one wide cell and return
-        newRow.append(
-          `<th scope="row" colspan="${totalColumns}">${row.name}</th>`
-        );
-        return;
-      }
-
-      // Add row header with name
-      newRow.append(`<th scope="row">${row.name}</th>`);
-
-      if (!row.cells) {
-        newRow.append(
-          `<td colspan="${totalColumns - 1}">No dimensions specified</td>`
-        );
-        return;
-      }
-
-      // Set up data cells with `id` to be populated by analytics query
-      // TODO: Is this ID necessary any more? with new population method
-      row.cells.forEach((cell) => {
-        // If cell is empty, make empty cell element
-        if (!cell) return newRow.append(`<td></td>`);
-
-        const { dId: dimensionId, value } = cell;
-
-        if (value) {
-          // Hardcoded value or dimension not found. Add cell with content:
-          newRow.append(`<td>${value}</td>`);
-          return;
-        }
-
-        // Otherwise make cell and give it a id to target to be populated with data
-        newRow.append(`<td data-dimension-id=${dimensionId}>Loading...</td>`);
-      });
     });
   }
 
@@ -1000,7 +941,7 @@
       // Add row header with name
       newRow.append(`<th scope="row">${row.name}</th>`);
 
-      if (!row.cells) {
+      if (!row.cells || !row.cells.length) {
         newRow.append(
           `<td colspan="${totalColumns - 1}">No dimensions specified</td>`
         );
@@ -1017,61 +958,22 @@
   }
 
   jQuery(document).ready(function () {
-    // Put javascript to be executed after page is loaded here
+    // Javascript to be executed after page is loaded here
 
-    // Parallel promises to fetch indicators and programIndicators
     getAllDimensions().then((allDimensions) => {
-      const { rows: rows2, dimensionsToQuery } = populateDimensionIds(
+      const { rows: rows2, dimensionsToQuery } = populateCellDimensionIds(
         rows,
         allDimensions
       );
 
-      // TODO: Still need to build htmlTableHeaders
-      buildHtmlTable(rows2, columns); // TODO: args, lol
+      populateHtmlTableHeader();
 
       getAnalyticsData(dimensionsToQuery, period, orgUnit).then(
         populateCellValues
       ).then(
         populateHtmlTableBodyWithValues
       );
-
-      // TODO from here:
-      // 1. Get analytics data
-      // 2. Populate `value` property of each cell (maybe by $(id), because iterating over rows will leave some cells that don't have data in the db empty)
-      // Then again, this can be tested for with (dimensionName && !analyticsResult) => "-"
-      // 3. Execute custom logic
-      // 4. Add values to html table
-      // How do I get custom logic in there? Do I mark a custom logic cell with id="row(Idx) col(Idx)" to hit it with a selector?  Maybe id each cell this way?
-
-      // TODO: Refactor into `getAnalyticsData(dimensionsToQuery, period, orgUnit)`
-      // API call to fetch analytics data
-
-      /* $.get(
-        "../api/analytics",
-        {
-          dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
-          filter: `ou:${orgUnit.id}`,
-          skipMeta: true,
-        },
-        (json) => {
-          // console.log("Analytics results: ", json.rows);
-
-          // convert to a map for easy lookup by ID:
-          const keyValuePairs = json.rows.map((row) => [row[0], row[2]]);
-          const resultsMap = new Map(keyValuePairs);
-          console.log(resultsMap);
-
-          // Fill cells that returned data; put "-" in ones that didn't
-          dimensionsToQuery.forEach((dim) => {
-            const cellContent =
-              json.rows.find((row) => row[0] === dim)?.[2] || "-";
-            $(`td[data-dimension-id=${dim}]`).text(cellContent);
-          });
-        }
-      ); // End $.get()
- */
-
-    }); // End getAllDimensions().then()
+    });
   });
 </script>
 
