@@ -117,6 +117,7 @@
    * they receive any number of arguments and only operate on numbers, ignoring non-number cell values.
    *
    * You can also hard-code the value of the cell with the `value` property of the cell.
+   * (But do not include a `dn` property if you want the value hard-coded)
    */
   const rows = [
     // Endemicity
@@ -981,17 +982,16 @@
       const allDimensions = [...programIndicators, ...indicators];
 
       // Convert to a Map where keys are names and values are ids for lookup
-      // const keyValuePairs = allDimensions.map(dimension => {
-      //   return [dimension.displayName, dimension.id];
-      // })
-      // const dimensionsMap = new Map(keyValuePairs);
-
-      return allDimensions;
+      const keyValuePairs = allDimensions.map(dimension => {
+        return [dimension.displayName, dimension.id];
+      })
+      return new Map(keyValuePairs);
     });
   }
 
   function populateCellDimensionIds(allDimensions) {
-    // Also populates `state.dimensionsToQuery`
+    // Populates dimensionId (`dId`) on cells based on dimensionName
+    // Also populates `state.dimensionsToQuery` for analytics query
     const dimensionsToQuery = [];
 
     // Look up dimension ids by name and add ids to cells
@@ -1001,19 +1001,18 @@
       cells.forEach((cell) => {
         if (!cell || !cell.dn) return;
         const { dn: dimensionName } = cell;
-        // if (!dimensionName) return;
 
-        const dimension = allDimensions.find(
-          (dim) => dim.displayName === dimensionName
-        );
-        if (!dimension) {
+        // Find dimension in map:
+        const dimensionId = allDimensions.get(dimensionName);
+
+        if (!dimensionId) {
           cell.value = `(dimension not found: ${dimensionName})`;
           return;
         }
 
-        // Dimension found: populate `id` on cell and add it to list to query
-        dimensionsToQuery.push(dimension.id);
-        cell.dId = dimension.id;
+        // Dimension found - add it to list to query and populate cell
+        dimensionsToQuery.push(dimensionId);
+        cell.dId = dimensionId;
       });
     });
 
