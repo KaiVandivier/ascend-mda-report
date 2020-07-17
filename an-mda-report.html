@@ -847,7 +847,8 @@
     return { rows, dimensionsToQuery };
   }
 
-  function buildHtmlTable(rows, columns) { // Should parameters these really be here?
+  function buildHtmlTable(rows, columns) {
+    // Should parameters these really be here?
     console.log("I'm in the new html table build!");
     // Remove "loading"
     $("#loading").remove();
@@ -930,22 +931,66 @@
     });
   }
 
+  function getAnalyticsData(dimensionsToQuery, period, orgUnit) {
+    return $.get("../api/analytics", {
+      dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
+      filter: `ou:${orgUnit.id}`,
+      skipMeta: true,
+    }).then((json) => {
+      // convert to a map for easy lookup by ID:
+      const keyValuePairs = json.rows.map((row) => [row[0], row[2]]);
+      const resultsMap = new Map(keyValuePairs);
+      return resultsMap;
+    });
+  }
+
+  function populateCellValues(analyticsResults) {
+    // Use dimensionId or customLogic to populate value
+    rows.forEach(({ cells }) => {
+      if (!cells) return; // Empty row; return
+
+      cells.forEach((cell, idx, arr) => {
+        // (get `idx` and `arr` values for custom logic functions)
+        if (!cell) return;
+        const { dId: dimensionId, customLogic } = cell;
+
+        if (dimensionId) {
+          const data = analyticsResults.get(dimensionId);
+          cell.value = data || "-";
+          return;
+        }
+
+        if (customLogic) {
+          cell.value = customLogic(idx, arr); // for example
+          return;
+        }
+      });
+    });
+  }
+
   jQuery(document).ready(function () {
     // Put javascript to be executed after page is loaded here
 
     // Parallel promises to fetch indicators and programIndicators
     getAllDimensions().then((allDimensions) => {
-      const { rows: rows2 , dimensionsToQuery } = populateDimensionIds(rows, allDimensions);
+      const { rows: rows2, dimensionsToQuery } = populateDimensionIds(
+        rows,
+        allDimensions
+      );
 
       buildHtmlTable(rows2, columns); // TODO: args, lol
+
+      getAnalyticsData(dimensionsToQuery, period, orgUnit).then(
+        populateCellValues
+      );
 
       // TODO from here:
       // 1. Get analytics data
       // 2. Populate `value` property of each cell (maybe by $(id), because iterating over rows will leave some cells that don't have data in the db empty)
-        // Then again, this can be tested for with (dimensionName && !analyticsResult) => "-"
+      // Then again, this can be tested for with (dimensionName && !analyticsResult) => "-"
       // 3. Execute custom logic
       // 4. Add values to html table
-        // How do I get custom logic in there? Do I mark a custom logic cell with id="row(Idx) col(Idx)" to hit it with a selector?  Maybe id each cell this way?
+      // How do I get custom logic in there? Do I mark a custom logic cell with id="row(Idx) col(Idx)" to hit it with a selector?  Maybe id each cell this way?
 
       // TODO: Refactor into `getAnalyticsData(dimensionsToQuery, period, orgUnit)`
       // API call to fetch analytics data
@@ -972,7 +1017,7 @@
           });
         }
       ); // End $.get()
-    }); // End Promise.all()
+    }); // End getAllDimensions().then()
   });
 </script>
 
