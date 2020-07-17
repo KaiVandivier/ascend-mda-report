@@ -913,6 +913,7 @@
       }
 
       // Set up data cells with `id` to be populated by analytics query
+      // TODO: Is this ID necessary any more? with new population method
       row.cells.forEach((cell) => {
         // If cell is empty, make empty cell element
         if (!cell) return newRow.append(`<td></td>`);
@@ -968,6 +969,53 @@
     });
   }
 
+  function populateHtmlTableBodyWithValues() {
+    // Clear tbody for fresh rows
+    const tbody = $("#tbody").empty();
+    
+    // Set up table body to be populated
+    const totalColumns =
+      1 +
+      columns.reduce(
+        (sum, column) => sum + (column.subcategories?.length || 1), 0
+      );
+
+    // Set up table body
+    rows.forEach((row) => {
+      // Make new row element
+      const newRow = $(
+        `<tr data-name="${row.name}" data-type="${row.type}"></tr>`
+      );
+      // Add new row to DOM
+      tbody.append(newRow);
+
+      if (row.type === rowTypes.CATEGORY) {
+        // Row is just a category label (like "Coverage Evaluation"): make one wide cell and return
+        newRow.append(
+          `<th scope="row" colspan="${totalColumns}">${row.name}</th>`
+        );
+        return;
+      }
+
+      // Add row header with name
+      newRow.append(`<th scope="row">${row.name}</th>`);
+
+      if (!row.cells) {
+        newRow.append(
+          `<td colspan="${totalColumns - 1}">No dimensions specified</td>`
+        );
+        return;
+      }
+
+      row.cells.forEach((cell) => {
+        // If cell is empty or has no value, make empty cell element
+        if (!cell || !cell.value) return newRow.append(`<td></td>`);
+        const { value } = cell;
+        newRow.append(`<td>${value}</td>`);
+      });
+    });
+  }
+
   jQuery(document).ready(function () {
     // Put javascript to be executed after page is loaded here
 
@@ -978,10 +1026,13 @@
         allDimensions
       );
 
+      // TODO: Still need to build htmlTableHeaders
       buildHtmlTable(rows2, columns); // TODO: args, lol
 
       getAnalyticsData(dimensionsToQuery, period, orgUnit).then(
         populateCellValues
+      ).then(
+        populateHtmlTableBodyWithValues
       );
 
       // TODO from here:
@@ -994,7 +1045,8 @@
 
       // TODO: Refactor into `getAnalyticsData(dimensionsToQuery, period, orgUnit)`
       // API call to fetch analytics data
-      $.get(
+
+      /* $.get(
         "../api/analytics",
         {
           dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
@@ -1017,6 +1069,8 @@
           });
         }
       ); // End $.get()
+ */
+
     }); // End getAllDimensions().then()
   });
 </script>
