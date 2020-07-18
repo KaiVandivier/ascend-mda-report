@@ -24,10 +24,10 @@ Row objects use these properties:
 
 Cells are defined by an array for each row. The array should be an appropriate size to fill the table, and the order of the cells should match the column definitions.
 
-Enter `null` to create an empty cell, or define the contents of the cell with an object. When defining the contents of a cell, you have several options - see this example of a data row and comments below.
+Enter `null` to create an empty cell, or define the contents of the cell with an object. When defining the contents of a cell, you have several options - see this example of a data row and explanation below:
 
 ```javascript
-// ...
+// ...other rows
 {
   name: "IUs which reached the criteria to stop MDA",
   type: rowTypes.DATA,
@@ -36,10 +36,10 @@ Enter `null` to create an empty cell, or define the contents of the cell with an
     { dId: "d3AglBM9nF4", },
     { value: "I will end up in the table!", }
     null,
-    {  dn: "OMDA - IUs which reached the criteria to stop MDA", },
+    { dn: "OMDA - IUs which reached the criteria to stop MDA", },
     null,
     null,
-    {  dn: "SCMDA - IUs which reached the criteria to stop MDA", },
+    { dn: "SCMDA - IUs which reached the criteria to stop MDA", },
     null,
     null,
     { dn: "STMDA - IUs which reached the criteria to stop MDA", },
@@ -55,7 +55,7 @@ Enter `null` to create an empty cell, or define the contents of the cell with an
     },
   ],
 },
-// ...
+// more rows...
 ```
 
 - You may use the name of the dimension to query from the database (like an indicator or program indicator, e.g. "TCMDA - Epidemiological Coverage").
