@@ -707,8 +707,8 @@
             "OMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
         },
         {
-          customLogic: (idx, row) =>
-            greatestOf(row[idx - 1].value, row[idx - 2].value),
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
           dn:
@@ -719,8 +719,8 @@
             "SCMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
         },
         {
-          customLogic: (idx, row) =>
-            greatestOf(row[idx - 1].value, row[idx - 2].value),
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
           dn:
@@ -731,8 +731,8 @@
             "STMDA - IU supported with NTD MDA treatment planning and coordination Round 2",
         },
         {
-          customLogic: (idx, row) =>
-            greatestOf(row[idx - 1].value, row[idx - 2].value),
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         null,
       ],
@@ -762,8 +762,8 @@
             "OMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2",
         },
         {
-          customLogic: (idx, row) =>
-            greatestOf(row[idx - 1].value, row[idx - 2].value),
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
           dn:
@@ -774,8 +774,8 @@
             "SCMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2",
         },
         {
-          customLogic: (idx, row) =>
-            greatestOf(row[idx - 1].value, row[idx - 2].value),
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
           dn:
@@ -786,17 +786,17 @@
             "STMDA - IUs where MDA treatment coverage was verified and addressed using SCT Round 2",
         },
         {
-          customLogic: (idx, row) =>
-            greatestOf(row[idx - 1].value, row[idx - 2].value),
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
-          customLogic: (idx, row) =>
+          customLogic: (cells, idx) =>
             sumOf(
-              row[0].value,
-              row[1].value,
-              row[4].value,
-              row[7].value,
-              row[10].value
+              cells[0].value,
+              cells[1].value,
+              cells[4].value,
+              cells[7].value,
+              cells[10].value
             ),
         },
       ],
@@ -810,29 +810,29 @@
         { dn: "OMDA - IUs not meeting the cut-off value for SCT Round 1" },
         { dn: "OMDA - IUs not meeting the cut-off value for SCT Round 2" },
         {
-          customLogic: (idx, row) =>
-            greatestOf(row[idx - 1].value, row[idx - 2].value),
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         { dn: "SCMDA - IUs not meeting the cut-off value for SCT Round 1" },
         { dn: "SCMDA - IUs not meeting the cut-off value for SCT Round 2" },
         {
-          customLogic: (idx, row) =>
-            greatestOf(row[idx - 1].value, row[idx - 2].value),
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         { dn: "STMDA - IUs not meeting the cut-off value for SCT Round 1" },
         { dn: "STMDA - IUs not meeting the cut-off value for SCT Round 2" },
         {
-          customLogic: (idx, row) =>
-            greatestOf(row[idx - 1].value, row[idx - 2].value),
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
-          customLogic: (idx, row) =>
+          customLogic: (cells, idx) =>
             sumOf(
-              row[0].value,
-              row[1].value,
-              row[4].value,
-              row[7].value,
-              row[10].value
+              cells[0].value,
+              cells[1].value,
+              cells[4].value,
+              cells[7].value,
+              cells[10].value
             ),
         },
       ],
@@ -856,13 +856,13 @@
         { dn: null, value: "todo" },
         { dn: null, value: "todo" },
         {
-          customLogic: (idx, row) =>
+          customLogic: (cells, idx) =>
             sumOf(
-              row[0].value,
-              row[1].value,
-              row[4].value,
-              row[7].value,
-              row[10].value
+              cells[0].value,
+              cells[1].value,
+              cells[4].value,
+              cells[7].value,
+              cells[10].value
             ),
         },
       ],
@@ -1050,7 +1050,7 @@
         }
 
         if (customLogic) {
-          cell.value = customLogic(idx, arr);
+          cell.value = customLogic(arr, idx);
           return;
         }
       });
