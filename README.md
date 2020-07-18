@@ -6,7 +6,27 @@ This is an HTML template for a Standard Report in the DHIS2 software, designed t
 
 ### Columns
 
-Todo
+Define column headers in the `columns` array.  Each column is an object:
+
+- It should have `name` and `shortName` properties.  The short name will be used unless the column has multiple subcategories.
+- A column may have an array of `subcategories`, which will be displayed as subheadings.
+  - A subcategory should be an object with `name` and `shortName` properties.  Only the short name will be displayed on the table.
+  - A column with subcategories will result in a number of columns in the table equal to the number of subcategories, and the column title header will span those columns.
+  - A few reusable subcategories are included as an enum in the template.
+
+An example column:
+
+```javascript
+const columns = [
+  // ...
+  {
+    name: "Onchocerciasis",
+    shortName: "Oncho.",
+    subcategories: [colSubcats.ROUND_1, colSubcats.ROUND_2, colSubcats.TOTAL],
+  },
+  // ...
+]
+```
 
 ### Rows
 
@@ -24,38 +44,40 @@ Row objects use these properties:
 
 Cells are defined by an array for each row. The array should be an appropriate size to fill the table, and the order of the cells should match the column definitions.
 
-Enter `null` to create an empty cell, or define the contents of the cell with an object. When defining the contents of a cell, you have several options - see this example of a data row and explanation below:
+Enter `null` to create an empty cell, or define the contents of the cell with an object. When defining the contents of a cell, you have several options: you can specify a dimension name (`dn`), a dimension ID (`dId`), custom logic (`customLogic`, a function), or a hard-coded value - see this example of a data row and explanations of each option below:
 
 ```javascript
-// ...other rows
-{
-  name: "IUs which reached the criteria to stop MDA",
-  type: rowTypes.DATA,
-  cells: [
-    { dn: "TCMDA - IUs which reached the criteria to stop MDA", },
-    { dId: "d3AglBM9nF4", },
-    { value: "I will end up in the table!", }
-    null,
-    { dn: "OMDA - IUs which reached the criteria to stop MDA", },
-    null,
-    null,
-    { dn: "SCMDA - IUs which reached the criteria to stop MDA", },
-    null,
-    null,
-    { dn: "STMDA - IUs which reached the criteria to stop MDA", },
-    {
-      customLogic: (cells, idx) =>
-        sumOf(
-          cells[0].value,
-          cells[1].value,
-          cells[4].value,
-          cells[7].value,
-          cells[10].value
-        ),
-    },
-  ],
-},
-// more rows...
+const rows = [
+  // ...
+  {
+    name: "Number of IUs which reached the criteria to stop MDA",
+    type: rowTypes.DATA,
+    cells: [
+      { dn: "TCMDA - IUs which reached the criteria to stop MDA", },
+      { dId: "d3AglBM9nF4", },
+      { value: "I will end up in the table!", }
+      null,
+      { dn: "OMDA - IUs which reached the criteria to stop MDA", },
+      null,
+      null,
+      { dn: "SCMDA - IUs which reached the criteria to stop MDA", },
+      null,
+      null,
+      { dn: "STMDA - IUs which reached the criteria to stop MDA", },
+      {
+        customLogic: (cells, idx) =>
+          sumOf(
+            cells[0].value,
+            cells[1].value,
+            cells[4].value,
+            cells[7].value,
+            cells[10].value
+          ),
+      },
+    ],
+  },
+  // ...
+]
 ```
 
 - You may use the name of the dimension to query from the database (like an indicator or program indicator, e.g. "TCMDA - Epidemiological Coverage").
