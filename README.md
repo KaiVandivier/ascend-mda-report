@@ -12,7 +12,7 @@ Define column headers in the `columns` array.  Each column is an object:
 - A column may have an array of `subcategories`, which will be displayed as subheadings.
   - A subcategory should be an object with `name` and `shortName` properties.  Only the short name will be displayed on the table.
   - A column with subcategories will result in a number of columns in the table equal to the number of subcategories, and the column title header will span those columns.
-  - A few reusable subcategories are included as an enum in the template.
+  - A few reusable subcategories are included as an enum (`colSubcats`) in the template.
 
 An example column:
 
