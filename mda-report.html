@@ -1,4 +1,4 @@
-<!-- Check out the repository at https://github.com/KaiVandivier/ascend-mda-report -->
+<!-- Check out the documentation at https://github.com/KaiVandivier/ascend-mda-report -->
 
 <!-- Bootstrap stylesheet -->
 <link
@@ -39,6 +39,12 @@
     CATEGORY: "category",
     DATA: "data"
   });
+
+  /**
+   * Row and column definitions: Edit these to define the table.
+   * See the documentation at https://github.com/KaiVandivier/ascend-mda-report
+   * for a guide.
+   */
   const columns = [
     {
       name: "Trachoma",
@@ -72,26 +78,6 @@
     },
   ];
 
-  /**
-   * Row and cell definitions:
-   * This is where to define the contents of cells in the table.
-   *
-   * The `dn` property is short for `dimensionName`:
-   * If you provide a dimension name, the dimension ID will be looked up and the cell value will be populated
-   * according to the result of an analytics query.
-   * Currently (17 July 2020), only Indicators and Program Indicators can be looked up by name,
-   * but these can be expanded (see `getAllDimensions()`).
-   *
-   * To populate a cell with custom logic, provide a function for the `customLogic` property:
-   * It will be called during table population with data. It should return the value that will be the final cell value.
-   * The function receives its index and the current row of cells to use for calculations,
-   * e.g. `customLogic: (cells, idx) => { console.log(cells[idx-1].value) }` -> Logs value of previous cell
-   * `sumOf()` and `greatestOf()` are helper functions that may be useful for custom logic;
-   * they receive any number of arguments and only operate on numbers, ignoring non-number cell values.
-   *
-   * You can also hard-code the value of the cell with the `value` property of the cell.
-   * (But do not include a `dn` property if you want the value hard-coded)
-   */
   const rows = [
     // Endemicity
     { name: "Endemicity", type: rowTypes.CATEGORY },
