@@ -37,8 +37,7 @@
   });
   const rowTypes = Object.freeze({
     CATEGORY: "category",
-    PROGRAM_INDICATOR: "programIndicator",
-    INDICATOR: "indicator",
+    DATA: "data"
   });
   const columns = [
     {
@@ -92,7 +91,7 @@
    * To populate a cell with custom logic, provide a function for the `customLogic` property:
    * It will be called during table population with data. It should return the value that will be the final cell value.
    * The function receives its index and the current row of cells to use for calculations,
-   * e.g. `customLogic: (idx, row) => { console.log(row[idx-1].value) }` -> Logs value of previous cell
+   * e.g. `customLogic: (cells, idx) => { console.log(cells[idx-1].value) }` -> Logs value of previous cell
    * `sumOf()` and `greatestOf()` are helper functions that may be useful for custom logic;
    * they receive any number of arguments and only operate on numbers, ignoring non-number cell values.
    *
@@ -104,7 +103,7 @@
     { name: "Endemicity", type: rowTypes.CATEGORY },
     {
       name: "Endemic IUs",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - Endemic IUs" },
         { dn: "LFMDA - Endemic IUs" },
@@ -122,7 +121,7 @@
     },
     {
       name: "IUs which reached the criteria to stop MDA",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         {
           dn: "TCMDA - IUs which reached the criteria to stop MDA",
@@ -150,7 +149,7 @@
     },
     {
       name: "IUs in post-treatment surveillance",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - IUs in post-treatment surveillance" },
         { dn: "LFMDA - IUs in post-treatment surveillance" },
@@ -168,7 +167,7 @@
     },
     {
       name: "IUs eligible for post MDA surveillance phase",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         {
           dn: "TCMDA - IUs eligible for post MDA surveillance phase",
@@ -190,7 +189,7 @@
     },
     {
       name: "IUs where NTD endemicity is unknown",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - IUs where NTD endemicity is unknown" },
         { dn: "LFMDA - IUs where NTD endemicity is unknown" },
@@ -208,7 +207,7 @@
     },
     {
       name: "Population in NTD affected IUs",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - Population in NTD affected IUs" },
         { dn: "LFMDA - Population in NTD affected IUs" },
@@ -226,7 +225,7 @@
     },
     {
       name: "IUs eligible for pre-TAS surveys",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         null,
         { dn: "LFMDA - IUs eligible for pre-TAS surveys" },
@@ -244,7 +243,7 @@
     },
     {
       name: "IUs eligible for TAS/IA surveys",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - IUs eligible for TAS/IA surveys" },
         { dn: "LFMDA - IUs eligible for TAS/IA surveys" },
@@ -265,7 +264,7 @@
     { name: "Targets", type: rowTypes.CATEGORY },
     {
       name: "Total Population of IUs",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - Total Population of IUs" },
         { dn: "LFMDA - Total Population of IUs" },
@@ -283,7 +282,7 @@
     },
     {
       name: "Population eligible for MDA treatment",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - Population eligible for MDA treatment" },
         { dn: "LFMDA - Population eligible for MDA treatment" },
@@ -319,7 +318,7 @@
     },
     {
       name: "Estimated size of populations with high risk of infection",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         {
           dn:
@@ -376,7 +375,7 @@
     { name: "Coverage", type: rowTypes.CATEGORY },
     {
       name: "Geographic Coverage",
-      type: rowTypes.INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - Geographic Coverage" },
         { dn: "LFMDA - Geographic Coverage" },
@@ -394,7 +393,7 @@
     },
     {
       name: "Program Coverage",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - Program Coverage" },
         { dn: "LFMDA - Program Coverage" },
@@ -412,7 +411,7 @@
     },
     {
       name: "Epidemiological Coverage",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - Epidemiological Coverage" },
         { dn: "LFMDA - Epidemiological Coverage" },
@@ -430,7 +429,7 @@
     },
     {
       name: "IUs reaching targeted program coverage",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - IUs reaching targeted program coverage" },
         { dn: "LFMDA - IUs reaching targeted program coverage" },
@@ -449,7 +448,7 @@
     {
       name:
         "IUs reaching target therapeutic coverage within populations with high risk of infection",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         {
           dn:
@@ -491,7 +490,7 @@
     },
     {
       name: "IUs where MDA treatment has been provided",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - IUs where MDA treatment has been provided" },
         { dn: "LFMDA - IUs where MDA treatment has been provided" },
@@ -509,7 +508,7 @@
     },
     {
       name: "MDA treatments distributed to high risk populations",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         null,
         {
@@ -560,7 +559,7 @@
     },
     {
       name: "Number of PC treatments provided per IU",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - Total Persons Treated" },
         { dn: "LFMDA - Total Persons Treated" },
@@ -578,7 +577,7 @@
     },
     {
       name: "IUs where MDA campaigns were conducted",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - IUs where MDA campaigns were conducted" },
         { dn: "LFMDA - IUs where MDA campaigns were conducted" },
@@ -596,7 +595,7 @@
     },
     {
       name: "IUs reaching required therapeutic coverage",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - IUs reaching required therapeutic coverage" },
         { dn: "LFMDA - IUs reaching required therapeutic coverage" },
@@ -615,7 +614,7 @@
     {
       name:
         "Number of people, in population eligible for treatment, receiving MDA treatment",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - Total Persons Treated" },
         { dn: "LFMDA - Total Persons Treated" },
@@ -634,7 +633,7 @@
     {
       name:
         "Number of People, in population eligible for treatment, not receiving MDA treatment",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         {
           dn:
@@ -688,7 +687,7 @@
     },
     {
       name: "IU supported with NTD MDA treatment planning and coordination",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         {
           dn:
@@ -743,7 +742,7 @@
     {
       name:
         "IUs where MDA treatment coverage was verified and addressed using SCT",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         {
           dn:
@@ -803,7 +802,7 @@
     },
     {
       name: "IUs not meeting the cut-off value for SCT",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - IUs not meeting the cut-off value for SCT" },
         { dn: "LFMDA - IUs not meeting the cut-off value for SCT" },
@@ -841,7 +840,7 @@
       name:
         "Number of evaluation areas where mob-up activites were conducted following a SCT",
       dnBase: "",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       // Todo
       cells: [
         { dn: null, value: "todo" },
@@ -871,36 +870,36 @@
       name:
         "Number of IUs for which independent representative coverage surveys according to WHO guidelines were completed",
       dnBase: "",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: null, value: "todo" },
         { dn: null, value: "todo" },
         { dn: null, value: "todo" },
         { dn: null, value: "todo" },
         {
-          customLogic: (idx, row) =>
-            greatestOf(row[idx - 1].value, row[idx - 2].value),
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         { dn: null, value: "todo" },
         { dn: null, value: "todo" },
         {
-          customLogic: (idx, row) =>
-            greatestOf(row[idx - 1].value, row[idx - 2].value),
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         { dn: null, value: "todo" },
         { dn: null, value: "todo" },
         {
-          customLogic: (idx, row) =>
-            greatestOf(row[idx - 1].value, row[idx - 2].value),
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
-          customLogic: (idx, row) =>
+          customLogic: (cells, idx) =>
             sumOf(
-              row[0].value,
-              row[1].value,
-              row[4].value,
-              row[7].value,
-              row[10].value
+              cells[0].value,
+              cells[1].value,
+              cells[4].value,
+              cells[7].value,
+              cells[10].value
             ),
         },
       ],
@@ -912,7 +911,7 @@
       name:
         "Number of people from marginilized groups (LNOB) who received NTD MDA treatment",
       dnBase: "",
-      type: rowTypes.PROGRAM_INDICATOR,
+      type: rowTypes.DATA,
       cells: [
         { dn: null, value: "todo" },
         { dn: null, value: "todo" },
