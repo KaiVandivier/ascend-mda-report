@@ -1,5 +1,13 @@
 <!-- Check out the repository at https://github.com/KaiVandivier/ascend-mda-report -->
 
+<!-- Bootstrap stylesheet -->
+<link
+  rel="stylesheet"
+  href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+  integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+  crossorigin="anonymous"
+/>
+
 <style type="text/css" media="screen">
   /* Put your CSS styling here */
 
@@ -8,8 +16,8 @@
     font-weight: normal;
   }
 
+  /* Stripe columns 2, 4-6, 10-12. (simply `even` for top header row) */
   /* THIS IS HARD-CODED AND NEEDS CHANGING IF COLUMNS CHANGE */
-  /* Stripe columns 2, 4-6, 10-12. (simply even for top header row) */
   tr#header-row-top > *:nth-child(even),
   tr:not(#header-row-top) > *:nth-child(2),
   tr:not(#header-row-top) > *:nth-child(n + 4):nth-child(-n + 6),
@@ -21,21 +29,6 @@
 <script type="text/javascript">
   // Put your javascript functions here
 
-  // Constants
-  const allOrgUnits = [
-    { id: "GdH306UQ8L8", displayName: "ASCEND (Global)" },
-    { id: "NcFgAaXhz7C", displayName: "Bangladesh" },
-    { id: "AE6IvE2jiSd", displayName: "Ethiopia" },
-    { id: "TDzGT1zy5Ay", displayName: "Kenya" },
-    { id: "Ej29Oagyhzo", displayName: "Malawi" },
-    { id: "dDWimYQWqK3", displayName: "Mozambique" },
-    { id: "cDXNddYCdPh", displayName: "South Sudan" },
-    { id: "FqoRMDOhFAp", displayName: "Tanzania" },
-    { id: "IHyDQqsAo7k", displayName: "Tanzania, Zanzibar" },
-    { id: "Yz1I2quJvaQ", displayName: "Uganda" },
-    { id: "AK2b9x2HipG", displayName: "Zambia" },
-    { id: "zzkzrWcJnfM", displayName: "ZZ TEST" },
-  ];
   // Enums for table
   const colSubcats = Object.freeze({
     ROUND_1: { name: "Round 1", shortName: "R1" },
@@ -86,26 +79,11 @@
     },
   ];
 
-  // Defining initial values for state
-  const period = dhis2.report.periods[0] || "THIS_YEAR";
-  const orgUnit = dhis2.report.organisationUnit.length
-    ? dhis2.report.organisationUnit.id
-    : "GdH306UQ8L8"; // This is the global org-unit
-  const dimensionsToQuery = [];
-
-  // App state:
-  // TODO: (maybe `rows` should go in here)
-  let state = {
-    period,
-    orgUnit,
-    dimensionsToQuery: [],
-  };
-
   /**
    * Row and cell definitions:
    * This is where to define the contents of cells in the table.
    *
-   * The `dn` property is short for `dimensionName`: 
+   * The `dn` property is short for `dimensionName`:
    * If you provide a dimension name, the dimension ID will be looked up and the cell value will be populated
    * according to the result of an analytics query.
    * Currently (17 July 2020), only Indicators and Program Indicators can be looked up by name,
@@ -953,7 +931,24 @@
         },
       ],
     },
-  ]; // End row definitions
+  ];
+  // End row & cell definitions
+
+  // Defining initial values for state
+  // (Ideally, these would be set by the reports app parameters)
+  const period = dhis2.report.periods[0] || "THIS_YEAR";
+  const orgUnit = dhis2.report.organisationUnit.length
+    ? dhis2.report.organisationUnit.id
+    : "GdH306UQ8L8"; // This is the global org-unit
+  const dimensionsToQuery = [];
+
+  // App state:
+  // TODO: (maybe `rows` should go in here?)
+  let state = {
+    period,
+    orgUnit,
+    dimensionsToQuery: [],
+  };
 
   // Functions
   function greatestOf(...args) {
@@ -980,9 +975,9 @@
       const allDimensions = [...programIndicators, ...indicators];
 
       // Convert to a Map where keys are names and values are ids for lookup
-      const keyValuePairs = allDimensions.map(dimension => {
+      const keyValuePairs = allDimensions.map((dimension) => {
         return [dimension.displayName, dimension.id];
-      })
+      });
       return new Map(keyValuePairs);
     });
   }
@@ -997,7 +992,13 @@
       if (!cells) return;
 
       cells.forEach((cell) => {
-        if (!cell || !cell.dn) return;
+        if (!cell) return;
+        if (cell.dId) {
+          // cell already has `dimensionId`; skip ID lookup
+          dimensionsToQuery.push(cell.dId);
+          return;
+        }
+        if (!cell.dn) return;
         const { dn: dimensionName } = cell;
 
         // Find dimension in map:
@@ -1016,6 +1017,44 @@
 
     state = { ...state, dimensionsToQuery };
     return dimensionsToQuery;
+  }
+
+  function getAnalyticsData(/* dimensionsToQuery, period, orgUnit */) {
+    const { dimensionsToQuery, period, orgUnit } = state;
+    return $.get("../api/analytics", {
+      dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
+      filter: `ou:${orgUnit}`,
+      skipMeta: true,
+    }).then((json) => {
+      // convert to a map for easy lookup by ID:
+      const keyValuePairs = json.rows.map((row) => [row[0], row[2]]);
+      const resultsMap = new Map(keyValuePairs);
+      return resultsMap;
+    });
+  }
+
+  function populateCellValues(analyticsResults) {
+    // Use `dimensionId` or `customLogic` to populate `value`
+    rows.forEach(({ cells }) => {
+      if (!cells) return; // Empty row; return
+
+      cells.forEach((cell, idx, arr) => {
+        // (get `idx` and `arr` values for custom logic functions)
+        if (!cell) return;
+        const { dId: dimensionId, customLogic } = cell;
+
+        if (dimensionId) {
+          const data = analyticsResults.get(dimensionId);
+          cell.value = data || "-";
+          return;
+        }
+
+        if (customLogic) {
+          cell.value = customLogic(idx, arr);
+          return;
+        }
+      });
+    });
   }
 
   function populateHtmlTableHeader() {
@@ -1041,44 +1080,6 @@
       // Else, th with col name on top header row, empty cell on bottom
       $("#header-row-top").append(`<th scope=col>${col.shortName}</th>`);
       $("#header-row-bottom").append(`<th scope="col"></th>`);
-    });
-  }
-
-  function getAnalyticsData(/* dimensionsToQuery, period, orgUnit */) {
-    const { dimensionsToQuery, period, orgUnit } = state;
-    return $.get("../api/analytics", {
-      dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
-      filter: `ou:${orgUnit}`,
-      skipMeta: true,
-    }).then((json) => {
-      // convert to a map for easy lookup by ID:
-      const keyValuePairs = json.rows.map((row) => [row[0], row[2]]);
-      const resultsMap = new Map(keyValuePairs);
-      return resultsMap;
-    });
-  }
-
-  function populateCellValues(analyticsResults) {
-    // Use dimensionId or customLogic to populate value
-    rows.forEach(({ cells }) => {
-      if (!cells) return; // Empty row; return
-
-      cells.forEach((cell, idx, arr) => {
-        // (get `idx` and `arr` values for custom logic functions)
-        if (!cell) return;
-        const { dId: dimensionId, customLogic } = cell;
-
-        if (dimensionId) {
-          const data = analyticsResults.get(dimensionId);
-          cell.value = data || "-";
-          return;
-        }
-
-        if (customLogic) {
-          cell.value = customLogic(idx, arr); // for example
-          return;
-        }
-      });
     });
   }
 
@@ -1132,6 +1133,7 @@
   }
 
   function handleChange(e) {
+    // On form change, update state with new "period" or "orgUnit", and query data
     state = { ...state, [e.target.name]: e.target.value };
     $("#tbody").empty().text("Loading data...");
     getAnalyticsData()
@@ -1157,14 +1159,6 @@
       .catch(console.error);
   });
 </script>
-
-<!-- Bootstrap stylesheet -->
-<link
-  rel="stylesheet"
-  href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-  integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-  crossorigin="anonymous"
-/>
 
 <div>
   <!-- HTML Markup to make up report -->
