@@ -998,8 +998,9 @@
     return dimensionsToQuery;
   }
 
-  function getAnalyticsData(/* dimensionsToQuery, period, orgUnit */) {
+  function getAnalyticsData() {
     const { dimensionsToQuery, period, orgUnit } = state;
+    // Query analytics API for data
     return $.get("../api/analytics", {
       dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
       filter: `ou:${orgUnit}`,
