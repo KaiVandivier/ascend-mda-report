@@ -1,18 +1,62 @@
 # ASCEND MDA Treatment Summary Report
 
-This is an HTML template for a Standard Report in the DHIS2 software, designed to generate a custom report from numerous indicators and program indicators.
+This is an HTML template for a Standard Report in the DHIS2 software, designed to generate a custom report from numerous indicators and program indicators. [Read more about HTML-based standard reports here.](https://docs.dhis2.org/master/en/user/html/designing-html-based-standard-reports.html)
 
-Some instructions for editing and maintenance are in comments in code.
+## Setting up columns, rows, and cells
 
-TODO: Add more instructions for editing and maintenance here.
+### Columns
 
-## Setting up rows, columns, and cells
+Todo
 
 ### Rows
 
+Row definitions live in the `rows` array, an array of objects.
+
+Row objects use these properties:
+
+- `name`: The name of the row, which will be printed as the row header in a `<th>` cell.
+- `type`: Defines the type of the row, using values set in an enum:
+  - `rowTypes.CATEGORY` indicates that this row is a label for a group of following rows, and a category row will make one big cell that spans the width of the table. A category row should not have a `cells` property.
+  - `rowTypes.DATA` indicates this row will be filled with data cells. This row should define the cells in the `cells` property.
+- `cells`: An array that will define the contents of each cell in the row. See the following section for cell definitions.
+
 ### Cells
 
-When defining the contents of a cell, you have several options:
+Cells are defined by an array for each row. The array should be an appropriate size to fill the table, and the order of the cells should match the column definitions.
+
+Enter `null` to create an empty cell, or define the contents of the cell with an object. When defining the contents of a cell, you have several options - see this example of a data row and comments below.
+
+```javascript
+// ...
+{
+  name: "IUs which reached the criteria to stop MDA",
+  type: rowTypes.DATA,
+  cells: [
+    { dn: "TCMDA - IUs which reached the criteria to stop MDA", },
+    { dId: "d3AglBM9nF4", },
+    { value: "I will end up in the table!", }
+    null,
+    {  dn: "OMDA - IUs which reached the criteria to stop MDA", },
+    null,
+    null,
+    {  dn: "SCMDA - IUs which reached the criteria to stop MDA", },
+    null,
+    null,
+    { dn: "STMDA - IUs which reached the criteria to stop MDA", },
+    {
+      customLogic: (cells, idx) =>
+        sumOf(
+          cells[0].value,
+          cells[1].value,
+          cells[4].value,
+          cells[7].value,
+          cells[10].value
+        ),
+    },
+  ],
+},
+// ...
+```
 
 - You may use the name of the dimension to query from the database (like an indicator or program indicator, e.g. "TCMDA - Epidemiological Coverage").
   - To do so, set the value `dn` (short for "dimension name") property of the cell to the name of the dimension
@@ -27,9 +71,9 @@ When defining the contents of a cell, you have several options:
   - This has the benefits of avoiding string-matching sensitivity and being resilient to dimension name changes in the database, but may be tedious to look up individually for many cells.
   - This will override the dimension name (`dn`) property if it is provided.
 - You may use custom logic to compute a cell's value based on other cells' values
-  - Provide a function on the `customLogic` property that will be executed while the table is being populated with values that have been queried from the database.  The function should return the value that will ultimately be set as the cell's `value`.
+  - Provide a function on the `customLogic` property that will be executed while the table is being populated with values that have been queried from the database. The function should return the value that will ultimately be set as the cell's `value`.
   - The function will be called with two arguments: `cells`, an array of the cells in that row, and `idx`, the current cell's index in that array.
-  - Helper functions `sumOf()` and `greatestOf()` may be useful for your custom logic.  They take any number of arguments and will operate on the arguments that are numbers (i.e. `!isNaN`), so it's safe to pass them cell values that may be strings or numbers.
+  - Helper functions `sumOf()` and `greatestOf()` may be useful for your custom logic. They take any number of arguments and will operate on the arguments that are numbers (i.e. `!isNaN`), so it's safe to pass them cell values that may be strings or numbers.
   - Ex: This custom logic will sum up the values of the two previous cells in the row: `{ customLogic: (cells, idx) => sumOf(cells[idx - 1].value, cells[idx - 2].value) }`
   - Note that at execution time, the custom logic function will only have access to up-to-date values on the previous cells in the row.
 - You may hard-code an explicit value for the cell
