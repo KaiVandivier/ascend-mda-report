@@ -531,9 +531,7 @@
             "STMDA - Total MDA treatments distributed to high risk populations",
         },
         {
-          // dn: "MDA - Total MDA treatments distributed to high risk populations",
-          value:
-            "Oops! I cause a server error: 'java.lang.Long cannot be cast to java.lang.Double' (dimension name 'MDA - Total MDA treatments distributed to high risk populations')",
+          dn: "MDA - Total MDA treatments distributed to high risk populations",
         },
       ],
     },
@@ -818,22 +816,31 @@
     },
     {
       name:
-        "Number of evaluation areas where mob-up activites were conducted following a SCT",
+        "Number of evaluation areas where mop-up activites were conducted following a SCT",
       dnBase: "",
       type: rowTypes.DATA,
       // Todo
       cells: [
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
+        { dn: "TCMDA - IUs where mop-up activities were conducted following a SCT" },
+        { dn: "LFMDA - IUs where mop-up activities were conducted following a SCT" },
+        { dn: "OMDA - IUs where mop-up activities were conducted following a SCT Round 1" },
+        { dn: "OMDA - IUs where mop-up activities were conducted following a SCT Round 2" },
+        {
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
+        },
+        { dn: "SCMDA - IUs where mop-up activities were conducted following a SCT Round 1" },
+        { dn: "SCMDA - IUs where mop-up activities were conducted following a SCT Round 2" },
+        {
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
+        },
+        { dn: "STMDA - IUs where mop-up activities were conducted following a SCT Round 1" },
+        { dn: "STMDA - IUs where mop-up activities were conducted following a SCT Round 2" },
+        {
+          customLogic: (cells, idx) =>
+            greatestOf(cells[idx - 1].value, cells[idx - 2].value),
+        },
         {
           customLogic: (cells, idx) =>
             sumOf(
@@ -852,22 +859,22 @@
       dnBase: "",
       type: rowTypes.DATA,
       cells: [
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
+        { dn: "TCMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed" },
+        { dn: "LFMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed" },
+        { dn: "OMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 1" },
+        { dn: "OMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 2" },
         {
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
+        { dn: "SCMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 1" },
+        { dn: "SCMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 2" },
         {
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
+        { dn: "STMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 1" },
+        { dn: "STMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 2" },
         {
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
@@ -893,18 +900,19 @@
       dnBase: "",
       type: rowTypes.DATA,
       cells: [
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
-        { dn: null, value: "todo" },
+        { dn: "TCMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment" },
+        { dn: "LFMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment" },
+        { dn: "OMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 1" },
+        { dn: "OMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 2" },
+        { dn: "OMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment" },
+        { dn: "SCMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 1" },
+        { dn: "SCMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 2" },
+        { dn: "SCMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment" },
+        { dn: "STMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 1" },
+        { dn: "STMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 2" },
+        { dn: "STMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment" },
         {
+          // Notice: "receiving" vs "who received"
           dn:
             "MDA - Total people from marginalized groups (LNOB) who received NTD MDA treatment",
         },
