@@ -142,7 +142,7 @@
         null,
         null,
         { dn: "STMDA - IUs in post-treatment surveillance" },
-        null,
+        { customLogic: countIUsWithAtLeastOneResponse },
       ],
     },
     {
@@ -182,7 +182,7 @@
         null,
         null,
         { dn: "STMDA - IUs where NTD endemicity is unknown" },
-        null,
+        { customLogic: countIUsWithAtLeastOneResponse },
       ],
     },
     {
@@ -200,7 +200,7 @@
         { dn: "STMDA - Population in NTD affected IUs Round 1" },
         { dn: "STMDA - Population in NTD affected IUs Round 2" },
         { dn: "STMDA - Population in NTD affected IUs Total" },
-        null,
+        { customLogic: countIUsWithAtLeastOneResponse },
       ],
     },
     {
@@ -483,7 +483,7 @@
         { dn: "STMDA - IUs where MDA treatment has been provided Round 1" },
         { dn: "STMDA - IUs where MDA treatment has been provided Round 2" },
         null,
-        { customLogic: (cells) => countIUsWithAtLeastOneResponse(cells) },
+        { customLogic: countIUsWithAtLeastOneResponse },
       ],
     },
     {
@@ -767,7 +767,7 @@
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
-          customLogic: (cells, idx) => countIUsWithAtLeastOneResponse(cells)
+          customLogic: countIUsWithAtLeastOneResponse
         },
       ],
     },
@@ -824,7 +824,7 @@
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
-        { customLogic: (cells, idx) => countIUsWithAtLeastOneResponse(cells, idx) }
+        { customLogic: countIUsWithAtLeastOneResponse }
       ],
     },
     {
