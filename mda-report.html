@@ -483,7 +483,7 @@
         { dn: "STMDA - IUs where MDA treatment has been provided Round 1" },
         { dn: "STMDA - IUs where MDA treatment has been provided Round 2" },
         null,
-        null,
+        { customLogic: (cells) => countIUsWithAtLeastOneResponse(cells) },
       ],
     },
     {
@@ -767,14 +767,7 @@
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
-          customLogic: (cells, idx) =>
-            sumOf(
-              cells[0].value,
-              cells[1].value,
-              cells[4].value,
-              cells[7].value,
-              cells[10].value
-            ),
+          customLogic: (cells, idx) => countIUsWithAtLeastOneResponse(cells)
         },
       ],
     },
@@ -802,16 +795,7 @@
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
-        {
-          customLogic: (cells, idx) =>
-            sumOf(
-              cells[0].value,
-              cells[1].value,
-              cells[4].value,
-              cells[7].value,
-              cells[10].value
-            ),
-        },
+        null,
       ],
     },
     {
@@ -819,7 +803,6 @@
         "Number of evaluation areas where mop-up activites were conducted following a SCT",
       dnBase: "",
       type: rowTypes.DATA,
-      // Todo
       cells: [
         { dn: "TCMDA - IUs where mop-up activities were conducted following a SCT" },
         { dn: "LFMDA - IUs where mop-up activities were conducted following a SCT" },
@@ -944,8 +927,9 @@
   }
 
   function countIUsWithAtLeastOneResponse(cells) {
+    // This function counts all unique IUs with at least one value in this row
     // 1. Build dimensions list for query url
-    const dimensions = cells.filter(cell => cell.dId)
+    const dimensions = cells.filter(cell => cell && cell.dId)
       .map(cell => cell.dId)
       .join(";");
 
