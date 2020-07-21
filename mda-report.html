@@ -841,16 +841,7 @@
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
-        {
-          customLogic: (cells, idx) =>
-            sumOf(
-              cells[0].value,
-              cells[1].value,
-              cells[4].value,
-              cells[7].value,
-              cells[10].value
-            ),
-        },
+        { customLogic: (cells, idx) => countIUsWithAtLeastOneResponse(cells, idx) }
       ],
     },
     {
@@ -924,7 +915,7 @@
   // Defining initial values for state
   // (Ideally, these would be set by the reports app parameters)
   const period = dhis2.report.periods[0] || "THIS_YEAR";
-  const orgUnit = dhis2.report.organisationUnit.length
+  const orgUnit = Object.keys(dhis2.report.organisationUnit).length
     ? dhis2.report.organisationUnit.id
     : "GdH306UQ8L8"; // This is the global org-unit
   const dimensionsToQuery = [];
@@ -938,6 +929,8 @@
   };
 
   // Functions
+
+  // Helper functions
   function greatestOf(...args) {
     const nums = args.filter((n) => !isNaN(n));
     if (!nums.length) return 0;
@@ -950,6 +943,30 @@
     return nums.reduce((sum, n) => sum + Number(n), 0);
   }
 
+  function countIUsWithAtLeastOneResponse(cells) {
+    // 1. Build dimensions list for query url
+    const dimensions = cells.filter(cell => cell.dId)
+      .map(cell => cell.dId)
+      .join(";");
+
+    // 2. Query analytics:
+    return $.get("../api/analytics", {
+      // Second orgunit dimension is hardcoded to IU level
+      dimension: `dx:${dimensions},ou:${state.orgUnit};LEVEL-iGO9aN3ZSSi`,
+      filter: `pe:${state.period}`,
+      skipMeta: true,
+    }).then(json => {
+      // 3. Get number of unique org units (IUs) with response > 0
+      const uniqueOrgUnits = new Map();
+      json.rows.forEach(([dimensionId, orgUnitId, value]) => {
+        if (!value || value <= 0) return;
+        uniqueOrgUnits.set(orgUnitId, true);
+      })
+      return uniqueOrgUnits.size;
+    })
+  }
+
+  // Table logic
   function getAllDimensions() {
     // Gets a list of all indicators' and program indicators' names and IDs
     return Promise.all([
@@ -1023,10 +1040,10 @@
 
   function populateCellValues(analyticsResults) {
     // Use `dimensionId` or `customLogic` to populate `value`
-    rows.forEach(({ cells }) => {
+    return Promise.all(rows.map(({ cells }) => {
       if (!cells) return; // Empty row; return
 
-      cells.forEach((cell, idx, arr) => {
+      return Promise.all(cells.map(async (cell, idx, arr) => {
         // (get `idx` and `arr` values for custom logic functions)
         if (!cell) return;
         const { dId: dimensionId, customLogic } = cell;
@@ -1038,11 +1055,11 @@
         }
 
         if (customLogic) {
-          cell.value = customLogic(arr, idx);
+          cell.value = await customLogic(arr, idx);
           return;
         }
-      });
-    });
+      }));
+    }));
   }
 
   function populateHtmlTableHeader() {
