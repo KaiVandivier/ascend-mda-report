@@ -3,8 +3,8 @@
 <!-- Bootstrap stylesheet -->
 <link
   rel="stylesheet"
-  href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-  integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+  href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+  integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
   crossorigin="anonymous"
 />
 
@@ -1133,9 +1133,6 @@
   }
 
   function populateHtmlTableHeader() {
-    // Remove "loading"
-    $("#loading").remove();
-
     $("#header-row-top").append(`<th scope="col"></th>`);
     $("#header-row-bottom").append(`<th scope="col"></th>`);
     columns.forEach((col) => {
@@ -1159,8 +1156,9 @@
   }
 
   function populateHtmlTableBodyWithValues() {
-    // Clear tbody for fresh rows
+    // Clear tbody for fresh rows & remove "loading"
     const tbody = $("#tbody").empty();
+    $("#loading").hide();
 
     // Set up table body to be populated
     const totalColumns =
@@ -1210,7 +1208,12 @@
   function handleChange(e) {
     // On form change, update state with new "period" or "orgUnit", and query data
     state = { ...state, [e.target.name]: e.target.value };
-    $("#tbody").empty().text("Loading data...");
+
+    // Prepare for reload & show loading
+    $("#tbody").empty();
+    $("#loading").show();
+
+    // Query new data and populate table
     getAnalyticsData()
       .then(populateCellValues)
       .then(populateHtmlTableBodyWithValues);
@@ -1272,8 +1275,6 @@
     >
   </p>
 
-  <p id="loading">Loading...</p>
-
   <table id="table1" class="table">
     <thead id="thead">
       <tr id="header-row-top">
@@ -1287,4 +1288,11 @@
       <!-- Script will populate rows here -->
     </tbody>
   </table>
+
+  <div id="loading" class="text-center">
+    <p id=>Loading...</p>
+    <div class="spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
 </div>
