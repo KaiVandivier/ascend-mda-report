@@ -37,7 +37,7 @@
   });
   const rowTypes = Object.freeze({
     CATEGORY: "category",
-    DATA: "data"
+    DATA: "data",
   });
 
   /**
@@ -767,7 +767,7 @@
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
-          customLogic: countIUsWithAtLeastOneResponse
+          customLogic: countIUsWithAtLeastOneResponse,
         },
       ],
     },
@@ -804,27 +804,51 @@
       dnBase: "",
       type: rowTypes.DATA,
       cells: [
-        { dn: "TCMDA - IUs where mop-up activities were conducted following a SCT" },
-        { dn: "LFMDA - IUs where mop-up activities were conducted following a SCT" },
-        { dn: "OMDA - IUs where mop-up activities were conducted following a SCT Round 1" },
-        { dn: "OMDA - IUs where mop-up activities were conducted following a SCT Round 2" },
+        {
+          dn:
+            "TCMDA - IUs where mop-up activities were conducted following a SCT",
+        },
+        {
+          dn:
+            "LFMDA - IUs where mop-up activities were conducted following a SCT",
+        },
+        {
+          dn:
+            "OMDA - IUs where mop-up activities were conducted following a SCT Round 1",
+        },
+        {
+          dn:
+            "OMDA - IUs where mop-up activities were conducted following a SCT Round 2",
+        },
         {
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
-        { dn: "SCMDA - IUs where mop-up activities were conducted following a SCT Round 1" },
-        { dn: "SCMDA - IUs where mop-up activities were conducted following a SCT Round 2" },
+        {
+          dn:
+            "SCMDA - IUs where mop-up activities were conducted following a SCT Round 1",
+        },
+        {
+          dn:
+            "SCMDA - IUs where mop-up activities were conducted following a SCT Round 2",
+        },
         {
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
-        { dn: "STMDA - IUs where mop-up activities were conducted following a SCT Round 1" },
-        { dn: "STMDA - IUs where mop-up activities were conducted following a SCT Round 2" },
+        {
+          dn:
+            "STMDA - IUs where mop-up activities were conducted following a SCT Round 1",
+        },
+        {
+          dn:
+            "STMDA - IUs where mop-up activities were conducted following a SCT Round 2",
+        },
         {
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
-        { customLogic: countIUsWithAtLeastOneResponse }
+        { customLogic: countIUsWithAtLeastOneResponse },
       ],
     },
     {
@@ -833,22 +857,46 @@
       dnBase: "",
       type: rowTypes.DATA,
       cells: [
-        { dn: "TCMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed" },
-        { dn: "LFMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed" },
-        { dn: "OMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 1" },
-        { dn: "OMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 2" },
+        {
+          dn:
+            "TCMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed",
+        },
+        {
+          dn:
+            "LFMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed",
+        },
+        {
+          dn:
+            "OMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 1",
+        },
+        {
+          dn:
+            "OMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 2",
+        },
         {
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
-        { dn: "SCMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 1" },
-        { dn: "SCMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 2" },
+        {
+          dn:
+            "SCMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 1",
+        },
+        {
+          dn:
+            "SCMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 2",
+        },
         {
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
-        { dn: "STMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 1" },
-        { dn: "STMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 2" },
+        {
+          dn:
+            "STMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 1",
+        },
+        {
+          dn:
+            "STMDA - IUs where independent representative coverage surveys according to WHO guidelines were completed Round 2",
+        },
         {
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
@@ -874,17 +922,50 @@
       dnBase: "",
       type: rowTypes.DATA,
       cells: [
-        { dn: "TCMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment" },
-        { dn: "LFMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment" },
-        { dn: "OMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 1" },
-        { dn: "OMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 2" },
-        { dn: "OMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment" },
-        { dn: "SCMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 1" },
-        { dn: "SCMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 2" },
-        { dn: "SCMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment" },
-        { dn: "STMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 1" },
-        { dn: "STMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 2" },
-        { dn: "STMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment" },
+        {
+          dn:
+            "TCMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment",
+        },
+        {
+          dn:
+            "LFMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment",
+        },
+        {
+          dn:
+            "OMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 1",
+        },
+        {
+          dn:
+            "OMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 2",
+        },
+        {
+          dn:
+            "OMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment",
+        },
+        {
+          dn:
+            "SCMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 1",
+        },
+        {
+          dn:
+            "SCMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 2",
+        },
+        {
+          dn:
+            "SCMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment",
+        },
+        {
+          dn:
+            "STMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 1",
+        },
+        {
+          dn:
+            "STMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment Round 2",
+        },
+        {
+          dn:
+            "STMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment",
+        },
         {
           // Notice: "receiving" vs "who received"
           dn:
@@ -929,8 +1010,9 @@
   function countIUsWithAtLeastOneResponse(cells) {
     // This function counts all unique IUs with at least one value in this row
     // 1. Build dimensions list for query url
-    const dimensions = cells.filter(cell => cell && cell.dId)
-      .map(cell => cell.dId)
+    const dimensions = cells
+      .filter((cell) => cell && cell.dId)
+      .map((cell) => cell.dId)
       .join(";");
 
     // 2. Query analytics:
@@ -939,15 +1021,15 @@
       dimension: `dx:${dimensions},ou:${state.orgUnit};LEVEL-iGO9aN3ZSSi`,
       filter: `pe:${state.period}`,
       skipMeta: true,
-    }).then(json => {
+    }).then((json) => {
       // 3. Get number of unique org units (IUs) with response > 0
       const uniqueOrgUnits = new Map();
       json.rows.forEach(([dimensionId, orgUnitId, value]) => {
         if (!value || value <= 0) return;
         uniqueOrgUnits.set(orgUnitId, true);
-      })
+      });
       return uniqueOrgUnits.size;
-    })
+    });
   }
 
   // Table logic
@@ -1024,26 +1106,30 @@
 
   function populateCellValues(analyticsResults) {
     // Use `dimensionId` or `customLogic` to populate `value`
-    return Promise.all(rows.map(({ cells }) => {
-      if (!cells) return; // Empty row; return
+    return Promise.all(
+      rows.map(({ cells }) => {
+        if (!cells) return; // Empty row; return
 
-      return Promise.all(cells.map(async (cell, idx, arr) => {
-        // (get `idx` and `arr` values for custom logic functions)
-        if (!cell) return;
-        const { dId: dimensionId, customLogic } = cell;
+        return Promise.all(
+          cells.map(async (cell, idx, arr) => {
+            // (get `idx` and `arr` values for custom logic functions)
+            if (!cell) return;
+            const { dId: dimensionId, customLogic } = cell;
 
-        if (dimensionId) {
-          const data = analyticsResults.get(dimensionId);
-          cell.value = data || "-";
-          return;
-        }
+            if (dimensionId) {
+              const data = analyticsResults.get(dimensionId);
+              cell.value = data || "-";
+              return;
+            }
 
-        if (customLogic) {
-          cell.value = await customLogic(arr, idx);
-          return;
-        }
-      }));
-    }));
+            if (customLogic) {
+              cell.value = await customLogic(arr, idx);
+              return;
+            }
+          })
+        );
+      })
+    );
   }
 
   function populateHtmlTableHeader() {
