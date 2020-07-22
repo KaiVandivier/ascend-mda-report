@@ -11,18 +11,44 @@
 <style type="text/css" media="screen">
   /* Put your CSS styling here */
 
-  /* Rows that are not category labels */
-  th[scope="row"]:not([colspan]) {
-    font-weight: normal;
+  /* Table styles */
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
   }
+
+  td, th { background: white; }
+
+  /* Stripe columns: headers */
+  thead th:nth-child(even) { background: #fafafa }
 
   /* Stripe columns 2, 4-6, 10-12. (simply `even` for top header row) */
   /* THIS IS HARD-CODED AND NEEDS CHANGING IF COLUMNS CHANGE */
-  tr#header-row-top > *:nth-child(even),
-  tr:not(#header-row-top) > *:nth-child(2),
-  tr:not(#header-row-top) > *:nth-child(n + 4):nth-child(-n + 6),
-  tr:not(#header-row-top) > *:nth-child(n + 10):nth-child(-n + 12) {
+  tbody tr *:nth-child(2),
+  tbody tr *:nth-child(n + 4):nth-child(-n + 6),
+  tbody tr *:nth-child(n + 10):nth-child(-n + 12) {
     background-color: #fafafa;
+  }
+
+  /* Table header styles */
+  #header-row > th {
+    position: sticky;
+    top: 0;
+  }
+
+  th.container {
+    width: auto;
+  }
+
+  .bottom-row {
+    height: 1.5rem;
+    font-weight: normal;
+    font-size: 0.9rem;
+  }
+
+  /* Row headers that are not category labels: normal font-weight */
+  th[scope="row"]:not([colspan]) {
+    font-weight: normal;
   }
 </style>
 
@@ -600,13 +626,22 @@
         { dn: "OMDA - Total Persons Treated Round 1" },
         { dn: "OMDA - Total Persons Treated Round 2" },
         // The following one and the other two named like it are standar Indicators
-        { dn: "OMDA - Total People, in population eligible for treatment, receiving MDA treatment" },
+        {
+          dn:
+            "OMDA - Total People, in population eligible for treatment, receiving MDA treatment",
+        },
         { dn: "SCMDA - Total Persons Treated Round 1" },
         { dn: "SCMDA - Total Persons Treated Round 2" },
-        { dn: "SCMDA - Total People, in population eligible for treatment, receiving MDA treatment" },
+        {
+          dn:
+            "SCMDA - Total People, in population eligible for treatment, receiving MDA treatment",
+        },
         { dn: "STMDA - Total Persons Treated Round 1" },
         { dn: "STMDA - Total Persons Treated Round 2" },
-        { dn: "STMDA - Total People, in population eligible for treatment, receiving MDA treatment" },
+        {
+          dn:
+            "STMDA - Total People, in population eligible for treatment, receiving MDA treatment",
+        },
         null,
       ],
     },
@@ -634,7 +669,7 @@
         {
           dn:
             "OMDA - Total People, in population eligible for treatment, not receiving MDA treatment",
-          dId: "aMUoBNLJ21U" // Provided because duplicate name in Ind. and prog.Ind.
+          dId: "aMUoBNLJ21U", // Provided because duplicate name in Ind. and prog.Ind.
         },
         {
           dn:
@@ -1049,14 +1084,17 @@
       const [{ programIndicators }, { indicators }] = values;
       const allDimensions = [...programIndicators, ...indicators];
 
-      const dimensionMap = new Map()
-      allDimensions.forEach(dimension => {
+      const dimensionMap = new Map();
+      allDimensions.forEach((dimension) => {
         if (dimensionMap.get(dimension.displayName))
-          console.log("Duplicate dimension name found: ", dimension.displayName);
+          console.log(
+            "Duplicate dimension name found: ",
+            dimension.displayName
+          );
 
         // As of right now, overwrite to give last-queried group precedence
         dimensionMap.set(dimension.displayName, dimension.id);
-      })
+      });
       return dimensionMap;
     });
   }
@@ -1113,7 +1151,6 @@
     // Generic error test
     // $.get("../cant/get/me").catch(console.error);
 
-
     /* 
     Culprits:
     fc7tgI3f6a1 - SCMDA - Program coverage round 2
@@ -1128,41 +1165,43 @@
       dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
       filter: `ou:${orgUnit}`,
       skipMeta: true,
-    }).then((json) => {
-      // convert to a map for easy lookup by ID:
-      const keyValuePairs = json.rows.map((row) => [row[0], row[2]]);
-      const resultsMap = new Map(keyValuePairs);
-      return resultsMap;
-    }).catch((err) => {
-      // There was an error with the monolothic query. Fall back to individual queries
-      console.log("Falling back to individual queries")
-      console.error(err);
-      // // TODO: Query individual things;
-      // // query each one; see if it returns an error
-      // return Promise.all(
-      //   dimensionsToQuery.map(dimensionId => {
-      //     return $.get("../api/analytics", {
-      //       dimension: `dx:${dimensionId},pe:${period}`,
-      //       filter: `ou:${orgUnit}`,
-      //       skipMeta: true,
-      //     }).then(json => {
-      //       if (!json.rows.length) return;
-      //       return [json.rows[0][0], json.rows[0][2]]
-      //     }).catch((err) => {
-      //       console.error("Analytics query error: ", err);
-      //       const errorMessage = `Err ${err.status}: ${err.statusText}`;
+    })
+      .then((json) => {
+        // convert to a map for easy lookup by ID:
+        const keyValuePairs = json.rows.map((row) => [row[0], row[2]]);
+        const resultsMap = new Map(keyValuePairs);
+        return resultsMap;
+      })
+      .catch((err) => {
+        // There was an error with the monolothic query. Fall back to individual queries
+        console.log("Falling back to individual queries");
+        console.error(err);
+        // // TODO: Query individual things;
+        // // query each one; see if it returns an error
+        // return Promise.all(
+        //   dimensionsToQuery.map(dimensionId => {
+        //     return $.get("../api/analytics", {
+        //       dimension: `dx:${dimensionId},pe:${period}`,
+        //       filter: `ou:${orgUnit}`,
+        //       skipMeta: true,
+        //     }).then(json => {
+        //       if (!json.rows.length) return;
+        //       return [json.rows[0][0], json.rows[0][2]]
+        //     }).catch((err) => {
+        //       console.error("Analytics query error: ", err);
+        //       const errorMessage = `Err ${err.status}: ${err.statusText}`;
 
-      //       return [dimensionId, errorMessage]
-      //     });
-      //   })).then((kvPairs) => {
-      //     console.log("kvPairs", kvPairs);
-      //     const filteredPairs = kvPairs.filter(pair => pair);
-      //     console.log("filtered pairs:", filteredPairs)
-      //     const resultsMap = new Map(filteredPairs);
-      //     console.log("Results map:", resultsMap);
-      //     return resultsMap;
-      //   }).catch(console.error);
-    });
+        //       return [dimensionId, errorMessage]
+        //     });
+        //   })).then((kvPairs) => {
+        //     console.log("kvPairs", kvPairs);
+        //     const filteredPairs = kvPairs.filter(pair => pair);
+        //     console.log("filtered pairs:", filteredPairs)
+        //     const resultsMap = new Map(filteredPairs);
+        //     console.log("Results map:", resultsMap);
+        //     return resultsMap;
+        //   }).catch(console.error);
+      });
   }
 
   function populateCellValues(analyticsResults) {
@@ -1194,25 +1233,32 @@
   }
 
   function populateHtmlTableHeader() {
-    $("#header-row-top").append(`<th scope="col"></th>`);
-    $("#header-row-bottom").append(`<th scope="col"></th>`);
+    // Empty cell over row names (Maybe "indicator?")
+    $("#header-row").append(`<th scope="col"></th>`);
     columns.forEach((col) => {
-      if (col.subcategories) {
-        // 1. Make the top row th colspan = col.subcategories.length
-        $("#header-row-top").append(
-          `<th scope="col" colspan="${col.subcategories.length}">${col.name}</th>`
+      const colspan = col.subcategories ? col.subcategories.length : 1;
+      const subheadings = col.subcategories
+        ? col.subcategories.map((sc) => sc.shortName)
+        : null;
+
+      const newHeader = $(`
+        <th scope="col" class="container" colspan="${colspan}">
+          <div class="row mb-2">
+            <span class="col">${subheadings ? col.name : col.shortName}</span>
+          </div>
+        </th>
+      `);
+      $("#header-row").append(newHeader);
+
+      const bottomRow = $(`<div class="row no-gutters bottom-row"></div>`);
+      newHeader.append(bottomRow);
+
+      if (subheadings) {
+        subheadings.forEach((subheading) =>
+          bottomRow.append(`<span class="col">${subheading}</span>`)
         );
-        // 2. Make a bottom row th for each subcategory
-        col.subcategories.forEach((subcat) => {
-          $("#header-row-bottom").append(
-            `<th scope="col">${subcat.shortName}</th>`
-          );
-        });
         return;
       }
-      // Else, th with col name on top header row, empty cell on bottom
-      $("#header-row-top").append(`<th scope=col>${col.shortName}</th>`);
-      $("#header-row-bottom").append(`<th scope="col"></th>`);
     });
   }
 
@@ -1261,7 +1307,11 @@
         if (!cell || typeof cell.value === "undefined")
           return newRow.append(`<td></td>`);
         const { value } = cell;
-        const formattedValue = isNaN(value) ? value : Number(value).toFixed(2).replace(/\.?0*$/, "");
+        const formattedValue = isNaN(value)
+          ? value
+          : Number(value)
+              .toFixed(2)
+              .replace(/\.?0*$/, "");
         newRow.append(`<td>${formattedValue}</td>`);
       });
     });
@@ -1339,11 +1389,8 @@
 
   <table id="table1" class="table">
     <thead id="thead">
-      <tr id="header-row-top">
+      <tr id="header-row">
         <!-- Script will populate col headers here -->
-      </tr>
-      <tr id="header-row-bottom">
-        <!-- Script will populate col subheaders here-->
       </tr>
     </thead>
     <tbody id="tbody">
@@ -1352,7 +1399,7 @@
   </table>
 
   <div id="loading" class="text-center">
-    <p id=>Loading...</p>
+    <p>Loading...</p>
     <div class="spinner-border" role="status">
       <span class="sr-only">Loading...</span>
     </div>
