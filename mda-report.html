@@ -280,7 +280,8 @@
           dn: "SCMDA - Population eligible for MDA treatment Round 2",
         },
         {
-          dn: "SCMDA - Population eligible for MDA treatment Total",
+          // Note that this is a regular Indicator (not program indic.)
+          dn: "SCMDA - Total Population eligible for MDA treatment",
         },
         {
           dn: "STMDA - Population eligible for MDA treatment Round 1",
@@ -591,20 +592,21 @@
     },
     {
       name:
-        "Number of people, in population eligible for treatment, receiving MDA treatment",
+        "People, in population eligible for treatment, receiving MDA treatment",
       type: rowTypes.DATA,
       cells: [
         { dn: "TCMDA - Total Persons Treated" },
         { dn: "LFMDA - Total Persons Treated" },
         { dn: "OMDA - Total Persons Treated Round 1" },
         { dn: "OMDA - Total Persons Treated Round 2" },
-        { dn: "OMDA - Total Persons Treated Round 1 AND 2" },
+        // The following one and the other two named like it are standar Indicators
+        { dn: "OMDA - Total People, in population eligible for treatment, receiving MDA treatment" },
         { dn: "SCMDA - Total Persons Treated Round 1" },
         { dn: "SCMDA - Total Persons Treated Round 2" },
-        { dn: "SCMDA - Total Persons Treated Round 1 AND 2" },
+        { dn: "SCMDA - Total People, in population eligible for treatment, receiving MDA treatment" },
         { dn: "STMDA - Total Persons Treated Round 1" },
         { dn: "STMDA - Total Persons Treated Round 2" },
-        { dn: "STMDA - Total Persons Treated Round 1 AND 2" },
+        { dn: "STMDA - Total People, in population eligible for treatment, receiving MDA treatment" },
         null,
       ],
     },
@@ -632,6 +634,7 @@
         {
           dn:
             "OMDA - Total People, in population eligible for treatment, not receiving MDA treatment",
+          dId: "aMUoBNLJ21U" // Provided because duplicate name in Ind. and prog.Ind.
         },
         {
           dn:
@@ -644,6 +647,7 @@
         {
           dn:
             "SCMDA - Total People, in population eligible for treatment, not receiving MDA treatment",
+          dId: "OAwgpaRCOvc",
         },
         {
           dn:
@@ -656,6 +660,7 @@
         {
           dn:
             "STMDA - Total People, in population eligible for treatment, not receiving MDA treatment",
+          dId: "c3F2W3YUOgT",
         },
         {
           dn:
@@ -1044,11 +1049,15 @@
       const [{ programIndicators }, { indicators }] = values;
       const allDimensions = [...programIndicators, ...indicators];
 
-      // Convert to a Map where keys are names and values are ids for lookup
-      const keyValuePairs = allDimensions.map((dimension) => {
-        return [dimension.displayName, dimension.id];
-      });
-      return new Map(keyValuePairs);
+      const dimensionMap = new Map()
+      allDimensions.forEach(dimension => {
+        if (dimensionMap.get(dimension.displayName))
+          console.log("Duplicate dimension name found: ", dimension.displayName);
+
+        // As of right now, overwrite to give last-queried group precedence
+        dimensionMap.set(dimension.displayName, dimension.id);
+      })
+      return dimensionMap;
     });
   }
 
