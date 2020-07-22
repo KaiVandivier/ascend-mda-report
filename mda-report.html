@@ -1091,7 +1091,30 @@
 
   function getAnalyticsData() {
     const { dimensionsToQuery, period, orgUnit } = state;
-    // Query analytics API for data
+
+    // query each one; see if it returns an error
+    // dimensionsToQuery.forEach(dimensionId => {
+    //   $.get("../api/analytics", {
+    //     dimension: `dx:${dimensionId},pe:${period}`,
+    //     filter: `ou:${orgUnit}`,
+    //     skipMeta: true,
+    //   }).catch(console.error);
+    // })
+
+    // Generic error test
+    // $.get("../cant/get/me").catch(console.error);
+
+
+    /* 
+    Culprits:
+    fc7tgI3f6a1 - SCMDA - Program coverage round 2
+    VAYxYVlnZYt - SCMDA - Epidemiological coverage round 2
+     */
+
+    // TODO: Make a fallback if monolith query fails
+    // TODO: Make an error-handling helper function outside
+
+    // Query analytics API for data (with one monolithic query)
     return $.get("../api/analytics", {
       dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
       filter: `ou:${orgUnit}`,
@@ -1101,6 +1124,35 @@
       const keyValuePairs = json.rows.map((row) => [row[0], row[2]]);
       const resultsMap = new Map(keyValuePairs);
       return resultsMap;
+    }).catch((err) => {
+      // There was an error with the monolothic query. Fall back to individual queries
+      console.log("Falling back to individual queries")
+      console.error(err);
+      // // TODO: Query individual things;
+      // // query each one; see if it returns an error
+      // return Promise.all(
+      //   dimensionsToQuery.map(dimensionId => {
+      //     return $.get("../api/analytics", {
+      //       dimension: `dx:${dimensionId},pe:${period}`,
+      //       filter: `ou:${orgUnit}`,
+      //       skipMeta: true,
+      //     }).then(json => {
+      //       if (!json.rows.length) return;
+      //       return [json.rows[0][0], json.rows[0][2]]
+      //     }).catch((err) => {
+      //       console.error("Analytics query error: ", err);
+      //       const errorMessage = `Err ${err.status}: ${err.statusText}`;
+
+      //       return [dimensionId, errorMessage]
+      //     });
+      //   })).then((kvPairs) => {
+      //     console.log("kvPairs", kvPairs);
+      //     const filteredPairs = kvPairs.filter(pair => pair);
+      //     console.log("filtered pairs:", filteredPairs)
+      //     const resultsMap = new Map(filteredPairs);
+      //     console.log("Results map:", resultsMap);
+      //     return resultsMap;
+      //   }).catch(console.error);
     });
   }
 
@@ -1200,7 +1252,8 @@
         if (!cell || typeof cell.value === "undefined")
           return newRow.append(`<td></td>`);
         const { value } = cell;
-        newRow.append(`<td>${value}</td>`);
+        const formattedValue = isNaN(value) ? value : Number(value).toFixed(2).replace(/\.?0*$/, "");
+        newRow.append(`<td>${formattedValue}</td>`);
       });
     });
   }
