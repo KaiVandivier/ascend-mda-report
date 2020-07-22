@@ -41,9 +41,9 @@
   }
 
   .bottom-row {
-    height: 1.5rem;
     font-weight: normal;
     font-size: 0.9rem;
+    height: calc(0.9rem * 1.5);
   }
 
   /* Row headers that are not category labels: normal font-weight */
@@ -1339,11 +1339,11 @@
   jQuery(document).ready(function () {
     // Javascript to be executed after page is loaded here
 
+    populateHtmlTableHeader();
     getAllDimensions()
       .then(populateCellDimensionIds)
       .then(getAnalyticsData)
       .then(populateCellValues)
-      .then(populateHtmlTableHeader)
       .then(populateHtmlTableBodyWithValues)
       .then(setUpForm)
       .catch(console.error);
