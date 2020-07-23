@@ -17,10 +17,15 @@
     border-spacing: 0;
   }
 
-  td, th { background: white; }
+  td,
+  th {
+    background: white;
+  }
 
   /* Stripe columns: headers */
-  thead th:nth-child(even) { background: #fafafa }
+  thead th:nth-child(even) {
+    background: #fafafa;
+  }
 
   /* Stripe columns 2, 4-6, 10-12. (simply `even` for top header row) */
   /* THIS IS HARD-CODED AND NEEDS CHANGING IF COLUMNS CHANGE */
@@ -1061,15 +1066,20 @@
       dimension: `dx:${dimensions},ou:${state.orgUnit};LEVEL-iGO9aN3ZSSi`,
       filter: `pe:${state.period}`,
       skipMeta: true,
-    }).then((json) => {
-      // 3. Get number of unique org units (IUs) with response > 0
-      const uniqueOrgUnits = new Map();
-      json.rows.forEach(([dimensionId, orgUnitId, value]) => {
-        if (!value || value <= 0) return;
-        uniqueOrgUnits.set(orgUnitId, true);
+    })
+      .then((json) => {
+        // 3. Get number of unique org units (IUs) with response > 0
+        const uniqueOrgUnits = new Map();
+        json.rows.forEach(([dimensionId, orgUnitId, value]) => {
+          if (!value || value <= 0) return;
+          uniqueOrgUnits.set(orgUnitId, true);
+        });
+        return uniqueOrgUnits.size;
+      })
+      .catch((err) => {
+        console.error("countIUsWithAtLeastOneResponse() error:", err);
+        return "Oops! There was an error.";
       });
-      return uniqueOrgUnits.size;
-    });
   }
 
   // Table logic
@@ -1137,30 +1147,9 @@
   }
 
   function getAnalyticsData() {
+    // Query analytics API for data (with one monolithic query)
     const { dimensionsToQuery, period, orgUnit } = state;
 
-    // query each one; see if it returns an error
-    // dimensionsToQuery.forEach(dimensionId => {
-    //   $.get("../api/analytics", {
-    //     dimension: `dx:${dimensionId},pe:${period}`,
-    //     filter: `ou:${orgUnit}`,
-    //     skipMeta: true,
-    //   }).catch(console.error);
-    // })
-
-    // Generic error test
-    // $.get("../cant/get/me").catch(console.error);
-
-    /* 
-    Culprits:
-    fc7tgI3f6a1 - SCMDA - Program coverage round 2
-    VAYxYVlnZYt - SCMDA - Epidemiological coverage round 2
-     */
-
-    // TODO: Make a fallback if monolith query fails
-    // TODO: Make an error-handling helper function outside
-
-    // Query analytics API for data (with one monolithic query)
     return $.get("../api/analytics", {
       dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
       filter: `ou:${orgUnit}`,
@@ -1174,34 +1163,63 @@
       })
       .catch((err) => {
         // There was an error with the monolothic query. Fall back to individual queries
-        console.log("Falling back to individual queries");
-        console.error(err);
-        // // TODO: Query individual things;
-        // // query each one; see if it returns an error
-        // return Promise.all(
-        //   dimensionsToQuery.map(dimensionId => {
-        //     return $.get("../api/analytics", {
-        //       dimension: `dx:${dimensionId},pe:${period}`,
-        //       filter: `ou:${orgUnit}`,
-        //       skipMeta: true,
-        //     }).then(json => {
-        //       if (!json.rows.length) return;
-        //       return [json.rows[0][0], json.rows[0][2]]
-        //     }).catch((err) => {
-        //       console.error("Analytics query error: ", err);
-        //       const errorMessage = `Err ${err.status}: ${err.statusText}`;
 
-        //       return [dimensionId, errorMessage]
-        //     });
-        //   })).then((kvPairs) => {
-        //     console.log("kvPairs", kvPairs);
-        //     const filteredPairs = kvPairs.filter(pair => pair);
-        //     console.log("filtered pairs:", filteredPairs)
-        //     const resultsMap = new Map(filteredPairs);
-        //     console.log("Results map:", resultsMap);
-        //     return resultsMap;
-        //   }).catch(console.error);
+        // Log error and notify user
+        console.error(
+          "There was an error with the monolithic query. Falling back to individual queries.",
+          err
+        );
+        const errMsgExists = $("#errMsg").length;
+        if (!errMsgExists) {
+          $("#loading").prepend(`
+            <div id="errMsg">
+              <p>Oops! There was a hiccup with the database.  This will take a bit longer than usual.</p>
+              <p>Check the console for error info.</p>
+            </div>
+          `);
+        }
+
+        // Query dimensions individually to sort out errors
+        return getAnalyticsDataIndividually();
       });
+  }
+
+  function getAnalyticsDataIndividually() {
+    // Query each cell individually to sort out errors
+    // (This is much slower and should only be used if there is a db error)
+    const { dimensionsToQuery, period, orgUnit } = state;
+
+    return Promise.all(
+      dimensionsToQuery.map((dimensionId) => {
+        // Query individual cell contents
+        return $.get("../api/analytics", {
+          dimension: `dx:${dimensionId},pe:${period}`,
+          filter: `ou:${orgUnit}`,
+          skipMeta: true,
+        }).then(
+          // If successful, return key-value pair of data
+          (json) => {
+            if (!json.rows.length) return;
+            return [dimensionId, json.rows[0][2]];
+          },
+          // If unsuccessful, log error and make key-value pair of id and error message
+          (err) => {
+            console.error(`Analytics query error found for dimension ID ${dimensionId}: `, err);
+            const { status, statusText, responseJSON } = err;
+            const errorMessage = `(Err ${status}: ${
+              responseJSON ? responseJSON.message : statusText
+            })`;
+
+            return [dimensionId, errorMessage];
+          }
+        );
+      })
+    ).then((kvPairs) => {
+      // Turn key-value pairs into a map for lookup during table population
+      const filteredPairs = kvPairs.filter((pair) => pair);
+      const resultsMap = new Map(filteredPairs);
+      return resultsMap;
+    });
   }
 
   function populateCellValues(analyticsResults) {
