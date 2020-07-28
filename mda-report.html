@@ -1204,7 +1204,10 @@
           },
           // If unsuccessful, log error and make key-value pair of id and error message
           (err) => {
-            console.error(`Analytics query error found for dimension ID ${dimensionId}: `, err);
+            console.error(
+              `Analytics query error found for dimension ID ${dimensionId}: `,
+              err
+            );
             const { status, statusText, responseJSON } = err;
             const errorMessage = `(Err ${status}: ${
               responseJSON ? responseJSON.message : statusText
@@ -1225,27 +1228,29 @@
   function populateCellValues(analyticsResults) {
     // Use `dimensionId` or `customLogic` to populate `value`
     return Promise.all(
-      rows.map(({ cells }) => {
+      rows.map(async ({ cells }) => {
         if (!cells) return; // Empty row; return
 
-        return Promise.all(
-          cells.map(async (cell, idx, arr) => {
-            // (get `idx` and `arr` values for custom logic functions)
-            if (!cell) return;
-            const { dId: dimensionId, customLogic } = cell;
+        // Execute (possibly async) cell logic in series
+        return cells
+          .reduce((prevTask, cell, idx, arr) => {
+            return prevTask.then(async () => {
+              if (!cell) return;
+              const { dId: dimensionId, customLogic } = cell;
 
-            if (dimensionId) {
-              const data = analyticsResults.get(dimensionId);
-              cell.value = data || "-";
-              return;
-            }
+              if (dimensionId) {
+                const data = analyticsResults.get(dimensionId);
+                cell.value = data || "-";
+                return;
+              }
 
-            if (customLogic) {
-              cell.value = await customLogic(arr, idx);
-              return;
-            }
-          })
-        );
+              if (customLogic) {
+                cell.value = await customLogic(arr, idx);
+                return;
+              }
+            });
+          }, Promise.resolve())
+          .catch(console.error.bind(console, "Cell population error: "));
       })
     );
   }
