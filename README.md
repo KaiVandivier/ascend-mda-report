@@ -121,7 +121,7 @@ Here is an example in which the custom logic function returns the sum of the pre
 ```javascript
 const rows = [
   {
-    name: "Row with sumOf() example",
+    name: "Row with custom logic example",
     type: rowTypes.DATA,
     cells: [
       // ...
@@ -137,8 +137,6 @@ const rows = [
 
 A few reusable functions are in the template for custom logic that you might want to apply the cells:
 
-- Helper functions `sumOf()` and `greatestOf()` may be useful for your custom logic. They take any number of arguments and will operate on the arguments that are numbers (i.e. `!isNaN`), so it's safe to pass them cell values that may be strings or numbers.
-
 ##### sumOf(...args)
 
 This function receives any number of arguments and returns the sum of any numbers that were passed in to the arguments. Because it filters out non-number inputs, it's safe to pass it values with an unknown type. Here is an example where the function sums up the values in known columns:
@@ -146,7 +144,7 @@ This function receives any number of arguments and returns the sum of any number
 ```javascript
 const rows = [
   {
-    name: "Row with custom logic cell example",
+    name: "Row with sumOf() example",
     type: rowTypes.DATA,
     cells: [
       // ...
@@ -173,7 +171,7 @@ This returns the greatest number in the arguments passed to it. Like `sumOf()`, 
 ```javascript
 const rows = [
   {
-    name: "Row with custom logic cell example",
+    name: "Row with greatestOf() example",
     type: rowTypes.DATA,
     cells: [
       // ...
@@ -193,7 +191,7 @@ This function takes as input the list of cells in the row and returns the number
 ```javascript
 const rows = [
   {
-    name: "Row with custom logic cell example",
+    name: "Row with countIUs...() example",
     type: rowTypes.DATA,
     cells: [
       // ...
