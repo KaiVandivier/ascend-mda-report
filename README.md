@@ -6,11 +6,11 @@ This is an HTML template for a Standard Report in the DHIS2 software, designed t
 
 ### Columns
 
-Define column headers in the `columns` array.  Each column is an object:
+Define column headers in the `columns` array. Each column is an object:
 
-- It should have `name` and `shortName` properties.  The short name will be used unless the column has multiple subcategories.
+- It should have `name` and `shortName` properties. The short name will be used unless the column has multiple subcategories.
 - A column may have an array of `subcategories`, which will be displayed as subheadings.
-  - A subcategory should be an object with `name` and `shortName` properties.  Only the short name will be displayed on the table.
+  - A subcategory should be an object with `name` and `shortName` properties. Only the short name will be displayed on the table.
   - A column with subcategories will result in a number of columns in the table equal to the number of subcategories, and the column title header will span those columns.
   - A few reusable subcategories are included as an enum (`colSubcats`) in the template.
 
@@ -25,7 +25,7 @@ const columns = [
     subcategories: [colSubcats.ROUND_1, colSubcats.ROUND_2, colSubcats.TOTAL],
   },
   // ...
-]
+];
 ```
 
 ### Rows
@@ -83,6 +83,7 @@ const rows = [
 #### Ways to define cell contents
 
 - Using a dimension name, like "TCMDA - Epidemiological Coverage" (can be an indicator or program indicator):
+
   - To do so, set the value `dn` (short for "dimension name") property of the cell to the name of the dimension
   - Ex: `{ dn: "TCMDA - Epidemiological Coverage" }`
   - The script will look up the dimension ID based on the name and populate the `dId` property on the cell
@@ -91,18 +92,16 @@ const rows = [
   - Note that if you _also_ manually set the `dId` property of the cell, the script will not perform the name->ID lookup; i.e., the dimension ID will take precedence.
 
 - Using a dimension ID:
+
   - Set the `dId` property (short for "dimension ID") of the cell
   - Ex: `{ dId: "kTtjN2SNEDH" }`
-  - This has the benefits of avoiding string-matching sensitivity and being resilient to dimension name changes in the database, but may be tedious to look up individually for many cells.
+  - This has the benefits of avoiding string-matching sensitivity, being resilient to dimension name changes in the database, and the ability to correctly specify an indicator if there are duplicate names, but it may be tedious to look up IDs individually for many cells.
   - This will override the dimension name (`dn`) property if it is provided.
 
 - Using custom logic to compute a cell's value based on other cells' values:
+
   - Provide a function on the `customLogic` property that will be executed while the table is being populated with values that have been queried from the database. The function should return the value that will ultimately be set as the cell's `value`.
-  - The function can be asynchronous and return a promise; the return value will be `await`ed upon.
-  - The function will be called with two arguments: `cells`, an array of the cells in that row, and `idx`, the current cell's index in that array.
-  - Helper functions `sumOf()` and `greatestOf()` may be useful for your custom logic. They take any number of arguments and will operate on the arguments that are numbers (i.e. `!isNaN`), so it's safe to pass them cell values that may be strings or numbers.
-  - Ex: This custom logic will sum up the values of the two previous cells in the row: `{ customLogic: (cells, idx) => sumOf(cells[idx - 1].value, cells[idx - 2].value) }`
-  - Note that at execution time, the custom logic function will only have access to up-to-date values on the previous cells in the row.
+  - Read more in the [custom logic section](#custom-logic-functions-for-cells) below
 
 - Hard-coding an explicit value for the cell:
   - Set the `value` property of the cell.
@@ -111,14 +110,96 @@ const rows = [
 
 #### Custom logic functions for cells
 
-##### sumOf()
+Here are some details about using custom logic functions:
 
-Todo
+- The function will be called with two arguments: `cells`, an array of the cells in that row, and `idx`, the current cell's index in that array.
+- The function can be asynchronous and return a promise; the return value will be `await`ed upon.
+- Note that at execution time, the custom logic function will only have access to up-to-date values on the previous cells in the row.
 
-##### greatestOf()
+Here is an example in which the custom logic function returns the sum of the previous two cells in a row:
 
-Todo
+```javascript
+const rows = [
+  {
+    name: "Row with sumOf() example",
+    type: rowTypes.DATA,
+    cells: [
+      // ...
+      {
+        customLogic: (cells, idx) =>
+          sumOf(cells[idx - 1].value, cells[idx - 2].value),
+      },
+    ],
+  },
+  // ...
+];
+```
 
-##### countIUsWithAtLeastOneResponse()
+A few reusable functions are in the template for custom logic that you might want to apply the cells:
 
-Todo
+- Helper functions `sumOf()` and `greatestOf()` may be useful for your custom logic. They take any number of arguments and will operate on the arguments that are numbers (i.e. `!isNaN`), so it's safe to pass them cell values that may be strings or numbers.
+
+##### sumOf(...args)
+
+This function receives any number of arguments and returns the sum of any numbers that were passed in to the arguments. Because it filters out non-number inputs, it's safe to pass it values with an unknown type. Here is an example where the function sums up the values in known columns:
+
+```javascript
+const rows = [
+  {
+    name: "Row with custom logic cell example",
+    type: rowTypes.DATA,
+    cells: [
+      // ...
+      {
+        customLogic: (cells, idx) =>
+          sumOf(
+            cells[0].value,
+            cells[1].value,
+            cells[4].value,
+            cells[7].value,
+            cells[10].value
+          ),
+      },
+    ],
+  },
+  // ...
+];
+```
+
+##### greatestOf(...args)
+
+This returns the greatest number in the arguments passed to it. Like `sumOf()`, this function receives any number of arguments, and filters out non-number values.  If there are no numbers passed as inputs, it returns 0.  Here is an example where the function returns the greatest value of the two previous cells:
+
+```javascript
+const rows = [
+  {
+    name: "Row with custom logic cell example",
+    type: rowTypes.DATA,
+    cells: [
+      // ...
+      {
+        customLogic: (cells, idx) => greatestOf(cells[idx - 1].value, cells[idx - 2]),
+      },
+    ],
+  },
+  // ...
+];
+```
+
+##### countIUsWithAtLeastOneResponse(cells)
+
+This function takes as input the list of cells in the row and returns the number of unique orginisation units at a given level (IU level, in this report) which have responded to at least one of the indicators in the row.  Because the function signature matches the arguments passed to custom logic functions, implementation is very simple:
+
+```javascript
+const rows = [
+  {
+    name: "Row with custom logic cell example",
+    type: rowTypes.DATA,
+    cells: [
+      // ...
+      { customLogic: countIUsWithAtLeastOneResponse },
+    ],
+  },
+  // ...
+];
+```
