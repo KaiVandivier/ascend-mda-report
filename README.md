@@ -80,6 +80,8 @@ const rows = [
 ]
 ```
 
+#### Ways to define cell contents
+
 - Using a dimension name, like "TCMDA - Epidemiological Coverage" (can be an indicator or program indicator):
   - To do so, set the value `dn` (short for "dimension name") property of the cell to the name of the dimension
   - Ex: `{ dn: "TCMDA - Epidemiological Coverage" }`
@@ -105,4 +107,18 @@ const rows = [
 - Hard-coding an explicit value for the cell:
   - Set the `value` property of the cell.
   - Ex: `{ value: "This is the value that will end up in the table" }`
-  - Note that this value will be overridden if any of the other properties above are set.
+  - Note that a hard-coded value will be overridden if any of the other properties above are set.
+
+#### Custom logic functions for cells
+
+##### sumOf()
+
+Todo
+
+##### greatestOf()
+
+Todo
+
+##### countIUsWithAtLeastOneResponse()
+
+Todo
