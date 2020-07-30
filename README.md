@@ -166,7 +166,7 @@ const rows = [
 
 ##### greatestOf(...args)
 
-This returns the greatest number in the arguments passed to it. Like `sumOf()`, this function receives any number of arguments, and filters out non-number values.  If there are no numbers passed as inputs, it returns 0.  Here is an example where the function returns the greatest value of the two previous cells:
+This returns the greatest number in the arguments passed to it. Like `sumOf()`, this function receives any number of arguments, and filters out non-number values. If there are no numbers passed as inputs, it returns 0. Here is an example where the function returns the greatest value of the two previous cells:
 
 ```javascript
 const rows = [
@@ -176,7 +176,8 @@ const rows = [
     cells: [
       // ...
       {
-        customLogic: (cells, idx) => greatestOf(cells[idx - 1].value, cells[idx - 2]),
+        customLogic: (cells, idx) =>
+          greatestOf(cells[idx - 1].value, cells[idx - 2]),
       },
     ],
   },
@@ -184,18 +185,23 @@ const rows = [
 ];
 ```
 
-##### countIUsWithAtLeastOneResponse(cells)
+##### uniqueRespondingIUs(cells)
 
-This function takes as input the list of cells in the row and returns the number of unique orginisation units at a given level (IU level, in this report) which have responded to at least one of the indicators in the row.  Because the function signature matches the arguments passed to custom logic functions, implementation is very simple:
+This function takes as input the list of cells in the row, finds the number of unique orginisation units at a given level (IU level, in this report) which have responded to at least one of the indicators in the row, and returns a promise which resolves to an object with 1) the number of unique responding IUs and 2) the sum of the numerical values reported for each unique IU. When an IU has responded twice or more to indicators in the row, the greater value of the responses is used in the sum of values. Because this returns a promise, retrieve your value of interest from a `.then()` statement (and recall that the custom logic function itself can return a promise). Here is an example, where the total number of unique IUs in the row is reported:
 
 ```javascript
 const rows = [
   {
-    name: "Row with countIUs...() example",
+    name: "Row with uniqueRespondingIUs() example",
     type: rowTypes.DATA,
     cells: [
       // ...
-      { customLogic: countIUsWithAtLeastOneResponse },
+      {
+        customLogic: (cells, idx) =>
+          uniqueRespondingIUs(cells).then(({ uniqueIUs, sumOfValues }) => {
+            return uniqueIUs;
+          }),
+      },
     ],
   },
   // ...
