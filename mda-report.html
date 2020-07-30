@@ -173,7 +173,8 @@
         null,
         null,
         { dn: "STMDA - IUs in post-treatment surveillance" },
-        { customLogic: countIUsWithAtLeastOneResponse },
+        { customLogic: (cells) =>
+            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs), },
       ],
     },
     {
@@ -213,7 +214,8 @@
         null,
         null,
         { dn: "STMDA - IUs where NTD endemicity is unknown" },
-        { customLogic: countIUsWithAtLeastOneResponse },
+        { customLogic: (cells) =>
+            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs), },
       ],
     },
     {
@@ -231,7 +233,11 @@
         { dn: "STMDA - Population in NTD affected IUs Round 1" },
         { dn: "STMDA - Population in NTD affected IUs Round 2" },
         { dn: "STMDA - Population in NTD affected IUs Total" },
-        { customLogic: countIUsWithAtLeastOneResponse },
+        // The following may need to _sum_ values of unique IUs
+        {
+          customLogic: (cells, idx) =>
+            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+        },
       ],
     },
     {
@@ -515,7 +521,8 @@
         { dn: "STMDA - IUs where MDA treatment has been provided Round 1" },
         { dn: "STMDA - IUs where MDA treatment has been provided Round 2" },
         null,
-        { customLogic: countIUsWithAtLeastOneResponse },
+        { customLogic: (cells) =>
+            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs), },
       ],
     },
     {
@@ -812,7 +819,8 @@
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
-          customLogic: countIUsWithAtLeastOneResponse,
+          customLogic: (cells) =>
+            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
         },
       ],
     },
@@ -893,7 +901,8 @@
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
-        { customLogic: countIUsWithAtLeastOneResponse },
+        { customLogic: (cells) =>
+            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs), },
       ],
     },
     {
@@ -946,7 +955,10 @@
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
-        { customLogic: countIUsWithAtLeastOneResponse },
+        {
+          customLogic: (cells) =>
+            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+        },
       ],
     },
 
@@ -1043,7 +1055,7 @@
     return nums.reduce((sum, n) => sum + Number(n), 0);
   }
 
-  function countIUsWithAtLeastOneResponse(cells) {
+  function uniqueRespondingIUs(cells) {
     // This function counts all unique IUs with at least one value in this row
     // 1. Build dimensions list for query url
     const dimensions = cells
@@ -1059,16 +1071,34 @@
       skipMeta: true,
     })
       .then((json) => {
-        // 3. Get number of unique org units (IUs) with response > 0
+        // 3. Get unique org units (IUs) with response > 0
         const uniqueOrgUnits = new Map();
         json.rows.forEach(([dimensionId, orgUnitId, value]) => {
-          if (!value || value <= 0) return;
-          uniqueOrgUnits.set(orgUnitId, true);
+          if (!value) return;
+
+          // If this org unit is a duplicate in the list, set value to be the greater
+          const existingValue = uniqueOrgUnits.get(orgUnitId);
+          if (existingValue) {
+            const greaterValue = greatestOf(value, existingValue);
+            uniqueOrgUnits.set(orgUnitId, greaterValue);
+            return;
+          }
+
+          // Otherwise, set value
+          uniqueOrgUnits.set(orgUnitId, value);
         });
-        return uniqueOrgUnits.size;
+
+        let sumOfValues = 0;
+        uniqueOrgUnits.forEach((value) => {
+          if (isNaN(value)) return;
+          sumOfValues += Number(value);
+        });
+        const numUniqueIUs = uniqueOrgUnits.size;
+
+        return { numUniqueIUs, sumOfValues };
       })
       .catch((err) => {
-        console.error("countIUsWithAtLeastOneResponse() error:", err);
+        console.error("uniqueRespondingIUs() error:", err);
         return "Oops! There was an error.";
       });
   }
@@ -1280,6 +1310,9 @@
     // Clear tbody for fresh rows & remove "loading"
     const tbody = $("#tbody").empty();
     $("#loading").hide();
+    const numberFormat = new Intl.NumberFormat(undefined, {
+      maximumFractionDigits: 2,
+    });
 
     // Set up table body to be populated
     const totalColumns =
@@ -1323,9 +1356,7 @@
         const { value } = cell;
         const formattedValue = isNaN(value)
           ? value
-          : Number(value)
-              .toFixed(2)
-              .replace(/\.?0*$/, "");
+          : numberFormat.format(Number(value));
         newRow.append(`<td>${formattedValue}</td>`);
       });
     });
