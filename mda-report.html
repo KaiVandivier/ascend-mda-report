@@ -1026,17 +1026,16 @@
 
   // Defining initial values for state
   // (Ideally, these would be set by the reports app parameters)
-  const period = dhis2.report.periods[0] || "THIS_YEAR";
-  const orgUnit = Object.keys(dhis2.report.organisationUnit).length
+  const initialPeriod = "2020;2019;2018;2017;2016;2015;2014;2013;2012;2011;2010";
+  const initialOrgUnit = Object.keys(dhis2.report.organisationUnit).length
     ? dhis2.report.organisationUnit.id
     : "GdH306UQ8L8"; // This is the global org-unit
-  const dimensionsToQuery = [];
 
   // App state:
   // TODO: (maybe `rows` should go in here?)
   let state = {
-    period,
-    orgUnit,
+    period: initialPeriod,
+    orgUnit: initialOrgUnit,
     dimensionsToQuery: [],
   };
 
@@ -1172,13 +1171,13 @@
     const { dimensionsToQuery, period, orgUnit } = state;
 
     return $.get("../api/analytics", {
-      dimension: `dx:${dimensionsToQuery.join(";")},pe:${period}`,
-      filter: `ou:${orgUnit}`,
+      dimension: `dx:${dimensionsToQuery.join(";")}`,
+      filter: `ou:${orgUnit},pe:${period}`,
       skipMeta: true,
     })
       .then((json) => {
         // convert to a map for easy lookup by ID:
-        const keyValuePairs = json.rows.map((row) => [row[0], row[2]]);
+        const keyValuePairs = json.rows.map((row) => [row[0], row[1]]);
         const resultsMap = new Map(keyValuePairs);
         return resultsMap;
       })
@@ -1402,8 +1401,18 @@
   <div class="form-group">
     <label for="periodSelect">Period:</label>
     <select name="period" id="periodSelect" class="form-control">
+      <option value="2020;2019;2018;2017;2016;2015;2014;2013;2012;2011;2010">Total Across All Years</option>
       <option value="2020">2020</option>
       <option value="2019">2019</option>
+      <option value="2018">2018</option>
+      <option value="2017">2017</option>
+      <option value="2016">2016</option>
+      <option value="2015">2015</option>
+      <option value="2014">2014</option>
+      <option value="2013">2013</option>
+      <option value="2012">2012</option>
+      <option value="2011">2011</option>
+      <option value="2010">2010</option>
     </select>
   </div>
 
