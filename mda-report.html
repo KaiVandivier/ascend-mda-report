@@ -1026,6 +1026,7 @@
 
   // Defining initial values for state
   // (Ideally, these would be set by the reports app parameters)
+  // Initial period should get overwritten by `setUpPeriodSelect()`;
   const initialPeriod = "2020;2019;2018;2017;2016;2015;2014;2013;2012;2011;2010";
   const initialOrgUnit = Object.keys(dhis2.report.organisationUnit).length
     ? dhis2.report.organisationUnit.id
@@ -1380,9 +1381,28 @@
     $("#orgUnitSelect").on("change", handleChange);
   }
 
+  function setUpPeriodSelect(startingYear) {
+    // Populate period select with options, including "total across all years"
+    const periodSelect = $("#periodSelect");
+    const currentYear = new Date().getFullYear();
+
+    const allYears = [];
+    for (let year = currentYear; year >= startingYear; year--) {
+      allYears.push(year);
+    }
+    const allYearsString = allYears.join(";")
+    state = { ...state, period: allYearsString };
+
+    periodSelect.append(`<option value="${allYearsString}">Total Across All Years</option>`);
+    allYears.forEach((year) => {
+      periodSelect.append(`<option value="${year}">${year}</option>`);
+    })
+  }
+
   jQuery(document).ready(function () {
     // Javascript to be executed after page is loaded here
 
+    setUpPeriodSelect(2010); // Change starting year here
     populateHtmlTableHeader();
     getAllDimensions()
       .then(populateCellDimensionIds)
@@ -1401,18 +1421,7 @@
   <div class="form-group">
     <label for="periodSelect">Period:</label>
     <select name="period" id="periodSelect" class="form-control">
-      <option value="2020;2019;2018;2017;2016;2015;2014;2013;2012;2011;2010">Total Across All Years</option>
-      <option value="2020">2020</option>
-      <option value="2019">2019</option>
-      <option value="2018">2018</option>
-      <option value="2017">2017</option>
-      <option value="2016">2016</option>
-      <option value="2015">2015</option>
-      <option value="2014">2014</option>
-      <option value="2013">2013</option>
-      <option value="2012">2012</option>
-      <option value="2011">2011</option>
-      <option value="2010">2010</option>
+      <!-- This will be populated by `setUpPeriodSelect()` -->
     </select>
   </div>
 
