@@ -173,8 +173,10 @@
         null,
         null,
         { dn: "STMDA - IUs in post-treatment surveillance" },
-        { customLogic: (cells) =>
-            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs), },
+        {
+          customLogic: (cells) =>
+            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+        },
       ],
     },
     {
@@ -214,8 +216,10 @@
         null,
         null,
         { dn: "STMDA - IUs where NTD endemicity is unknown" },
-        { customLogic: (cells) =>
-            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs), },
+        {
+          customLogic: (cells) =>
+            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+        },
       ],
     },
     {
@@ -521,8 +525,10 @@
         { dn: "STMDA - IUs where MDA treatment has been provided Round 1" },
         { dn: "STMDA - IUs where MDA treatment has been provided Round 2" },
         null,
-        { customLogic: (cells) =>
-            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs), },
+        {
+          customLogic: (cells) =>
+            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+        },
       ],
     },
     {
@@ -901,8 +907,10 @@
           customLogic: (cells, idx) =>
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
-        { customLogic: (cells) =>
-            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs), },
+        {
+          customLogic: (cells) =>
+            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+        },
       ],
     },
     {
@@ -1027,7 +1035,8 @@
   // Defining initial values for state
   // (Ideally, these would be set by the reports app parameters)
   // Initial period should get overwritten by `setUpPeriodSelect()`;
-  const initialPeriod = "2020;2019;2018;2017;2016;2015;2014;2013;2012;2011;2010";
+  const initialPeriod =
+    "2020;2019;2018;2017;2016;2015;2014;2013;2012;2011;2010";
   const initialOrgUnit = Object.keys(dhis2.report.organisationUnit).length
     ? dhis2.report.organisationUnit.id
     : "GdH306UQ8L8"; // This is the global org-unit
@@ -1390,19 +1399,109 @@
     for (let year = currentYear; year >= startingYear; year--) {
       allYears.push(year);
     }
-    const allYearsString = allYears.join(";")
-    state = { ...state, period: allYearsString };
+    const allYearsString = allYears.join(";");
+    state = { ...state, period: allYearsString, allYears: allYearsString };
 
-    periodSelect.append(`<option value="${allYearsString}">Total Across All Years</option>`);
+    periodSelect.append(
+      `<option value="${allYearsString}">Total Across All Years</option>`
+    );
     allYears.forEach((year) => {
       periodSelect.append(`<option value="${year}">${year}</option>`);
-    })
+    });
+  }
+
+  function setUpOrgUnitSelect(maxLevel) {
+    $.get("../api/organisationUnits.json", { maxLevel, paging: false })
+      .then(({ organisationUnits: orgUnits }) => {
+        if (!orgUnits) return;
+
+        const orgUnitSelect = $("#orgUnitSelect");
+        const allOrgUnits = new Map();
+        orgUnits.forEach(({ id, displayName }) => {
+          allOrgUnits.set(id, displayName);
+          orgUnitSelect.append(`<option value="${id}">${displayName}</option>`);
+        });
+
+        state = { ...state, allOrgUnits };
+      })
+      .catch(console.error);
+  }
+
+  function exportToCSV() {
+    const csvPrefix = "data:text/csv;charset=utf-8,";
+
+    // 0. Include Org unit and period
+    const { period, allYears, orgUnit, allOrgUnits } = state;
+    const csvOrgUnit = `Organisation Unit,${allOrgUnits.get(orgUnit)}\n`;
+    const csvPeriod = `Period,${
+      state.period === state.allYears ? "Total Across All Years" : state.period
+    }\n\n`;
+
+    // 1. Make two header rows for column title
+    const colHeadersTop = [null];
+    const colHeadersBot = [null];
+    const columnHeaders = columns.forEach((column) => {
+      // TODO: Short names?
+      // If no subcategories, enter column name on top and null on bottom.
+      if (!column.subcategories) {
+        colHeadersTop.push(column.name);
+        colHeadersBot.push(null);
+        return;
+      }
+
+      // If column has subcategories, enter col name and n-1 spaces on top,
+      // and all subcategories in bottom.
+      column.subcategories.forEach((subcategory, idx) => {
+        colHeadersTop.push(idx === 0 ? column.name : null);
+        colHeadersBot.push(subcategory.name);
+      });
+    });
+    const csvHeaders =
+      colHeadersTop.join(",") + "\n" + colHeadersBot.join(",") + "\n";
+
+    // 2. Map each row; join with newlines
+    // 3. Map each cell; join with columns
+    const csvRows = rows
+      .map((row) => {
+        const formattedName = row.name.replace(/,/g, "");
+        if (!row.cells) return formattedName;
+
+        const csvCells = row.cells
+          .map((cell) => {
+            // If cell is empty or has no value, make empty cell element
+            if (!cell || typeof cell.value === "undefined") return null;
+            const { value } = cell;
+            const formattedValue = isNaN(value)
+              ? value.replace(/,/g, "")
+              : Number(value)
+                  .toFixed(2)
+                  .replace(/\.?0*$/, "");
+            return formattedValue;
+          })
+          .join(",");
+        return `${formattedName},${csvCells}`;
+      })
+      .join("\n");
+
+    // 4. Combine all strings
+    const csvContent =
+      csvPrefix + csvOrgUnit + csvPeriod + csvHeaders + csvRows;
+
+    // 5. Encode URI; make invisible link then download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "mda_report.csv");
+    document.body.appendChild(link); // Required for FF
+
+    link.click(); // This will download the data file named "mda_report.csv".
   }
 
   jQuery(document).ready(function () {
     // Javascript to be executed after page is loaded here
 
     setUpPeriodSelect(2010); // Change starting year here
+    setUpOrgUnitSelect(2); // Change max org unit level here
     populateHtmlTableHeader();
     getAllDimensions()
       .then(populateCellDimensionIds)
@@ -1416,7 +1515,11 @@
 
 <div>
   <!-- HTML Markup to make up report -->
-  <h1>MDA Treatment Summary</h1>
+  <div class="d-flex pr-2 align-items-center justify-content-between">
+    <h1>MDA Treatment Summary</h1>
+    <button class="btn btn-primary" onclick="exportToCSV()">Download CSV</button>
+  </div>
+
 
   <div class="form-group">
     <label for="periodSelect">Period:</label>
@@ -1428,18 +1531,7 @@
   <div class="form-group">
     <label for="orgUnitSelect">Organisation Unit:</label>
     <select name="orgUnit" id="orgUnitSelect" class="form-control">
-      <option value="GdH306UQ8L8">ASCEND (Global)</option>
-      <option value="NcFgAaXhz7C">Bangladesh</option>
-      <option value="AE6IvE2jiSd">Ethiopia</option>
-      <option value="TDzGT1zy5Ay">Kenya</option>
-      <option value="Ej29Oagyhzo">Malawi</option>
-      <option value="dDWimYQWqK3">Mozambique</option>
-      <option value="cDXNddYCdPh">South Sudan</option>
-      <option value="FqoRMDOhFAp">Tanzania</option>
-      <option value="IHyDQqsAo7k">Tanzania, Zanzibar</option>
-      <option value="Yz1I2quJvaQ">Uganda</option>
-      <option value="AK2b9x2HipG">Zambia</option>
-      <option value="zzkzrWcJnfM">ZZ TEST</option>
+      <!-- This will be populated by `setUpOrgUnitSelect()` -->
     </select>
   </div>
 
