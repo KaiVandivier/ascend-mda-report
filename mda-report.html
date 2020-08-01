@@ -1,12 +1,28 @@
 <!-- Check out the documentation at https://github.com/KaiVandivier/ascend-mda-report -->
 
-<!-- Bootstrap stylesheet -->
+<!-- Bootstrap stylesheet and scripts -->
 <link
   rel="stylesheet"
   href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
   integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
   crossorigin="anonymous"
 />
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+  integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+  crossorigin="anonymous"
+></script>
+<script
+  src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+  integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+  crossorigin="anonymous"
+></script>
+
+<!-- Font awesome icons -->
+<script
+  src="https://kit.fontawesome.com/8483276227.js"
+  crossorigin="anonymous"
+></script>
 
 <style type="text/css" media="screen">
   /* Put your CSS styling here */
@@ -70,6 +86,19 @@
     CATEGORY: "category",
     DATA: "data",
   });
+  const tooltipTypes = Object.freeze({
+    INFO: { name: "info", icon: "fa-info-circle", color: "text-info" },
+    ERROR: {
+      name: "error",
+      icon: "fa-exclamation-circle",
+      color: "text-danger",
+    },
+    WARNING: {
+      name: "warning",
+      icon: "fa-exclamation-triangle",
+      color: "text-warning",
+    },
+  });
 
   /**
    * Row and column definitions: Edit these to define the table.
@@ -116,7 +145,14 @@
       name: "Endemic IUs",
       type: rowTypes.DATA,
       cells: [
-        { dn: "TCMDA - Endemic IUs" },
+        {
+          dn: "TCMDA - Endemic IUs",
+          tooltips: [
+            { type: tooltipTypes.INFO, message: "Example info tooltip" },
+            { type: tooltipTypes.ERROR, message: "Example error tooltip" },
+            { type: tooltipTypes.WARNING, message: "Example warning tooltip" },
+          ],
+        },
         { dn: "LFMDA - Endemic IUs" },
         null,
         null,
@@ -1358,16 +1394,34 @@
         return;
       }
 
+      // Fill in each cell
       row.cells.forEach((cell) => {
-        // If cell is empty or has no value, make empty cell element
-        if (!cell || typeof cell.value === "undefined")
-          return newRow.append(`<td></td>`);
+        const newCell = $(`<td></td>`);
+        if (!cell) return newRow.append(newCell);
+
         const { value } = cell;
-        const formattedValue = isNaN(value)
-          ? value
-          : numberFormat.format(Number(value));
-        newRow.append(`<td>${formattedValue}</td>`);
+        if (typeof value !== "undefined") {
+          const formattedValue = isNaN(value)
+            ? value
+            : numberFormat.format(Number(value));
+          newCell.append(formattedValue);
+        }
+
+        addTooltips(newCell, cell);
+        newRow.append(newCell);
       });
+    });
+  }
+
+  function addTooltips(htmlCell, { tooltips }) {
+    if (!tooltips || !tooltips.length) return;
+
+    tooltips.forEach(({ type, message }) => {
+      const htmlTooltip = $(
+        `<i class="fa ${type.icon} ${type.color}" data-toggle="tooltip" data-title="${message}"></i>`
+      );
+      htmlCell.append(" ", htmlTooltip);
+      htmlTooltip.tooltip();
     });
   }
 
@@ -1497,6 +1551,7 @@
     link.click(); // This will download the data file named "mda_report.csv".
   }
 
+
   jQuery(document).ready(function () {
     // Javascript to be executed after page is loaded here
 
@@ -1517,9 +1572,10 @@
   <!-- HTML Markup to make up report -->
   <div class="d-flex pr-2 align-items-center justify-content-between">
     <h1>MDA Treatment Summary</h1>
-    <button class="btn btn-primary" onclick="exportToCSV()">Download CSV</button>
+    <button class="btn btn-primary" onclick="exportToCSV()">
+      Download CSV
+    </button>
   </div>
-
 
   <div class="form-group">
     <label for="periodSelect">Period:</label>
