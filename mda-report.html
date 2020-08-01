@@ -87,7 +87,7 @@
     DATA: "data",
   });
   const tooltipTypes = Object.freeze({
-    INFO: { name: "info", icon: "fa-info-circle", color: "text-info" },
+    INFO: { name: "info", icon: "fa-info-circle", color: "text-secondary" },
     ERROR: {
       name: "error",
       icon: "fa-exclamation-circle",
@@ -147,6 +147,7 @@
       cells: [
         {
           dn: "TCMDA - Endemic IUs",
+          // TODO: Remove this when done testing
           tooltips: [
             { type: tooltipTypes.INFO, message: "Example info tooltip" },
             { type: tooltipTypes.ERROR, message: "Example error tooltip" },
@@ -156,7 +157,8 @@
         { dn: "LFMDA - Endemic IUs" },
         null,
         null,
-        { dn: "OMDA - Endemic IUs" },
+        { dn: "asdfsdf" },
+        // { dn: "OMDA - Endemic IUs" },
         null,
         null,
         { dn: "SCMDA - Endemic IUs" },
@@ -212,6 +214,10 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          tooltips: [{
+            type: tooltipTypes.INFO,
+            message: "IUs that participated in multiple MDAs are not double-counted"
+          }],
         },
       ],
     },
@@ -255,6 +261,10 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          tooltips: [{
+            type: tooltipTypes.INFO,
+            message: "IUs that participated in multiple MDAs are not double-counted"
+          }],
         },
       ],
     },
@@ -273,10 +283,13 @@
         { dn: "STMDA - Population in NTD affected IUs Round 1" },
         { dn: "STMDA - Population in NTD affected IUs Round 2" },
         { dn: "STMDA - Population in NTD affected IUs Total" },
-        // The following may need to _sum_ values of unique IUs
         {
           customLogic: (cells, idx) =>
             uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          tooltips: [{
+            type: tooltipTypes.INFO,
+            message: "IUs that participated in multiple MDAs are not double-counted"
+          }]
         },
       ],
     },
@@ -564,6 +577,10 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          tooltips: [{
+            type: tooltipTypes.INFO,
+            message: "IUs that participated in multiple MDAs are not double-counted"
+          }],
         },
       ],
     },
@@ -863,6 +880,10 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          tooltips: [{
+            type: tooltipTypes.INFO,
+            message: "IUs that participated in multiple MDAs are not double-counted"
+          }]
         },
       ],
     },
@@ -946,6 +967,10 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          tooltips: [{
+            type: tooltipTypes.INFO,
+            message: "IUs that participated in multiple MDAs are not double-counted"
+          }],
         },
       ],
     },
@@ -1002,6 +1027,10 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          tooltips: [{
+            type: tooltipTypes.INFO,
+            message: "IUs that participated in multiple MDAs are not double-counted"
+          }],
         },
       ],
     },
@@ -1085,9 +1114,13 @@
     dimensionsToQuery: [],
   };
 
-  // Functions
+  /* Functions */
 
-  // Custom logic helper functions
+  /**
+   *
+   * Custom logic helper functions
+   *
+   */
   function greatestOf(...args) {
     const nums = args.filter((n) => !isNaN(n));
     if (!nums.length) return 0;
@@ -1148,7 +1181,11 @@
       });
   }
 
-  // Table logic
+  /**
+   *
+   * Table logic
+   *
+   */
   function getAllDimensions() {
     // Gets a list of all indicators' and program indicators' names and IDs
     return Promise.all([
@@ -1198,7 +1235,11 @@
         const dimensionId = allDimensions.get(dimensionName);
 
         if (!dimensionId) {
-          cell.value = `(dimension not found: ${dimensionName})`;
+          if (!cell.tooltips) cell.tooltips = [];
+          cell.tooltips.push({
+            type: tooltipTypes.ERROR,
+            message: `Dimension not found: ${dimensionName}`,
+          })
           return;
         }
 
@@ -1275,9 +1316,9 @@
               err
             );
             const { status, statusText, responseJSON } = err;
-            const errorMessage = `(Err ${status}: ${
+            const errorMessage = `Err ${status}: ${
               responseJSON ? responseJSON.message : statusText
-            })`;
+            }`;
 
             return [dimensionId, errorMessage];
           }
@@ -1306,6 +1347,12 @@
 
               if (dimensionId) {
                 const data = analyticsResults.get(dimensionId);
+                if (/^Err/.test(data)) {
+                  // There is an error. Add a tooltip
+                  if (!cell.tooltips) cell.tooltips = [];
+                  cell.tooltips.push({ type: tooltipTypes.ERROR, message: data });
+                  return;
+                }
                 cell.value = data || "-";
                 return;
               }
@@ -1321,6 +1368,11 @@
     );
   }
 
+  /**
+   *
+   * HTML Table building
+   *
+   */
   function populateHtmlTableHeader() {
     // Empty cell over row names (Maybe "indicator?")
     $("#header-row").append(`<th scope="col"></th>`);
@@ -1425,6 +1477,11 @@
     });
   }
 
+  /**
+   *
+   * Other page DOM functions
+   *
+   */
   function handleChange(e) {
     // On form change, update state with new "period" or "orgUnit", and query data
     state = { ...state, [e.target.name]: e.target.value };
@@ -1481,6 +1538,11 @@
       .catch(console.error);
   }
 
+  /**
+   *
+   * CSV Export
+   *
+   */
   function exportToCSV() {
     const csvPrefix = "data:text/csv;charset=utf-8,";
 
@@ -1551,7 +1613,11 @@
     link.click(); // This will download the data file named "mda_report.csv".
   }
 
-
+  /**
+   *
+   * Page-load execution
+   *
+   */
   jQuery(document).ready(function () {
     // Javascript to be executed after page is loaded here
 
