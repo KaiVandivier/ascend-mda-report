@@ -157,8 +157,7 @@
         { dn: "LFMDA - Endemic IUs" },
         null,
         null,
-        { dn: "asdfsdf" },
-        // { dn: "OMDA - Endemic IUs" },
+        { dn: "OMDA - Endemic IUs" },
         null,
         null,
         { dn: "SCMDA - Endemic IUs" },
@@ -214,10 +213,13 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
-          tooltips: [{
-            type: tooltipTypes.INFO,
-            message: "IUs that participated in multiple MDAs are not double-counted"
-          }],
+          tooltips: [
+            {
+              type: tooltipTypes.INFO,
+              message:
+                "IUs that participated in multiple MDAs are not double-counted here",
+            },
+          ],
         },
       ],
     },
@@ -261,10 +263,13 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
-          tooltips: [{
-            type: tooltipTypes.INFO,
-            message: "IUs that participated in multiple MDAs are not double-counted"
-          }],
+          tooltips: [
+            {
+              type: tooltipTypes.INFO,
+              message:
+                "IUs that participated in multiple MDAs are not double-counted here",
+            },
+          ],
         },
       ],
     },
@@ -286,10 +291,13 @@
         {
           customLogic: (cells, idx) =>
             uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
-          tooltips: [{
-            type: tooltipTypes.INFO,
-            message: "IUs that participated in multiple MDAs are not double-counted"
-          }]
+          tooltips: [
+            {
+              type: tooltipTypes.INFO,
+              message:
+                "IUs that participated in multiple MDAs are not double-counted here",
+            },
+          ],
         },
       ],
     },
@@ -577,10 +585,13 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
-          tooltips: [{
-            type: tooltipTypes.INFO,
-            message: "IUs that participated in multiple MDAs are not double-counted"
-          }],
+          tooltips: [
+            {
+              type: tooltipTypes.INFO,
+              message:
+                "IUs that participated in multiple MDAs are not double-counted here",
+            },
+          ],
         },
       ],
     },
@@ -880,10 +891,13 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
-          tooltips: [{
-            type: tooltipTypes.INFO,
-            message: "IUs that participated in multiple MDAs are not double-counted"
-          }]
+          tooltips: [
+            {
+              type: tooltipTypes.INFO,
+              message:
+                "IUs that participated in multiple MDAs are not double-counted here",
+            },
+          ],
         },
       ],
     },
@@ -967,10 +981,13 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
-          tooltips: [{
-            type: tooltipTypes.INFO,
-            message: "IUs that participated in multiple MDAs are not double-counted"
-          }],
+          tooltips: [
+            {
+              type: tooltipTypes.INFO,
+              message:
+                "IUs that participated in multiple MDAs are not double-counted here",
+            },
+          ],
         },
       ],
     },
@@ -1027,10 +1044,13 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
-          tooltips: [{
-            type: tooltipTypes.INFO,
-            message: "IUs that participated in multiple MDAs are not double-counted"
-          }],
+          tooltips: [
+            {
+              type: tooltipTypes.INFO,
+              message:
+                "IUs that participated in multiple MDAs are not double-counted here",
+            },
+          ],
         },
       ],
     },
@@ -1097,8 +1117,13 @@
   ];
   // End row & cell definitions
 
-  // Defining initial values for state
-  // (Ideally, these would be set by the reports app parameters)
+  /**
+   *
+   * App state
+   *
+   */
+
+  // (Ideally, initial values would be set by the reports app parameters)
   // Initial period should get overwritten by `setUpPeriodSelect()`;
   const initialPeriod =
     "2020;2019;2018;2017;2016;2015;2014;2013;2012;2011;2010";
@@ -1106,15 +1131,14 @@
     ? dhis2.report.organisationUnit.id
     : "GdH306UQ8L8"; // This is the global org-unit
 
-  // App state:
-  // TODO: (maybe `rows` should go in here?)
   let state = {
     period: initialPeriod,
     orgUnit: initialOrgUnit,
+    // Dim. IDs, found by dimension-name lookup:
     dimensionsToQuery: [],
+    // Warnings and errors to be displayed in tooltips:
+    alerts: new Map(),
   };
-
-  /* Functions */
 
   /**
    *
@@ -1166,6 +1190,7 @@
           uniqueOrgUnits.set(orgUnitId, value);
         });
 
+        // Sum response values of unique IUs
         let sumOfValues = 0;
         uniqueOrgUnits.forEach((value) => {
           if (isNaN(value)) return;
@@ -1199,11 +1224,21 @@
 
       const dimensionMap = new Map();
       allDimensions.forEach((dimension) => {
-        if (dimensionMap.get(dimension.displayName))
-          console.log(
+        // Check for duplicated dimensions
+        const dimensionWithSameName = dimensionMap.get(dimension.displayName);
+        if (dimensionWithSameName) {
+          const alert = {
+            tooltipType: tooltipTypes.WARNING,
+            message: `Duplicate dimension name found: '${dimension.displayName}'. You may not get the data you're looking for if this cell is queried by name.`,
+          }
+          state.alerts.set(dimension.id, alert);
+          state.alerts.set(dimensionWithSameName.id, alert);
+
+          console.warn(
             "Duplicate dimension name found: ",
             dimension.displayName
           );
+        }
 
         // As of right now, overwrite to give last-queried group precedence
         dimensionMap.set(dimension.displayName, dimension.id);
@@ -1239,7 +1274,7 @@
           cell.tooltips.push({
             type: tooltipTypes.ERROR,
             message: `Dimension not found: ${dimensionName}`,
-          })
+          });
           return;
         }
 
@@ -1272,7 +1307,7 @@
         // There was an error with the monolothic query. Fall back to individual queries
 
         // Log error and notify user
-        console.error(
+        console.warn(
           "There was an error with the monolithic query. Falling back to individual queries.",
           err
         );
@@ -1280,8 +1315,8 @@
         if (!errMsgExists) {
           $("#loading").prepend(`
             <div id="errMsg">
-              <p>Oops! There was a hiccup with the database.  This will take a bit longer than usual.</p>
-              <p>Check the console for error info.</p>
+              <p>Oops!  There was an error with the database query.  This report will fall back to a less efficient method to identify the error, which will take a bit longer to load than usual.</p>
+              <p class="text-warning"><i class="fa fa-exclamation-triangle"></i> Warning: Please be aware that refreshing the table multiple times while the error exists can crash the server, due to a large volume of network requests.</p>
             </div>
           `);
         }
@@ -1293,7 +1328,7 @@
 
   function getAnalyticsDataIndividually() {
     // Query each cell individually to sort out errors
-    // (This is much slower and should only be used if there is a db error)
+    // (This is much slower and should only be used if there is a db error in the monolothic query)
     const { dimensionsToQuery, period, orgUnit } = state;
 
     return Promise.all(
@@ -1316,11 +1351,13 @@
               err
             );
             const { status, statusText, responseJSON } = err;
-            const errorMessage = `Err ${status}: ${
+            const errorMessage = `Query error, status ${status}: ${
               responseJSON ? responseJSON.message : statusText
             }`;
-
-            return [dimensionId, errorMessage];
+            state.alerts.set(dimensionId, {
+              tooltipType: tooltipTypes.ERROR,
+              message: errorMessage,
+            });
           }
         );
       })
@@ -1345,18 +1382,25 @@
               if (!cell) return;
               const { dId: dimensionId, customLogic } = cell;
 
+              // Handle cell defined by dimension ID
               if (dimensionId) {
                 const data = analyticsResults.get(dimensionId);
-                if (/^Err/.test(data)) {
-                  // There is an error. Add a tooltip
+
+                // Check for relevant alerts and add appropriate tooltips
+                const alert = state.alerts.get(dimensionId);
+                if (alert) {
                   if (!cell.tooltips) cell.tooltips = [];
-                  cell.tooltips.push({ type: tooltipTypes.ERROR, message: data });
-                  return;
+                  cell.tooltips.push({
+                    type: alert.tooltipType,
+                    message: alert.message,
+                  })
                 }
-                cell.value = data || "-";
+
+                cell.value = data ?? "-";
                 return;
               }
 
+              // Handle cell defined by custom logic
               if (customLogic) {
                 cell.value = await customLogic(arr, idx);
                 return;
