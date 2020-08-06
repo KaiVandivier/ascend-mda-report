@@ -626,7 +626,10 @@
       name: "MDA treatments distributed to high risk populations",
       type: rowTypes.DATA,
       cells: [
-        null,
+        {
+          dn:
+            "TCMDA - People from marginalized groups (LNOB) receiving NTD MDA treatment",
+        },
         {
           dn: "LFMDA - MDA treatments distributed to high risk populations",
         },
@@ -640,7 +643,7 @@
         },
         {
           dn:
-            "OMDA - Total MDA treatments distributed to high risk populations",
+            "OMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment",
         },
         {
           dn:
@@ -652,7 +655,7 @@
         },
         {
           dn:
-            "SCMDA - Total MDA treatments distributed to high risk populations",
+            "SCMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment",
         },
         {
           dn:
@@ -664,10 +667,18 @@
         },
         {
           dn:
-            "STMDA - Total MDA treatments distributed to high risk populations",
+            "STMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment",
         },
         {
-          dn: "MDA - Total MDA treatments distributed to high risk populations",
+          customLogic: (cells, idx) =>
+            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          tooltips: [
+            {
+              type: tooltipTypes.INFO,
+              message:
+                "IUs that participated in multiple MDAs are not double-counted here",
+            },
+          ],
         },
       ],
     },
@@ -1135,9 +1146,15 @@
             "STMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment",
         },
         {
-          // Notice: "receiving" vs "who received"
-          dn:
-            "MDA - Total people from marginalized groups (LNOB) who received NTD MDA treatment",
+          customLogic: (cells, idx) =>
+            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          tooltips: [
+            {
+              type: tooltipTypes.INFO,
+              message:
+                "IUs that participated in multiple MDAs are not double-counted here",
+            },
+          ],
         },
       ],
     },
