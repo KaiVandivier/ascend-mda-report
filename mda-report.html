@@ -242,7 +242,17 @@
         null,
         null,
         null,
-        null,
+        {
+          customLogic: (cells, idx) =>
+            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          tooltips: [
+            {
+              type: tooltipTypes.INFO,
+              message:
+                "IUs that participated in multiple MDAs are not double-counted here",
+            },
+          ],
+        },
       ],
     },
     {
@@ -355,7 +365,17 @@
         null,
         null,
         { dn: "STMDA - Total Population of IUs" },
-        { dn: "MDA - Total Population in Endemic IUs" },
+        {
+          customLogic: (cells, idx) =>
+            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          tooltips: [
+            {
+              type: tooltipTypes.INFO,
+              message:
+                "IUs that participated in multiple MDAs are not double-counted here",
+            },
+          ],
+        },
       ],
     },
     {
@@ -391,7 +411,15 @@
           dn: "STMDA - Population eligible for MDA treatment Total",
         },
         {
-          dn: "MDA - Total Population eligible for MDA treatment of IU",
+          customLogic: (cells, idx) =>
+            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          tooltips: [
+            {
+              type: tooltipTypes.INFO,
+              message:
+                "IUs that participated in multiple MDAs are not double-counted here",
+            },
+          ],
         },
       ],
     },
@@ -444,8 +472,15 @@
             "STMDA - Total Estimated size of populations with high risk of infection",
         },
         {
-          dn:
-            "MDA - Total Estimated size of populations with high risk of infection",
+          customLogic: (cells, idx) =>
+            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          tooltips: [
+            {
+              type: tooltipTypes.INFO,
+              message:
+                "IUs that participated in multiple MDAs are not double-counted here",
+            },
+          ],
         },
       ],
     },
@@ -583,8 +618,8 @@
         { dn: "STMDA - IUs where MDA treatment has been provided Round 2" },
         null,
         {
-          customLogic: (cells) =>
-            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          customLogic: (cells, idx) =>
+            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
           tooltips: [
             {
               type: tooltipTypes.INFO,
@@ -1230,7 +1265,7 @@
           const alert = {
             tooltipType: tooltipTypes.WARNING,
             message: `Duplicate dimension name found: '${dimension.displayName}'. You may not get the data you're looking for if this cell is queried by name.`,
-          }
+          };
           state.alerts.set(dimension.id, alert);
           state.alerts.set(dimensionWithSameName.id, alert);
 
@@ -1393,7 +1428,7 @@
                   cell.tooltips.push({
                     type: alert.tooltipType,
                     message: alert.message,
-                  })
+                  });
                 }
 
                 cell.value = data ?? "-";
