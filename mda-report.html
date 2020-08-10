@@ -1719,48 +1719,77 @@
 
     const checkboxes = $("#periodCheckboxes");
     checkboxes.append(`
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              value="${allYearsString}"
-              name="period"
-              id="${allYearsString}"
-              checked
-            />
-            <label class="form-check-label" for="${allYearsString}">
-              All Years
-            </label>
-          </div>
-        `);
+      <div class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          value="${allYearsString}"
+          name="period"
+          id="${allYearsString}"
+          checked
+        />
+        <label class="form-check-label" for="${allYearsString}">
+          All Years
+        </label>
+      </div>
+    `);
 
     allYears.forEach((year) => {
       checkboxes.append(`
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              value="${year}"
-              name="period"
-              id="${year}"
-            />
-            <label class="form-check-label" for="${year}">
-              ${year}
-            </label>
-          </div>
-          `);
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            value="${year}"
+            name="period"
+            id="${year}"
+          />
+          <label class="form-check-label" for="${year}">
+            ${year}
+          </label>
+        </div>
+      `);
     });
   }
 
-  // function setUpOrgUnitCheckboxes(maxOrgUnitLevel) {
-  //   ....
-  // }
+  function setUpOrgUnitCheckboxes(maxLevel) {
+    $.get("../api/organisationUnits.json", { maxLevel, paging: false })
+      .then(({ organisationUnits: orgUnits }) => {
+        if (!orgUnits) return;
+
+        // const orgUnitSelect = $("#orgUnitSelect");
+        const orgUnitCheckboxes = $("#orgUnitCheckboxes");
+        const allOrgUnits = new Map();
+        orgUnits.forEach(({ id, displayName }) => {
+          allOrgUnits.set(id, displayName);
+          // orgUnitSelect.append(`<option value="${id}">${displayName}</option>`);
+          orgUnitCheckboxes.append(`
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                value="${id}"
+                name="orgUnit"
+                id="${id}"
+              />
+              <label class="form-check-label" for="${id}">
+                ${displayName}
+              </label>
+            </div>
+          `);
+        });
+
+        state = { ...state, allOrgUnits };
+      })
+      .catch(console.error);
+  }
 
   function handleFormSubmit(e) {
     e.preventDefault();
 
     // Parse out input values
-    const checkboxes = [...e.target.elements].filter(
+    const eles = document.querySelector("#filterForm").elements;
+    const checkboxes = [...eles].filter(
       (ele) => ele.type === "checkbox"
     );
 
@@ -1777,19 +1806,27 @@
     const periodPrettyString = periodCheckboxValues.join(", ");
     const orgUnitFilterString = orgUnitCheckboxValues.join(";");
     const orgUnitPrettyString = orgUnitCheckboxValues.join(", ");
+    console.table({
+      periodFilterString,
+      periodPrettyString,
+      orgUnitFilterString,
+      orgUnitPrettyString
+    });
 
     // Update state
     // Load table
     // Trigger loading state
     // Query analytics, etc
     // Update period/org unit in DOM
+    // Close dropdown
   }
 
-  function setUpForm({ startingYear, maxOrgUnitLevel }) {
+  function setUpCheckboxForm({ startingYear, maxOrgUnitLevel }) {
     setUpPeriodCheckboxes(startingYear);
-    // setUpOrgUnitCheckboxes(maxOrgUnitLevel);
+    setUpOrgUnitCheckboxes(maxOrgUnitLevel);
 
-    $("form#filterForm").on("submit", handleFormSubmit);
+    // Use button because forms cannot submit in sandboxed iframes
+    $("#updateTable").on("click", handleFormSubmit);
   }
 
   /**
@@ -1800,7 +1837,7 @@
   jQuery(document).ready(function () {
     // Javascript to be executed after page is loaded here
 
-    setUpForm({ startingYear: 2010, maxOrgUnitLevel: 2 });
+    setUpCheckboxForm({ startingYear: 2010, maxOrgUnitLevel: 2 });
 
     setUpPeriodSelect(2010); // Change starting year here
     setUpOrgUnitSelect(2); // Change max org unit level here
@@ -1838,7 +1875,7 @@
     </select>
   </div>
 
-  <div class="dropdown">
+  <div class="dropright">
     <button
       class="btn btn-secondary dropdown-toggle"
       type="button"
@@ -1877,7 +1914,7 @@
 
         <div class="row">
           <div class="col d-flex justify-content-center">
-            <button class="btn btn-primary" type="submit">
+            <button id="updateTable" class="btn btn-primary" type="submit">
               Update Table
             </button>
           </div>
