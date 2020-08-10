@@ -1762,12 +1762,14 @@
       .then(({ organisationUnits: orgUnits }) => {
         if (!orgUnits) return;
 
-        // const orgUnitSelect = $("#orgUnitSelect");
         const orgUnitCheckboxes = $("#orgUnitCheckboxes");
+
         const allOrgUnits = new Map();
-        orgUnits.forEach(({ id, displayName }) => {
+        orgUnits.forEach(({ id, displayName }, idx) => {
+          // Set first orgUnit to state (should be global org unit)
+          if (idx === 0) state = { ...state, orgUnit: id };
+          
           allOrgUnits.set(id, displayName);
-          // orgUnitSelect.append(`<option value="${id}">${displayName}</option>`);
           orgUnitCheckboxes.append(`
             <div class="form-check">
               <input
@@ -1776,6 +1778,7 @@
                 value="${id}"
                 name="orgUnit"
                 id="${id}"
+                ${idx === 0 ? "checked" : ""}
               />
               <label class="form-check-label" for="${id}">
                 ${displayName}
