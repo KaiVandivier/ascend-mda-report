@@ -1745,6 +1745,54 @@
     </select>
   </div>
 
+  <div class="dropdown">
+    <button
+      class="btn btn-secondary dropdown-toggle"
+      type="button"
+      id="dropdownMenuButton"
+      data-toggle="dropdown"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >
+      Select Period and Org. Unit(s)
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <form id="filterForm" class="px-4 py-3 mb-0">
+        <div class="row">
+          <div class="col">
+            <fieldset class="form-group">
+              <legend class="pt-0">Period:</legend>
+              <div id="periodCheckboxes">
+                <!-- Populated by script -->
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="col">
+            <fieldset class="form-group">
+              <legend class="pt-0">
+                Organisation Unit:
+              </legend>
+              <div id="orgUnitCheckboxes">
+                <!-- Populate by script -->
+              </div>
+            </fieldset>
+          </div>
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <div class="row">
+          <div class="col d-flex justify-content-center">
+            <button class="btn btn-primary" type="submit">
+              Update Table
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <p>
     <em
       >A cell showing "-" means that no value exists in the database for that
