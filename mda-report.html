@@ -1768,7 +1768,7 @@
         orgUnits.forEach(({ id, displayName }, idx) => {
           // Set first orgUnit to state (should be global org unit)
           if (idx === 0) state = { ...state, orgUnit: id };
-          
+
           allOrgUnits.set(id, displayName);
           orgUnitCheckboxes.append(`
             <div class="form-check">
@@ -1808,11 +1808,26 @@
       .filter((checkbox) => checkbox.checked)
       .map((checkbox) => checkbox.value);
 
+    // Check for valid query parameters
+    $("#filterForm .alert").remove();
+    if (!periodCheckboxValues.length || !orgUnitCheckboxValues.length) {
+      $("#filterForm").prepend(`
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          At least one of each parameter below must be selected.
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      `);
+      return;
+    }
+    
+    // Format filter parameters
     const periodFilterString = periodCheckboxValues.join(";");
     const periodPrettyString = periodCheckboxValues.join(", ");
     const orgUnitFilterString = orgUnitCheckboxValues.join(";");
     const orgUnitPrettyString = orgUnitCheckboxValues.join(", ");
-    console.table({
+    console.table({ // TODO: Remove after testing
       periodFilterString,
       periodPrettyString,
       orgUnitFilterString,
@@ -1863,8 +1878,8 @@
 
     setUpCheckboxForm({ startingYear: 2010, maxOrgUnitLevel: 2 });
 
-    setUpPeriodSelect(2010); // Change starting year here
-    setUpOrgUnitSelect(2); // Change max org unit level here
+    // setUpPeriodSelect(2010); // Change starting year here
+    // setUpOrgUnitSelect(2); // Change max org unit level here
     populateHtmlTableHeader();
     getAllDimensions()
       .then(populateCellDimensionIds)
@@ -1878,72 +1893,73 @@
 
 <div class="p-1">
   <!-- HTML Markup to make up report -->
-  <div class="d-flex pr-2 align-items-center justify-content-between">
-    <h1>MDA Treatment Summary</h1>
-    <button class="btn btn-primary" onclick="exportToCSV()">
-      Download CSV
-    </button>
-  </div>
+  <h1>MDA Treatment Summary</h1>
 
-  <div class="form-group">
+  <!-- <div class="form-group">
     <label for="periodSelect">Period:</label>
     <select name="period" id="periodSelect" class="form-control">
-      <!-- This will be populated by `setUpPeriodSelect()` -->
+      This will be populated by `setUpPeriodSelect()`
     </select>
   </div>
 
   <div class="form-group">
     <label for="orgUnitSelect">Organisation Unit:</label>
     <select name="orgUnit" id="orgUnitSelect" class="form-control">
-      <!-- This will be populated by `setUpOrgUnitSelect()` -->
+      This will be populated by `setUpOrgUnitSelect()`
     </select>
-  </div>
+  </div> -->
 
-  <div class="dropdown dropright">
-    <button
-      class="btn btn-secondary dropdown-toggle"
-      type="button"
-      id="dropdownMenuButton"
-      data-toggle="dropdown"
-      aria-haspopup="true"
-      aria-expanded="false"
-    >
-      Select Period and Org. Unit(s)
-    </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-      <form id="filterForm" class="px-4 py-3 mb-0">
-        <div class="row">
-          <div class="col">
-            <fieldset class="form-group">
-              <legend class="pt-0">Period:</legend>
-              <div id="periodCheckboxes">
-                <!-- Populated by script -->
-              </div>
-            </fieldset>
+  <div class="mb-3">
+    <div class="d-inline-block dropdown dropright">
+      <button
+        class="btn btn-primary dropdown-toggle"
+        type="button"
+        id="dropdownMenuButton"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        Filter Period and Org. Unit(s)
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <form id="filterForm" class="px-4 py-3 mb-0" style="min-width: 30rem;">
+          <div class="row">
+            <div class="col">
+              <fieldset class="form-group">
+                <legend class="pt-0">Period:</legend>
+                <div id="periodCheckboxes">
+                  <!-- Populated by script -->
+                </div>
+              </fieldset>
+            </div>
+
+            <div class="col-7">
+              <fieldset class="form-group">
+                <legend class="pt-0">
+                  Organisation Unit:
+                </legend>
+                <div id="orgUnitCheckboxes">
+                  <!-- Populate by script -->
+                </div>
+              </fieldset>
+            </div>
           </div>
 
-          <div class="col">
-            <fieldset class="form-group">
-              <legend class="pt-0">
-                Organisation Unit:
-              </legend>
-              <div id="orgUnitCheckboxes">
-                <!-- Populate by script -->
-              </div>
-            </fieldset>
-          </div>
-        </div>
+          <div class="dropdown-divider"></div>
 
-        <div class="dropdown-divider"></div>
-
-        <div class="row">
-          <div class="col d-flex justify-content-center">
-            <button id="updateTable" class="btn btn-primary" type="submit">
-              Update Table
-            </button>
+          <div class="row">
+            <div class="col d-flex justify-content-center">
+              <button id="updateTable" class="btn btn-primary" type="submit">
+                Update Table
+              </button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <btn class="btn btn-primary" onclick="exportToCSV()">Download CSV</btn>
     </div>
   </div>
 
