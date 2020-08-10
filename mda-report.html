@@ -1703,11 +1703,104 @@
 
   /**
    *
+   * Period & Org Unit selection
+   *
+   */
+  function setUpPeriodCheckboxes(startingYear) {
+    // Populate period checkboxes, including "all years"
+    const currentYear = new Date().getFullYear();
+
+    const allYears = [];
+    for (let year = currentYear; year >= startingYear; year--) {
+      allYears.push(year);
+    }
+    const allYearsString = allYears.join(";");
+    state = { ...state, period: allYearsString, allYears: allYearsString };
+
+    const checkboxes = $("#periodCheckboxes");
+    checkboxes.append(`
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              value="${allYearsString}"
+              name="period"
+              id="${allYearsString}"
+              checked
+            />
+            <label class="form-check-label" for="${allYearsString}">
+              All Years
+            </label>
+          </div>
+        `);
+
+    allYears.forEach((year) => {
+      checkboxes.append(`
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              value="${year}"
+              name="period"
+              id="${year}"
+            />
+            <label class="form-check-label" for="${year}">
+              ${year}
+            </label>
+          </div>
+          `);
+    });
+  }
+
+  // function setUpOrgUnitCheckboxes(maxOrgUnitLevel) {
+  //   ....
+  // }
+
+  function handleFormSubmit(e) {
+    e.preventDefault();
+
+    // Parse out input values
+    const checkboxes = [...e.target.elements].filter(
+      (ele) => ele.type === "checkbox"
+    );
+
+    const periodCheckboxValues = checkboxes
+      .filter((checkbox) => checkbox.name === "period")
+      .filter((checkbox) => checkbox.checked)
+      .map((checkbox) => checkbox.value);
+    const orgUnitCheckboxValues = checkboxes
+      .filter((checkbox) => checkbox.name === "orgUnit")
+      .filter((checkbox) => checkbox.checked)
+      .map((checkbox) => checkbox.value);
+
+    const periodFilterString = periodCheckboxValues.join(";");
+    const periodPrettyString = periodCheckboxValues.join(", ");
+    const orgUnitFilterString = orgUnitCheckboxValues.join(";");
+    const orgUnitPrettyString = orgUnitCheckboxValues.join(", ");
+
+    // Update state
+    // Load table
+    // Trigger loading state
+    // Query analytics, etc
+    // Update period/org unit in DOM
+  }
+
+  function setUpForm({ startingYear, maxOrgUnitLevel }) {
+    setUpPeriodCheckboxes(startingYear);
+    // setUpOrgUnitCheckboxes(maxOrgUnitLevel);
+
+    $("form#filterForm").on("submit", handleFormSubmit);
+  }
+
+  /**
+   *
    * Page-load execution
    *
    */
   jQuery(document).ready(function () {
     // Javascript to be executed after page is loaded here
+
+    setUpForm({ startingYear: 2010, maxOrgUnitLevel: 2 });
 
     setUpPeriodSelect(2010); // Change starting year here
     setUpOrgUnitSelect(2); // Change max org unit level here
