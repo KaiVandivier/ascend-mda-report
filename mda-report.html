@@ -1572,67 +1572,6 @@
 
   /**
    *
-   * Other page DOM functions
-   *
-   */
-  function handleChange(e) {
-    // On form change, update state with new "period" or "orgUnit", and query data
-    state = { ...state, [e.target.name]: e.target.value };
-
-    // Prepare for reload & show loading
-    $("#tbody").empty();
-    $("#loading").show();
-
-    // Query new data and populate table
-    getAnalyticsData()
-      .then(populateCellValues)
-      .then(populateHtmlTableBodyWithValues);
-  }
-
-  function setUpForm() {
-    $("#periodSelect").on("change", handleChange);
-    $("#orgUnitSelect").on("change", handleChange);
-  }
-
-  function setUpPeriodSelect(startingYear) {
-    // Populate period select with options, including "total across all years"
-    const periodSelect = $("#periodSelect");
-    const currentYear = new Date().getFullYear();
-
-    const allYears = [];
-    for (let year = currentYear; year >= startingYear; year--) {
-      allYears.push(year);
-    }
-    const allYearsString = allYears.join(";");
-    state = { ...state, period: allYearsString, allYears: allYearsString };
-
-    periodSelect.append(
-      `<option value="${allYearsString}">Total Across All Years</option>`
-    );
-    allYears.forEach((year) => {
-      periodSelect.append(`<option value="${year}">${year}</option>`);
-    });
-  }
-
-  function setUpOrgUnitSelect(maxLevel) {
-    $.get("../api/organisationUnits.json", { maxLevel, paging: false })
-      .then(({ organisationUnits: orgUnits }) => {
-        if (!orgUnits) return;
-
-        const orgUnitSelect = $("#orgUnitSelect");
-        const allOrgUnits = new Map();
-        orgUnits.forEach(({ id, displayName }) => {
-          allOrgUnits.set(id, displayName);
-          orgUnitSelect.append(`<option value="${id}">${displayName}</option>`);
-        });
-
-        state = { ...state, allOrgUnits };
-      })
-      .catch(console.error);
-  }
-
-  /**
-   *
    * CSV Export
    *
    */
@@ -1877,9 +1816,6 @@
     // Javascript to be executed after page is loaded here
 
     setUpCheckboxForm({ startingYear: 2010, maxOrgUnitLevel: 2 });
-
-    // setUpPeriodSelect(2010); // Change starting year here
-    // setUpOrgUnitSelect(2); // Change max org unit level here
     populateHtmlTableHeader();
     getAllDimensions()
       .then(populateCellDimensionIds)
@@ -1894,20 +1830,6 @@
 <div class="p-1">
   <!-- HTML Markup to make up report -->
   <h1>MDA Treatment Summary</h1>
-
-  <!-- <div class="form-group">
-    <label for="periodSelect">Period:</label>
-    <select name="period" id="periodSelect" class="form-control">
-      This will be populated by `setUpPeriodSelect()`
-    </select>
-  </div>
-
-  <div class="form-group">
-    <label for="orgUnitSelect">Organisation Unit:</label>
-    <select name="orgUnit" id="orgUnitSelect" class="form-control">
-      This will be populated by `setUpOrgUnitSelect()`
-    </select>
-  </div> -->
 
   <div class="mb-3">
     <div class="d-inline-block dropdown dropright">
