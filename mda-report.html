@@ -32,6 +32,11 @@
 <style type="text/css" media="screen">
   /* Put your CSS styling here */
 
+  /* Vars */
+  :root {
+    --colShade: rgba(0,0,0,0.02);
+  }
+
   /* Button styles */
   .btn.disabled,
   .btn:disabled {
@@ -44,23 +49,9 @@
     border-spacing: 0;
   }
 
-  td,
-  th {
-    background: white;
-  }
-
-  /* Stripe columns: headers */
-  thead th:nth-child(even) {
-    background: #fafafa;
-  }
-
-  /* Stripe columns 2, 4-6, 10-12. (simply `even` for top header row) */
-  /* THIS IS HARD-CODED AND NEEDS CHANGING IF COLUMNS CHANGE */
-  tbody tr *:nth-child(2),
-  tbody tr *:nth-child(n + 4):nth-child(-n + 6),
-  tbody tr *:nth-child(n + 10):nth-child(-n + 12) {
-    background-color: #fafafa;
-  }
+  /* Table header color & stripe */
+  thead th { background: white; }
+  thead th:nth-child(even) { background: #f7f7f7; }
 
   /* Table header styles */
   #header-row > th {
@@ -78,10 +69,28 @@
     height: calc(0.9rem * 1.5);
   }
 
+  /**
+   * Table body color & stripe:
+   * Stripe columns 2, 4-6, 10-12
+   * THIS IS HARD-CODED AND NEEDS CHANGING IF COLUMNS CHANGE
+   */
+  tbody tr *:nth-child(2),
+  tbody tr *:nth-child(n + 4):nth-child(-n + 6),
+  tbody tr *:nth-child(n + 10):nth-child(-n + 12) {
+    background-color: var(--colShade);
+  }
+
   /* Row headers that are not category labels: normal font-weight */
   th[scope="row"]:not([colspan]) {
     font-weight: normal;
   }
+
+  /* Colors (used for rows) */
+  .pink { background: #fff5f577; }
+  .yellow { background: #ffffe077; }
+  .green { background: #f7ffee77; }
+  .blue { background: #f0f8ff77; }
+  .lilac { background: #f4ebff77; }
 </style>
 
 <script type="text/javascript">
@@ -155,6 +164,7 @@
     {
       name: "Endemic IUs",
       type: rowTypes.DATA,
+      color: "pink",
       cells: [
         { dn: "TCMDA - Endemic IUs" },
         { dn: "LFMDA - Endemic IUs" },
@@ -173,6 +183,7 @@
     {
       name: "IUs which reached the criteria to stop MDA",
       type: rowTypes.DATA,
+      color: "pink",
       cells: [
         {
           dn: "TCMDA - IUs which reached the criteria to stop MDA",
@@ -201,6 +212,7 @@
     {
       name: "IUs in post-treatment surveillance",
       type: rowTypes.DATA,
+      color: "pink",
       cells: [
         { dn: "TCMDA - IUs in post-treatment surveillance" },
         { dn: "LFMDA - IUs in post-treatment surveillance" },
@@ -229,6 +241,7 @@
     {
       name: "IUs eligible for post MDA surveillance phase",
       type: rowTypes.DATA,
+      color: "pink",
       cells: [
         {
           dn: "TCMDA - IUs eligible for post MDA surveillance phase",
@@ -261,6 +274,7 @@
     {
       name: "IUs where NTD endemicity is unknown",
       type: rowTypes.DATA,
+      color: "pink",
       cells: [
         { dn: "TCMDA - IUs where NTD endemicity is unknown" },
         { dn: "LFMDA - IUs where NTD endemicity is unknown" },
@@ -289,6 +303,7 @@
     {
       name: "Population in NTD affected IUs",
       type: rowTypes.DATA,
+      color: "pink",
       cells: [
         { dn: "TCMDA - Population in NTD affected IUs" },
         { dn: "LFMDA - Population in NTD affected IUs" },
@@ -317,6 +332,7 @@
     {
       name: "IUs eligible for pre-TAS surveys",
       type: rowTypes.DATA,
+      color: "pink",
       cells: [
         null,
         { dn: "LFMDA - IUs eligible for pre-TAS surveys" },
@@ -335,6 +351,7 @@
     {
       name: "IUs eligible for TAS/IA surveys",
       type: rowTypes.DATA,
+      color: "pink",
       cells: [
         { dn: "TCMDA - IUs eligible for TAS/IA surveys" },
         { dn: "LFMDA - IUs eligible for TAS/IA surveys" },
@@ -356,6 +373,7 @@
     {
       name: "Total Population of IUs",
       type: rowTypes.DATA,
+      color: "yellow",
       cells: [
         { dn: "TCMDA - Total Population of IUs" },
         { dn: "LFMDA - Total Population of IUs" },
@@ -384,6 +402,7 @@
     {
       name: "Population eligible for MDA treatment",
       type: rowTypes.DATA,
+      color: "yellow",
       cells: [
         { dn: "TCMDA - Population eligible for MDA treatment" },
         { dn: "LFMDA - Population eligible for MDA treatment" },
@@ -429,6 +448,7 @@
     {
       name: "Estimated size of populations with high risk of infection",
       type: rowTypes.DATA,
+      color: "yellow",
       cells: [
         {
           dn:
@@ -493,6 +513,7 @@
     {
       name: "Geographic Coverage",
       type: rowTypes.DATA,
+      color: "green",
       cells: [
         { dn: "TCMDA - Geographic Coverage" },
         { dn: "LFMDA - Geographic Coverage" },
@@ -511,6 +532,7 @@
     {
       name: "Program Coverage",
       type: rowTypes.DATA,
+      color: "green",
       cells: [
         { dn: "TCMDA - Program Coverage" },
         { dn: "LFMDA - Program Coverage" },
@@ -529,6 +551,7 @@
     {
       name: "Epidemiological Coverage",
       type: rowTypes.DATA,
+      color: "green",
       cells: [
         { dn: "TCMDA - Epidemiological Coverage" },
         { dn: "LFMDA - Epidemiological Coverage" },
@@ -547,6 +570,7 @@
     {
       name: "IUs reaching targeted program coverage",
       type: rowTypes.DATA,
+      color: "green",
       cells: [
         { dn: "TCMDA - IUs reaching targeted program coverage" },
         { dn: "LFMDA - IUs reaching targeted program coverage" },
@@ -566,6 +590,7 @@
       name:
         "IUs reaching target therapeutic coverage within populations with high risk of infection",
       type: rowTypes.DATA,
+      color: "green",
       cells: [
         {
           dn:
@@ -608,6 +633,7 @@
     {
       name: "IUs where MDA treatment has been provided",
       type: rowTypes.DATA,
+      color: "green",
       cells: [
         { dn: "TCMDA - IUs where MDA treatment has been provided" },
         { dn: "LFMDA - IUs where MDA treatment has been provided" },
@@ -636,6 +662,7 @@
     {
       name: "MDA treatments distributed to high risk populations",
       type: rowTypes.DATA,
+      color: "green",
       cells: [
         {
           dn:
@@ -696,6 +723,7 @@
     {
       name: "Number of PC treatments provided per IU",
       type: rowTypes.DATA,
+      color: "green",
       cells: [
         { dn: "TCMDA - Total Persons Treated" },
         { dn: "LFMDA - Total Persons Treated" },
@@ -714,6 +742,7 @@
     {
       name: "IUs where MDA campaigns were conducted",
       type: rowTypes.DATA,
+      color: "green",
       cells: [
         { dn: "TCMDA - IUs where MDA campaigns were conducted" },
         { dn: "LFMDA - IUs where MDA campaigns were conducted" },
@@ -732,6 +761,7 @@
     {
       name: "IUs reaching required therapeutic coverage",
       type: rowTypes.DATA,
+      color: "green",
       cells: [
         { dn: "TCMDA - IUs reaching required therapeutic coverage" },
         { dn: "LFMDA - IUs reaching required therapeutic coverage" },
@@ -751,6 +781,7 @@
       name:
         "People, in population eligible for treatment, receiving MDA treatment",
       type: rowTypes.DATA,
+      color: "green",
       cells: [
         { dn: "TCMDA - Total Persons Treated" },
         { dn: "LFMDA - Total Persons Treated" },
@@ -780,6 +811,7 @@
       name:
         "Number of People, in population eligible for treatment, not receiving MDA treatment",
       type: rowTypes.DATA,
+      color: "green",
       cells: [
         {
           dn:
@@ -837,6 +869,7 @@
     {
       name: "IU supported with NTD MDA treatment planning and coordination",
       type: rowTypes.DATA,
+      color: "green",
       cells: [
         {
           dn:
@@ -892,6 +925,7 @@
       name:
         "IUs where MDA treatment coverage was verified and addressed using SCT",
       type: rowTypes.DATA,
+      color: "blue",
       cells: [
         {
           dn:
@@ -953,6 +987,7 @@
     {
       name: "IUs not meeting the cut-off value for SCT",
       type: rowTypes.DATA,
+      color: "blue",
       cells: [
         { dn: "TCMDA - IUs not meeting the cut-off value for SCT" },
         { dn: "LFMDA - IUs not meeting the cut-off value for SCT" },
@@ -982,6 +1017,7 @@
         "Number of evaluation areas where mop-up activites were conducted following a SCT",
       dnBase: "",
       type: rowTypes.DATA,
+      color: "blue",
       cells: [
         {
           dn:
@@ -1045,6 +1081,7 @@
         "Number of IUs for which independent representative coverage surveys according to WHO guidelines were completed",
       dnBase: "",
       type: rowTypes.DATA,
+      color: "blue",
       cells: [
         {
           dn:
@@ -1109,8 +1146,8 @@
     {
       name:
         "Number of people from marginilized groups (LNOB) who received NTD MDA treatment",
-      dnBase: "",
       type: rowTypes.DATA,
+      color: "lilac",
       cells: [
         {
           dn:
@@ -1522,7 +1559,11 @@
     rows.forEach((row) => {
       // Make new row element
       const newRow = $(
-        `<tr data-name="${row.name}" data-type="${row.type}"></tr>`
+        `<tr
+          data-name="${row.name}"
+          data-type="${row.type}"
+          ${row.color ? `class="${row.color}"` : ""}
+        ></tr>`
       );
       // Add new row to DOM
       tbody.append(newRow);
