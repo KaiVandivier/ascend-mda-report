@@ -32,6 +32,11 @@
 <style type="text/css" media="screen">
   /* Put your CSS styling here */
 
+  /* Button styles */
+  .btn.disabled, .btn:disabled {
+    pointer-events: none;
+  }
+
   /* Table styles */
   table {
     border-collapse: separate;
@@ -1790,12 +1795,19 @@
     $("#tbody").empty();
     $("#loading").show();
     // TODO: disable CSV download
+    $("#downloadCSV").attr("disabled", true);
+    $("#downloadCSV").addClass("disabled");
+
 
     // Query new data and populate table
     return getAnalyticsData()
       .then(populateCellValues)
-      .then(populateHtmlTableBodyWithValues);
+      .then(populateHtmlTableBodyWithValues)
     // TODO: Enable CSV download
+      .then(() => {
+        $("#downloadCSV").attr("disabled", false);
+        $("#downloadCSV").removeClass("disabled");
+      })
     // TODO: update period and org unit display
   }
 
@@ -1822,7 +1834,6 @@
       .then(getAnalyticsData)
       .then(populateCellValues)
       .then(populateHtmlTableBodyWithValues)
-      .then(setUpForm)
       .catch(console.error);
   });
 </script>
@@ -1831,7 +1842,7 @@
   <!-- HTML Markup to make up report -->
   <h1>MDA Treatment Summary</h1>
 
-  <div class="mb-3">
+  <div class="mb-2">
     <div class="d-inline-block dropdown dropright">
       <button
         class="btn btn-primary dropdown-toggle"
@@ -1881,7 +1892,7 @@
     </div>
 
     <div class="btn-group">
-      <btn class="btn btn-primary" onclick="exportToCSV()">Download CSV</btn>
+      <btn id="downloadCSV" class="btn btn-primary" onclick="exportToCSV()">Download CSV</btn>
     </div>
   </div>
 
