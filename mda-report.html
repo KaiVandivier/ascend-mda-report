@@ -1598,7 +1598,7 @@
         $("#downloadCSV").removeClass("disabled");
       });
   }
-  
+
   /**
    *
    * CSV Export
@@ -1608,10 +1608,19 @@
     const csvPrefix = "data:text/csv;charset=utf-8,";
 
     // 0. Include Org unit and period
-    const { period, allYears, orgUnit, allOrgUnits } = state;
-    const csvOrgUnit = `Organisation Unit,${allOrgUnits.get(orgUnit)}\n`;
-    const csvPeriod = `Period,${
-      state.period === state.allYears ? "Total Across All Years" : state.period
+    const {
+      period,
+      allYears,
+      orgUnit,
+      allOrgUnits,
+      orgUnitPrettyString,
+      periodPrettyString,
+    } = state;
+    const csvOrgUnit = `Organisation Unit(s):,${
+      orgUnitPrettyString || allOrgUnits.get(orgUnit)
+    }\n`;
+    const csvPeriod = `Period(s):,${
+      period === allYears ? "All Years" : period
     }\n\n`;
 
     // 1. Make two header rows for column title
@@ -1792,11 +1801,18 @@
 
     // Format filter parameters
     const periodFilterString = periodCheckboxValues.join(";");
-    const periodPrettyString = periodCheckboxValues.join(", ");
+    const periodPrettyString = periodCheckboxValues
+      .map((period) => period === state.allYears ? "All Years" : period)
+      .join(", ");
     const orgUnitFilterString = orgUnitCheckboxValues.join(";");
-    const orgUnitPrettyString = orgUnitCheckboxValues.join(", ");
+    const orgUnitPrettyString = orgUnitCheckboxValues
+      .map((orgUnitId) => state.allOrgUnits.get(orgUnitId))
+      .join(", ");
+
+    // TODO: Save values as array to format later
+
+    // TODO: Remove after testing
     console.table({
-      // TODO: Remove after testing
       periodFilterString,
       periodPrettyString,
       orgUnitFilterString,
@@ -1808,6 +1824,8 @@
       ...state,
       period: periodFilterString,
       orgUnit: orgUnitFilterString,
+      periodPrettyString,
+      orgUnitPrettyString,
     };
     // Load table
     loadTableData();
