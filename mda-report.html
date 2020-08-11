@@ -33,7 +33,8 @@
   /* Put your CSS styling here */
 
   /* Button styles */
-  .btn.disabled, .btn:disabled {
+  .btn.disabled,
+  .btn:disabled {
     pointer-events: none;
   }
 
@@ -1577,6 +1578,29 @@
 
   /**
    *
+   * Load the Table, populate it with data
+   *
+   */
+  function loadTableData() {
+    // Prepare for new table data & show loading
+    $("#tbody").empty();
+    $("#loading").show();
+    $("#downloadCSV").attr("disabled", true);
+    $("#downloadCSV").addClass("disabled");
+
+    // Query new data and populate table
+    // TODO: update period and org unit display
+    return getAnalyticsData()
+      .then(populateCellValues)
+      .then(populateHtmlTableBodyWithValues)
+      .then(() => {
+        $("#downloadCSV").attr("disabled", false);
+        $("#downloadCSV").removeClass("disabled");
+      });
+  }
+  
+  /**
+   *
    * CSV Export
    *
    */
@@ -1765,13 +1789,14 @@
       `);
       return;
     }
-    
+
     // Format filter parameters
     const periodFilterString = periodCheckboxValues.join(";");
     const periodPrettyString = periodCheckboxValues.join(", ");
     const orgUnitFilterString = orgUnitCheckboxValues.join(";");
     const orgUnitPrettyString = orgUnitCheckboxValues.join(", ");
-    console.table({ // TODO: Remove after testing
+    console.table({
+      // TODO: Remove after testing
       periodFilterString,
       periodPrettyString,
       orgUnitFilterString,
@@ -1788,27 +1813,6 @@
     loadTableData();
     // Close dropdown
     $(".dropdown-toggle").dropdown("toggle");
-  }
-
-  function loadTableData() {
-    // Prepare for new table data & show loading
-    $("#tbody").empty();
-    $("#loading").show();
-    // TODO: disable CSV download
-    $("#downloadCSV").attr("disabled", true);
-    $("#downloadCSV").addClass("disabled");
-
-
-    // Query new data and populate table
-    return getAnalyticsData()
-      .then(populateCellValues)
-      .then(populateHtmlTableBodyWithValues)
-    // TODO: Enable CSV download
-      .then(() => {
-        $("#downloadCSV").attr("disabled", false);
-        $("#downloadCSV").removeClass("disabled");
-      })
-    // TODO: update period and org unit display
   }
 
   function setUpCheckboxForm({ startingYear, maxOrgUnitLevel }) {
@@ -1831,9 +1835,7 @@
     populateHtmlTableHeader();
     getAllDimensions()
       .then(populateCellDimensionIds)
-      .then(getAnalyticsData)
-      .then(populateCellValues)
-      .then(populateHtmlTableBodyWithValues)
+      .then(loadTableData)
       .catch(console.error);
   });
 </script>
@@ -1892,7 +1894,9 @@
     </div>
 
     <div class="btn-group">
-      <btn id="downloadCSV" class="btn btn-primary" onclick="exportToCSV()">Download CSV</btn>
+      <btn id="downloadCSV" class="btn btn-primary" onclick="exportToCSV()"
+        >Download CSV</btn
+      >
     </div>
   </div>
 
