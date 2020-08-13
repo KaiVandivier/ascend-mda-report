@@ -1269,7 +1269,7 @@
     // Dim. IDs, found by dimension-name lookup:
     dimensionsToQuery: [],
     // Warnings and errors to be displayed in tooltips:
-    alerts: new Map(),
+    alerts: [],
   };
 
   /**
@@ -1333,8 +1333,8 @@
         return { numUniqueIUs, sumOfValues };
       })
       .catch((err) => {
-        console.error("uniqueRespondingIUs() error:", err);
-        return "Oops! There was an error.";
+        // Format error for later handling
+        return Promise.reject({ ...err, message: "Unique IUs error"});
       });
   }
 
@@ -1360,11 +1360,12 @@
         const dimensionWithSameName = dimensionMap.get(dimension.displayName);
         if (dimensionWithSameName) {
           const alert = {
+            identifier: "dimension-name",
+            identifierValue: dimension.displayName,
             tooltipType: tooltipTypes.WARNING,
             message: `Duplicate dimension name found: '${dimension.displayName}'. You may not get the data you're looking for if this cell is queried by name.`,
           };
-          state.alerts.set(dimension.id, alert);
-          state.alerts.set(dimensionWithSameName.id, alert);
+          state.alerts.push(alert);
 
           console.warn(
             "Duplicate dimension name found: ",
@@ -1372,7 +1373,7 @@
           );
         }
 
-        // As of right now, overwrite to give last-queried group precedence
+        // As of right now, overwrite to give last-queried group precedence (i.e., indicators)
         dimensionMap.set(dimension.displayName, dimension.id);
       });
       return dimensionMap;
@@ -1486,7 +1487,9 @@
             const errorMessage = `Query error, status ${status}: ${
               responseJSON ? responseJSON.message : statusText
             }`;
-            state.alerts.set(dimensionId, {
+            state.alerts.push({
+              identifier: "dimension-id",
+              identifierValue: dimensionId,
               tooltipType: tooltipTypes.ERROR,
               message: errorMessage,
             });
@@ -1503,11 +1506,12 @@
 
   function populateCellValues(analyticsResults) {
     // Use `dimensionId` or `customLogic` to populate `value`
+    // Execute in parallel across rows
     return Promise.all(
-      rows.map(async ({ cells }) => {
+      rows.map(async ({ cells }, rowIdx) => {
         if (!cells) return; // Empty row; return
 
-        // Execute (possibly async) cell logic in series
+        // Execute (possibly async) cell logic in _series_
         return (
           cells
             .reduce((prevTask, cell, idx, arr) => {
@@ -1518,30 +1522,33 @@
                 // Handle cell defined by dimension ID
                 if (dimensionId) {
                   const data = analyticsResults.get(dimensionId);
-
-                  // TODO: Remove this in tooltips revamp
-                  // Check for relevant alerts and add appropriate tooltips
-                  const alert = state.alerts.get(dimensionId);
-                  if (alert) {
-                    if (!cell.tooltips) cell.tooltips = [];
-                    cell.tooltips.push({
-                      type: alert.tooltipType,
-                      message: alert.message,
-                    });
-                  }
-
                   cell.value = data ?? "-";
                   return;
                 }
 
                 // Handle cell defined by custom logic
                 if (customLogic) {
-                  cell.value = await customLogic(arr, idx);
+                  try {
+                    cell.value = await customLogic(arr, idx);
+                  } catch (err) {
+                    // If error in custom logic, create alert
+                    const message = `
+                      ${err.message || "Custom logic error"}: 
+                      ${err.status || ""} ${err.statusText || ""}.
+                      See console.
+                    `;
+                    state.alerts.push({
+                      identifier: "custom-logic",
+                      identifierValue: `row-${rowIdx}-idx-${idx}`,
+                      tooltipType: tooltipTypes.ERROR,
+                      message,
+                    });
+                    console.error(message, err);
+                  }
                   return;
                 }
               });
             }, Promise.resolve())
-            // TODO: An alert could go here?
             .catch(console.error.bind(console, "Cell population error: "))
         );
       })
@@ -1589,7 +1596,7 @@
     $("#loading").hide();
 
     // Set up table body
-    rows.forEach((row) => {
+    rows.forEach((row, rowIdx) => {
       // Make new row element
       const newRow = $(
         `<tr
@@ -1611,24 +1618,32 @@
 
       // Add row header with name
       newRow.append(`<th scope="row">${row.name}</th>`);
-      addCellsToNewRow(newRow, row.cells);
+      addCellsToHtmlRow(newRow, row, rowIdx);
     });
   }
 
-  function addCellsToNewRow(newRow, cells) {
+  function addCellsToHtmlRow(htmlRow, row, rowIdx) {
+    const { cells } = row;
     if (!cells || !cells.length) {
-      newRow.append(
+      htmlRow.append(
         `<td colspan="${state.totalColumns - 1}">No dimensions specified</td>`
       );
       return;
     }
 
-    cells.forEach((cell) => {
-      const newCell = $(`<td></td>`);
-      if (!cell) return newRow.append(newCell);
+    cells.forEach((cell, idx) => {
+      if (!cell) return htmlRow.append("<td></td>");
+      
+      const { dn, dId, customLogic, value } = cell;
+      const newCell = $(`
+        <td
+          ${dn ? `data-dimension-name="${dn}"` : ""}
+          ${dId ? `data-dimension-id="${dId}"` : ""}
+          ${customLogic ? `data-custom-logic="row-${rowIdx}-idx-${idx}"` : ""}
+        ></td>
+      `);
 
       // Add value and format number
-      const { value } = cell;
       if (typeof value !== "undefined") {
         const formattedValue = isNaN(value)
           ? value
@@ -1639,16 +1654,28 @@
       // Add tooltips, if defined
       if (cell.tooltips)
         cell.tooltips.forEach((tooltip) => addTooltipToCell(newCell, tooltip));
-      newRow.append(newCell);
+      htmlRow.append(newCell);
     });
   }
 
   function addTooltipToCell(htmlCell, { type, message }) {
+    // Check if cell is valid:
+    if (!htmlCell.length) return console.warn("Invalid html cell when adding tooltip");
+
     const htmlTooltip = $(
       `<i class="fa ${type.icon} ${type.color}" data-toggle="tooltip" data-title="${message}"></i>`
     );
     htmlCell.append(" ", htmlTooltip);
     htmlTooltip.tooltip();
+  }
+
+  function addAlertTooltips() {
+    state.alerts.forEach((alert) => {
+      const { identifier, identifierValue, tooltipType, message } = alert;
+      const targetCell = $(`[data-${identifier}="${identifierValue}"`);
+      if (!targetCell.length) return;
+      addTooltipToCell(targetCell, { type: tooltipType, message });
+    });
   }
 
   /**
@@ -1669,7 +1696,7 @@
       getAnalyticsData()
         .then(populateCellValues)
         .then(populateHtmlTableBodyWithValues)
-        // TODO: Add tooltips from alerts
+        .then(addAlertTooltips)
         .then(() => {
           $("#downloadCSV").attr("disabled", false);
           $("#downloadCSV").removeClass("disabled");
@@ -1888,14 +1915,6 @@
       .join(", ");
 
     // TODO: Save values as array to format later
-
-    // TODO: Remove after testing
-    console.table({
-      periodFilterString,
-      periodPrettyString,
-      orgUnitFilterString,
-      orgUnitPrettyString,
-    });
 
     // Update state
     state = {
