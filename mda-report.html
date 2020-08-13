@@ -34,9 +34,9 @@
 
   /* Vars */
   :root {
-    --colShade: rgba(0,0,0,0.02);
+    --colShade: rgba(0, 0, 0, 0.02);
     --pink: hsl(348, 100%, 97.5%);
-    --yellow: hsl(60, 100%, 97.5%); 
+    --yellow: hsl(60, 100%, 97.5%);
     --green: hsl(132, 100%, 97.5%);
     --blue: hsl(204, 100%, 97.5%);
     --lilac: hsl(276, 100%, 97.5%);
@@ -55,8 +55,12 @@
   }
 
   /* Table header color & stripe */
-  thead th { background: white; }
-  thead th:nth-child(even) { background: #f7f7f7; }
+  thead th {
+    background: white;
+  }
+  thead th:nth-child(even) {
+    background: #f7f7f7;
+  }
 
   /* Table header styles */
   #header-row > th {
@@ -91,11 +95,21 @@
   }
 
   /* Colors (used for rows) */
-  .pink { background: var(--pink); }
-  .yellow { background: var(--yellow); }
-  .green { background: var(--green); }
-  .blue { background: var(--blue); }
-  .lilac { background: var(--lilac); }
+  .pink {
+    background: var(--pink);
+  }
+  .yellow {
+    background: var(--yellow);
+  }
+  .green {
+    background: var(--green);
+  }
+  .blue {
+    background: var(--blue);
+  }
+  .lilac {
+    background: var(--lilac);
+  }
 </style>
 
 <script type="text/javascript">
@@ -117,7 +131,7 @@
     COVERAGE: "pink",
     COVERAGE_EVALUATION: "green",
     LNOB: "lilac",
-  })
+  });
   const tooltipTypes = Object.freeze({
     INFO: { name: "info", icon: "fa-info-circle", color: "text-secondary" },
     ERROR: {
@@ -1235,9 +1249,23 @@
     ? dhis2.report.organisationUnit.id
     : "GdH306UQ8L8"; // This is the global org-unit
 
+  // Number format to be used in cells
+  const numberFormat = new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: 2,
+  });
+  // Cell-width of table
+  const totalColumns =
+    1 +
+    columns.reduce(
+      (sum, column) => sum + (column.subcategories?.length || 1),
+      0
+    );
+
   let state = {
     period: initialPeriod,
     orgUnit: initialOrgUnit,
+    numberFormat,
+    totalColumns,
     // Dim. IDs, found by dimension-name lookup:
     dimensionsToQuery: [],
     // Warnings and errors to be displayed in tooltips:
@@ -1480,38 +1508,42 @@
         if (!cells) return; // Empty row; return
 
         // Execute (possibly async) cell logic in series
-        return cells
-          .reduce((prevTask, cell, idx, arr) => {
-            return prevTask.then(async () => {
-              if (!cell) return;
-              const { dId: dimensionId, customLogic } = cell;
+        return (
+          cells
+            .reduce((prevTask, cell, idx, arr) => {
+              return prevTask.then(async () => {
+                if (!cell) return;
+                const { dId: dimensionId, customLogic } = cell;
 
-              // Handle cell defined by dimension ID
-              if (dimensionId) {
-                const data = analyticsResults.get(dimensionId);
+                // Handle cell defined by dimension ID
+                if (dimensionId) {
+                  const data = analyticsResults.get(dimensionId);
 
-                // Check for relevant alerts and add appropriate tooltips
-                const alert = state.alerts.get(dimensionId);
-                if (alert) {
-                  if (!cell.tooltips) cell.tooltips = [];
-                  cell.tooltips.push({
-                    type: alert.tooltipType,
-                    message: alert.message,
-                  });
+                  // TODO: Remove this in tooltips revamp
+                  // Check for relevant alerts and add appropriate tooltips
+                  const alert = state.alerts.get(dimensionId);
+                  if (alert) {
+                    if (!cell.tooltips) cell.tooltips = [];
+                    cell.tooltips.push({
+                      type: alert.tooltipType,
+                      message: alert.message,
+                    });
+                  }
+
+                  cell.value = data ?? "-";
+                  return;
                 }
 
-                cell.value = data ?? "-";
-                return;
-              }
-
-              // Handle cell defined by custom logic
-              if (customLogic) {
-                cell.value = await customLogic(arr, idx);
-                return;
-              }
-            });
-          }, Promise.resolve())
-          .catch(console.error.bind(console, "Cell population error: "));
+                // Handle cell defined by custom logic
+                if (customLogic) {
+                  cell.value = await customLogic(arr, idx);
+                  return;
+                }
+              });
+            }, Promise.resolve())
+            // TODO: An alert could go here?
+            .catch(console.error.bind(console, "Cell population error: "))
+        );
       })
     );
   }
@@ -1555,17 +1587,6 @@
     // Clear tbody for fresh rows & remove "loading"
     const tbody = $("#tbody").empty();
     $("#loading").hide();
-    const numberFormat = new Intl.NumberFormat(undefined, {
-      maximumFractionDigits: 2,
-    });
-
-    // Set up table body to be populated
-    const totalColumns =
-      1 +
-      columns.reduce(
-        (sum, column) => sum + (column.subcategories?.length || 1),
-        0
-      );
 
     // Set up table body
     rows.forEach((row) => {
@@ -1574,7 +1595,7 @@
         `<tr
           data-name="${row.name}"
           data-type="${row.type}"
-          ${row.color ? `class="${row.color}"` : ""}
+          class="${row.color || ""}"
         ></tr>`
       );
       // Add new row to DOM
@@ -1583,50 +1604,51 @@
       if (row.type === rowTypes.CATEGORY) {
         // Row is just a category label (like "Coverage Evaluation"): make one wide cell and return
         newRow.append(
-          `<th scope="row" colspan="${totalColumns}">${row.name}</th>`
+          `<th scope="row" colspan="${state.totalColumns}">${row.name}</th>`
         );
         return;
       }
 
       // Add row header with name
       newRow.append(`<th scope="row">${row.name}</th>`);
-
-      if (!row.cells || !row.cells.length) {
-        newRow.append(
-          `<td colspan="${totalColumns - 1}">No dimensions specified</td>`
-        );
-        return;
-      }
-
-      // Fill in each cell
-      row.cells.forEach((cell) => {
-        const newCell = $(`<td></td>`);
-        if (!cell) return newRow.append(newCell);
-
-        const { value } = cell;
-        if (typeof value !== "undefined") {
-          const formattedValue = isNaN(value)
-            ? value
-            : numberFormat.format(Number(value));
-          newCell.append(formattedValue);
-        }
-
-        addTooltips(newCell, cell);
-        newRow.append(newCell);
-      });
+      addCellsToNewRow(newRow, row.cells);
     });
   }
 
-  function addTooltips(htmlCell, { tooltips }) {
-    if (!tooltips || !tooltips.length) return;
-
-    tooltips.forEach(({ type, message }) => {
-      const htmlTooltip = $(
-        `<i class="fa ${type.icon} ${type.color}" data-toggle="tooltip" data-title="${message}"></i>`
+  function addCellsToNewRow(newRow, cells) {
+    if (!cells || !cells.length) {
+      newRow.append(
+        `<td colspan="${state.totalColumns - 1}">No dimensions specified</td>`
       );
-      htmlCell.append(" ", htmlTooltip);
-      htmlTooltip.tooltip();
+      return;
+    }
+
+    cells.forEach((cell) => {
+      const newCell = $(`<td></td>`);
+      if (!cell) return newRow.append(newCell);
+
+      // Add value and format number
+      const { value } = cell;
+      if (typeof value !== "undefined") {
+        const formattedValue = isNaN(value)
+          ? value
+          : state.numberFormat.format(Number(value));
+        newCell.append(formattedValue);
+      }
+
+      // Add tooltips, if defined
+      if (cell.tooltips)
+        cell.tooltips.forEach((tooltip) => addTooltipToCell(newCell, tooltip));
+      newRow.append(newCell);
     });
+  }
+
+  function addTooltipToCell(htmlCell, { type, message }) {
+    const htmlTooltip = $(
+      `<i class="fa ${type.icon} ${type.color}" data-toggle="tooltip" data-title="${message}"></i>`
+    );
+    htmlCell.append(" ", htmlTooltip);
+    htmlTooltip.tooltip();
   }
 
   /**
@@ -1643,13 +1665,16 @@
 
     // Query new data and populate table
     // TODO: update period and org unit display
-    return getAnalyticsData()
-      .then(populateCellValues)
-      .then(populateHtmlTableBodyWithValues)
-      .then(() => {
-        $("#downloadCSV").attr("disabled", false);
-        $("#downloadCSV").removeClass("disabled");
-      });
+    return (
+      getAnalyticsData()
+        .then(populateCellValues)
+        .then(populateHtmlTableBodyWithValues)
+        // TODO: Add tooltips from alerts
+        .then(() => {
+          $("#downloadCSV").attr("disabled", false);
+          $("#downloadCSV").removeClass("disabled");
+        })
+    );
   }
 
   /**
@@ -1855,7 +1880,7 @@
     // Format filter parameters
     const periodFilterString = periodCheckboxValues.join(";");
     const periodPrettyString = periodCheckboxValues
-      .map((period) => period === state.allYears ? "All Years" : period)
+      .map((period) => (period === state.allYears ? "All Years" : period))
       .join(", ");
     const orgUnitFilterString = orgUnitCheckboxValues.join(";");
     const orgUnitPrettyString = orgUnitCheckboxValues
