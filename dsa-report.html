@@ -75,14 +75,8 @@
 
   /**
    * Table body color & stripe:
-   * Stripe columns 2, 4-6, 10-12
    * THIS IS HARD-CODED AND NEEDS CHANGING IF COLUMNS CHANGE
    */
-  /* tbody tr *:nth-child(2),
-  tbody tr *:nth-child(n + 4):nth-child(-n + 6),
-  tbody tr *:nth-child(n + 10):nth-child(-n + 12) {
-    background-color: var(--colShade);
-  } */
   tbody tr *:nth-child(even) {
     background-color: var(--colShade);
   }
@@ -188,7 +182,7 @@
       type: rowTypes.DATA,
       cells: [
         { dn: "LFDSA - IUs where NTD endemicity / morbidity mapping survey was conducted" },
-        { dn: "TDSA - IUs where NTD endemicity / morbidity mapping survey was conducted" },
+        { dn: "TCDSA - IUs where NTD endemicity / morbidity mapping survey was conducted" },
         { dn: "ODSA - IUs where NTD endemicity / morbidity mapping survey was conducted" },
         { dn: "SCDSA - IUs where NTD endemicity / morbidity mapping survey was conducted" },
         { dn: "STDSA - IUs where NTD endemicity / morbidity mapping survey was conducted" },
@@ -200,7 +194,7 @@
       type: rowTypes.DATA,
       cells: [
         { dn: "LFDSA - People screened in endemicity / morbidity mapping surveys" },
-        { dn: "TDSA - People screened in endemicity / morbidity mapping surveys" },
+        { dn: "TCDSA - People screened in endemicity / morbidity mapping surveys" },
         { dn: "ODSA - People screened in endemicity / morbidity mapping surveys" },
         { dn: "SCDSA - People screened in endemicity / morbidity mapping surveys" },
         { dn: "STDSA - People screened in endemicity / morbidity mapping surveys" },
@@ -212,11 +206,11 @@
       name: "People which were found to be positive with NTDs during endemicity / morbidity mapping surveys (clinical, RDT)",
       type: rowTypes.DATA,
       cells: [
-        { dn: "LFDSA - People screened in endemicity / morbidity mapping surveys" },
-        { dn: "TDSA - People screened in endemicity / morbidity mapping surveys" },
-        { dn: "ODSA - People screened in endemicity / morbidity mapping surveys" },
-        { dn: "SCDSA - People screened in endemicity / morbidity mapping surveys" },
-        { dn: "STDSA - People screened in endemicity / morbidity mapping surveys" },
+        { dn: "LFDSA - People positive with NTDs during endemicity / morbidity mapping surveys (clinical, RDT)" },
+        { dn: "TCDSA - People positive with NTDs during endemicity / morbidity mapping surveys (clinical, RDT)" },
+        { dn: "ODSA - People positive with NTDs during endemicity / morbidity mapping surveys (clinical, RDT)" },
+        { dn: "SCDSA - People positive with NTDs during endemicity / morbidity mapping surveys (clinical, RDT)" },
+        { dn: "STDSA - People positive with NTDs during endemicity / morbidity mapping surveys (clinical, RDT)" },
         null,
       ]
     },
@@ -273,7 +267,7 @@
       type: rowTypes.DATA,
       cells: [
         { dn: "LFDSA - IUs where TAS/IA surveys were completed" },
-        { dn: "TDSA - IUs where TAS/IA surveys were completed" },
+        { dn: "TCDSA - IUs where TAS/IA surveys were completed" },
         { dn: "ODSA - IUs where TAS/IA surveys were completed" },
         { dn: "SCDSA - IUs where TAS/IA surveys were completed" },
         { dn: "STDSA - IUs where TAS/IA surveys were completed" },
@@ -285,7 +279,7 @@
       type: rowTypes.DATA,
       cells: [
         { dn: "LFDSA - People participating in IA/TAS surveys" },
-        { dn: "TDSA - People participating in IA/TAS surveys" },
+        { dn: "TCDSA - People participating in IA/TAS surveys" },
         { dn: "ODSA - People participating in IA/TAS surveys" },
         { dn: "SCDSA - People participating in IA/TAS surveys" },
         { dn: "STDSA - People participating in IA/TAS surveys" },
@@ -297,7 +291,7 @@
       type: rowTypes.DATA,
       cells: [
         { dn: "LFDSA - People tested positive during IA/TAS surveys" },
-        { dn: "TDSA - People tested positive during IA/TAS surveys" },
+        { dn: "TCDSA - People tested positive during IA/TAS surveys" },
         { dn: "ODSA - People tested positive during IA/TAS surveys" },
         { dn: "SCDSA - People tested positive during IA/TAS surveys" },
         { dn: "STDSA - People tested positive during IA/TAS surveys" },
