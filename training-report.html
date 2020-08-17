@@ -145,156 +145,234 @@
    */
   const columns = [
     {
-      name: "Lymphatic Filariasis",
-      shortName: "L.F.",
+      name: "Female",
+      shortName: "Female",
       subcategories: null,
     },
     {
-      name: "Trachoma",
-      shortName: "Trach.",
+      name: "Male",
+      shortName: "Male",
       subcategories: null,
     },
     {
-      name: "Onchocerciasis",
-      shortName: "Oncho.",
-      subcategories: null,
-    },
-    {
-      name: "Schistosomiasis",
-      shortName: "Schisto.",
-      subcategories: null,
-    },
-    {
-      name: "S.T. Helminthiasis",
-      shortName: "STH",
-      subcategories: null,
-    },
-    {
-      name: "VL",
-      shortName: "VL",
+      name: "Total",
+      shortName: "Total",
       subcategories: null,
     },
   ];
 
   const rows = [
     {
-      name: "IUs where NTD endemicity / morbidity mapping survey was conducted",
+      name: "People trained to support morbidity mapping for LF",
       type: rowTypes.DATA,
       cells: [
-        { dn: "LFDSA - IUs where NTD endemicity / morbidity mapping survey was conducted" },
-        { dn: "TCDSA - IUs where NTD endemicity / morbidity mapping survey was conducted" },
-        { dn: "ODSA - IUs where NTD endemicity / morbidity mapping survey was conducted" },
-        { dn: "SCDSA - IUs where NTD endemicity / morbidity mapping survey was conducted" },
-        { dn: "STDSA - IUs where NTD endemicity / morbidity mapping survey was conducted" },
-        null,
+        { dn: "Training - People trained to support morbidity mapping for LF_Female" },
+        { dn: "Training - People trained to support morbidity mapping for LF_Male" },
+        { dn: "Training - People trained to support morbidity mapping for LF_Total" },
       ]
     },
     {
-      name: "People screened in endemicity / morbidity mapping surveys",
+      name: "People trained to support morbidity mapping for Trachoma",
       type: rowTypes.DATA,
       cells: [
-        { dn: "LFDSA - People screened in endemicity / morbidity mapping surveys" },
-        { dn: "TCDSA - People screened in endemicity / morbidity mapping surveys" },
-        { dn: "ODSA - People screened in endemicity / morbidity mapping surveys" },
-        { dn: "SCDSA - People screened in endemicity / morbidity mapping surveys" },
-        { dn: "STDSA - People screened in endemicity / morbidity mapping surveys" },
-        null,
+        { dn: "Training - People trained to support morbidity mapping for Trachoma_Female" },
+        { dn: "Training - People trained to support morbidity mapping for Trachoma_Male" },
+        { dn: "Training - People trained to support morbidity mapping for Trachoma_Total" },
       ]
     },
     {
-      // TODO: Check me out - are cell definitions correct?
-      name: "People which were found to be positive with NTDs during endemicity / morbidity mapping surveys (clinical, RDT)",
+      name: "Staff trained on transmission assessment and data collection",
       type: rowTypes.DATA,
       cells: [
-        { dn: "LFDSA - People positive with NTDs during endemicity / morbidity mapping surveys (clinical, RDT)" },
-        { dn: "TCDSA - People positive with NTDs during endemicity / morbidity mapping surveys (clinical, RDT)" },
-        { dn: "ODSA - People positive with NTDs during endemicity / morbidity mapping surveys (clinical, RDT)" },
-        { dn: "SCDSA - People positive with NTDs during endemicity / morbidity mapping surveys (clinical, RDT)" },
-        { dn: "STDSA - People positive with NTDs during endemicity / morbidity mapping surveys (clinical, RDT)" },
-        null,
+        { dn: "Training - Staff trained on transmission assessment and data collection_Female" },
+        { dn: "Training - Staff trained on transmission assessment and data collection_Male" },
+        { dn: "Training - Staff trained on transmission assessment and data collection_Total" },
       ]
     },
     {
-      name: "IUs in the evaluation area where Pre-TAS surveys were completed (or routine monitoring/SSA)",
+      name: "People trained in budgeting",
       type: rowTypes.DATA,
       cells: [
-        { dn: "LFDSA - IUs in the evaluation area where Pre-TAS surveys were completed (or routine monitoring/SSA)" },
-        null,
-        { dn: "ODSA - IUs in the evaluation area where Pre-TAS surveys were completed (or routine monitoring/SSA)" },
-        { dn: "SCDSA - IUs in the evaluation area where Pre-TAS surveys were completed (or routine monitoring/SSA)" },
-        { dn: "STDSA - IUs in the evaluation area where Pre-TAS surveys were completed (or routine monitoring/SSA)" },
-        null,
+        { dn: "Training - People trained in budgeting_Female" },
+        { dn: "Training - People trained in budgeting_Male" },
+        { dn: "Training - People trained in budgeting_Total" },
       ]
     },
     {
-      name: "Communities included in Pre-TAS surveys (or routine monitoring/SSA)",
+      name: "Total people trained",
+      type: rowTypes.DATA,
+      cells: [null, null, null],
+    },
+    {
+      name: "Total people trained",
+      type: rowTypes.DATA,
+      cells: [null, null, null],
+    },
+    {
+      name: "People trained on data management systems",
       type: rowTypes.DATA,
       cells: [
-        { dn: "LFDSA - Communities in the evaluation area where Pre-TAS surveys were completed (or routine monitoring/SSA)" },
-        null,
-        { dn: "ODSA - Communities in the evaluation area where Pre-TAS surveys were completed (or routine monitoring/SSA)" },
-        { dn: "SCDSA - Communities in the evaluation area where Pre-TAS surveys were completed (or routine monitoring/SSA)" },
-        { dn: "STDSA - Communities in the evaluation area where Pre-TAS surveys were completed (or routine monitoring/SSA)" },
-        null,
+        { dn: "Training - People trained on data management systems_Female" },
+        { dn: "Training - People trained on data management systems_Male" },
+        { dn: "Training - People trained on data management systems_Total" },
       ]
     },
     {
-      name: "People participating in pre-TAS surveys (or routine monitoring/SSA)",
+      name: "Surveillance trainings conducted",
       type: rowTypes.DATA,
       cells: [
-        { dn: "LFDSA - People participating in pre-TAS surveys (or routine monitoring/SSA)" },
         null,
-        { dn: "ODSA - People participating in pre-TAS surveys (or routine monitoring/SSA)" },
-        { dn: "SCDSA - People participating in pre-TAS surveys (or routine monitoring/SSA)" },
-        { dn: "STDSA - People participating in pre-TAS surveys (or routine monitoring/SSA)" },
         null,
+        { dn: "Training - Surveillance trainings conducted" },
       ]
     },
     {
-      name: "People positive in pre-TAS surveys (or routine monitoring/SSA)",
+      name: "People trained on supply chain management systems",
       type: rowTypes.DATA,
       cells: [
-        { dn: "LFDSA - People positive in pre-TAS surveys (or routine monitoring/SSA)" },
-        null,
-        { dn: "ODSA - People positive in pre-TAS surveys (or routine monitoring/SSA)" },
-        { dn: "SCDSA - People positive in pre-TAS surveys (or routine monitoring/SSA)" },
-        { dn: "STDSA - People positive in pre-TAS surveys (or routine monitoring/SSA)" },
-        null,
+        { dn: "Training - People trained on supply chain management systems_Female" },
+        { dn: "Training - People trained on supply chain management systems_Male" },
+        { dn: "Training - People trained on supply chain management systems_Total" },
       ]
     },
     {
-      name: "IUs where TAS/IA surveys were completed",
+      name: "NTD trainings including IEC/BCC components",
       type: rowTypes.DATA,
       cells: [
-        { dn: "LFDSA - IUs where TAS/IA surveys were completed" },
-        { dn: "TCDSA - IUs where TAS/IA surveys were completed" },
-        { dn: "ODSA - IUs where TAS/IA surveys were completed" },
-        { dn: "SCDSA - IUs where TAS/IA surveys were completed" },
-        { dn: "STDSA - IUs where TAS/IA surveys were completed" },
         null,
+        null,
+        { dn: "Training - NTD trainings including IEC/BCC components_Total" },
       ]
     },
     {
-      name: "People participating in IA/TAS surveys",
+      name: "Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: CDDs",
       type: rowTypes.DATA,
       cells: [
-        { dn: "LFDSA - People participating in IA/TAS surveys" },
-        { dn: "TCDSA - People participating in IA/TAS surveys" },
-        { dn: "ODSA - People participating in IA/TAS surveys" },
-        { dn: "SCDSA - People participating in IA/TAS surveys" },
-        { dn: "STDSA - People participating in IA/TAS surveys" },
-        null,
+        { dn: "Training - Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: CDDs_Female" },
+        { dn: "Training - Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: CDDs_Male" },
+        { dn: "Training - Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: CDDs_Total" },
       ]
     },
     {
-      name: "People tested positive during IA/TAS surveys",
+      name: "Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: FLHW",
       type: rowTypes.DATA,
       cells: [
-        { dn: "LFDSA - People tested positive during IA/TAS surveys" },
-        { dn: "TCDSA - People tested positive during IA/TAS surveys" },
-        { dn: "ODSA - People tested positive during IA/TAS surveys" },
-        { dn: "SCDSA - People tested positive during IA/TAS surveys" },
-        { dn: "STDSA - People tested positive during IA/TAS surveys" },
+        { dn: "Training - Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: FLHW_Female" },
+        { dn: "Training - Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: FLHW_Male" },
+        { dn: "Training - Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: FLHW_Total" },
+      ]
+    },
+    {
+      name: "Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: Supervisor/Trainers",
+      type: rowTypes.DATA,
+      cells: [
+        { dn: "Training - Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: Supervisor/Trainers_Female" },
+        { dn: "Training - Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: Supervisor/Trainers_Male" },
+        { dn: "Training - Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: Supervisor/Trainers_Total" },
+      ]
+    },
+    {
+      name: "Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: Teachers",
+      type: rowTypes.DATA,
+      cells: [
+        { dn: "Training - Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: Teachers_Female" },
+        { dn: "Training - Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: Teachers_Male" },
+        { dn: "Training - Health care providers and community drug distributors trained and working on MDA planning, social mobilization, implementation and monitoring: Teachers_Total" },
+      ]
+    },
+    {
+      name: "VL treatment facilities which are functional with adequate trained human resources, diagnostic equipment and supplies and medicines",
+      type: rowTypes.DATA,
+      cells: [null, null, null],
+    },
+    {
+      name: "VL treatment facilities receiving training",
+      type: rowTypes.DATA,
+      cells: [
+        null,
+        null,
+        { dn: "Training - VL treatment facilities receiving training"}
+      ]
+    },
+    {
+      // TODO: tidy up these names
+      name: "People trained in mmdp care: Lymphoedema management",
+      type: rowTypes.DATA,
+      cells: [
+        { dn: "Training - People trained in mmdp care: Lymphoedema management_Female" },
+        { dn: "Training - People trained in mmdp care: Lymphoedema management_Male" },
+        { dn: "Training - People trained in mmdp care: Lymphoedema management_Total" },
+      ]
+    },
+    {
+      name: "People trained in mmdp care: Hydrocelectomy",
+      type: rowTypes.DATA,
+      cells: [
+        { dn: "Training - People trained in mmdp care: Hydrocelectomy_Female" },
+        { dn: "Training - People trained in mmdp care: Hydrocelectomy_Male" },
+        { dn: "Training - People trained in mmdp care: Hydrocelectomy_Total" },
+      ]
+    },
+    {
+      name: "People trained in mmdp care: TT surgery",
+      type: rowTypes.DATA,
+      cells: [
+        { dn: "Training - People trained in mmdp care: TT surgery_Female" },
+        { dn: "Training - People trained in mmdp care: TT surgery_Male" },
+        { dn: "Training - People trained in mmdp care: TT surgery_Total" },
+      ]
+    },
+    {
+      name: "People trained in mmdp care: VL treatment",
+      type: rowTypes.DATA,
+      cells: [
+        { dn: "Training - People trained in mmdp care: VL treatment_Female" },
+        { dn: "Training - People trained in mmdp care: VL treatment_Male" },
+        { dn: "Training - People trained in mmdp care: VL treatment_Total" },
+      ]
+    },
+    {
+      name: "People trained in active case finding for VL",
+      type: rowTypes.DATA,
+      cells: [
+        { dn: "Training - People trained in active case finding for VL_Female" },
+        { dn: "Training - People trained in active case finding for VL_Male" },
+        { dn: "Training - People trained in active case finding for VL_Total" },
+      ]
+    },
+    {
+      name: "People trained in active case finding for trachoma",
+      type: rowTypes.DATA,
+      cells: [
+        { dn: "Training - People trained in active case finding for trachoma_Female" },
+        { dn: "Training - People trained in active case finding for trachoma_Male" },
+        { dn: "Training - People trained in active case finding for trachoma_Total" },
+      ]
+    },
+    {
+      name: "People trained in active case finding for LF",
+      type: rowTypes.DATA,
+      cells: [
+        { dn: "Training - People trained in active case finding for LF_Female" },
+        { dn: "Training - People trained in active case finding for LF_Male" },
+        { dn: "Training - People trained in active case finding for LF_Total" },
+      ]
+    },
+    {
+      name: "Total people trained: all training types",
+      type: rowTypes.DATA,
+      cells: [
+        { dn: "Training - People trained: all training types_Female" },
+        { dn: "Training - People trained: all training types_Male" },
+        { dn: "Training - People trained: all training types_Total" },
+      ]
+    },
+    {
+      name: "Total people trained: by training type",
+      type: rowTypes.DATA,
+      cells: [
+        null,
+        { value: "todo" },
         null,
       ]
     },
