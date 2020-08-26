@@ -729,15 +729,7 @@
             "STMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment",
         },
         {
-          customLogic: (cells, idx) =>
-            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
-          tooltips: [
-            {
-              type: tooltipTypes.INFO,
-              message:
-                "IUs that participated in multiple MDAs are not double-counted here",
-            },
-          ],
+          dn: "MDA - Total MDA treatments distributed to high risk populations",
         },
       ],
     },
@@ -1329,7 +1321,7 @@
       })
       .catch((err) => {
         // Format error for later handling
-        return Promise.reject({ ...err, message: "Unique IUs error"});
+        return Promise.reject({ ...err, message: "Unique IUs error" });
       });
   }
 
@@ -1507,45 +1499,43 @@
         if (!cells) return; // Empty row; return
 
         // Execute (possibly async) cell logic in _series_
-        return (
-          cells
-            .reduce((prevTask, cell, idx, arr) => {
-              return prevTask.then(async () => {
-                if (!cell) return;
-                const { dId: dimensionId, customLogic } = cell;
+        return cells
+          .reduce((prevTask, cell, idx, arr) => {
+            return prevTask.then(async () => {
+              if (!cell) return;
+              const { dId: dimensionId, customLogic } = cell;
 
-                // Handle cell defined by dimension ID
-                if (dimensionId) {
-                  const data = analyticsResults.get(dimensionId);
-                  cell.value = data ?? "-";
-                  return;
-                }
+              // Handle cell defined by dimension ID
+              if (dimensionId) {
+                const data = analyticsResults.get(dimensionId);
+                cell.value = data ?? "-";
+                return;
+              }
 
-                // Handle cell defined by custom logic
-                if (customLogic) {
-                  try {
-                    cell.value = await customLogic(arr, idx);
-                  } catch (err) {
-                    // If error in custom logic, create alert
-                    const message = `
+              // Handle cell defined by custom logic
+              if (customLogic) {
+                try {
+                  cell.value = await customLogic(arr, idx);
+                } catch (err) {
+                  // If error in custom logic, create alert
+                  const message = `
                       ${err.message || "Custom logic error"}: 
                       ${err.status || ""} ${err.statusText || ""}.
                       See console.
                     `;
-                    state.alerts.push({
-                      identifier: "custom-logic",
-                      identifierValue: `row-${rowIdx}-idx-${idx}`,
-                      tooltipType: tooltipTypes.ERROR,
-                      message,
-                    });
-                    console.error(message, err);
-                  }
-                  return;
+                  state.alerts.push({
+                    identifier: "custom-logic",
+                    identifierValue: `row-${rowIdx}-idx-${idx}`,
+                    tooltipType: tooltipTypes.ERROR,
+                    message,
+                  });
+                  console.error(message, err);
                 }
-              });
-            }, Promise.resolve())
-            .catch(console.error.bind(console, "Cell population error: "))
-        );
+                return;
+              }
+            });
+          }, Promise.resolve())
+          .catch(console.error.bind(console, "Cell population error: "));
       })
     );
   }
@@ -1628,7 +1618,7 @@
 
     cells.forEach((cell, idx) => {
       if (!cell) return htmlRow.append("<td></td>");
-      
+
       const { dn, dId, customLogic, value } = cell;
       const newCell = $(`
         <td
@@ -1655,7 +1645,8 @@
 
   function addTooltipToCell(htmlCell, { type, message }) {
     // Check if cell is valid:
-    if (!htmlCell.length) return console.warn("Invalid html cell when adding tooltip");
+    if (!htmlCell.length)
+      return console.warn("Invalid html cell when adding tooltip");
 
     const htmlTooltip = $(
       `<i class="fa ${type.icon} ${type.color}" data-toggle="tooltip" data-title="${message}"></i>`
@@ -1687,16 +1678,14 @@
 
     // Query new data and populate table
     // TODO: update period and org unit display
-    return (
-      getAnalyticsData()
-        .then(populateCellValues)
-        .then(populateHtmlTableBodyWithValues)
-        .then(addAlertTooltips)
-        .then(() => {
-          $("#downloadCSV").attr("disabled", false);
-          $("#downloadCSV").removeClass("disabled");
-        })
-    );
+    return getAnalyticsData()
+      .then(populateCellValues)
+      .then(populateHtmlTableBodyWithValues)
+      .then(addAlertTooltips)
+      .then(() => {
+        $("#downloadCSV").attr("disabled", false);
+        $("#downloadCSV").removeClass("disabled");
+      });
   }
 
   /**
