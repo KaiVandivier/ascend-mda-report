@@ -633,7 +633,15 @@
    */
   function populateHtmlTableHeader() {
     // Empty cell over row names (Maybe "indicator?")
-    $("#header-row").append(`<th scope="col"></th>`);
+    $("#header-row").append(`
+      <th scope="col" class="container">
+        <div class="row mb-2">
+          <span class="col">Indicator</span>
+        </div>
+        <div class="row bottom-row"></div>
+      </th>
+    `);
+
     columns.forEach((col) => {
       const colspan = col.subcategories ? col.subcategories.length : 1;
       const subheadings = col.subcategories
