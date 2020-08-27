@@ -160,7 +160,7 @@
       name: "Trachoma",
       shortName: "Trachoma",
       subcategories: null,
-    }
+    },
   ];
 
   const rows = [
@@ -186,7 +186,7 @@
         {
           dn: "LFMMDP - Reduction in backlog of MMDP care required per IU",
         },
-        null
+        null,
       ],
     },
     {
@@ -248,7 +248,7 @@
         {
           dn: "LFMMDP - Cases receiving MMDP care per IU",
         },
-        { value: "todo" }
+        { value: "todo" },
       ],
     },
     {
@@ -295,10 +295,7 @@
       name:
         "Support provided to monitor and supervise lymphedema management, hydrocele surgery and VL diagnosis and treatment (y/n)",
       type: rowTypes.DATA,
-      cells: [
-        { value: "todo" },
-        { value: "todo" },
-      ],
+      cells: [{ value: "todo" }, { value: "todo" }],
     },
   ];
   // End row & cell definitions
@@ -632,8 +629,16 @@
    *
    */
   function populateHtmlTableHeader() {
-    // Empty cell over row names (Maybe "indicator?")
-    $("#header-row").append(`<th scope="col"></th>`);
+    // Empty cell over row names
+    $("#header-row").append(`
+      <th scope="col" class="container">
+        <div class="row mb-2">
+          <span class="col">Indicator</span>
+        </div>
+        <div class="row bottom-row"></div>
+      </th>
+    `);
+
     columns.forEach((col) => {
       const colspan = col.subcategories ? col.subcategories.length : 1;
       const subheadings = col.subcategories
