@@ -479,7 +479,7 @@
    */
   function getAllDimensions() {
     // Gets a list of all indicators' and program indicators' names and IDs
-    const filter = "Training";
+    const filter = "MMDP";
 
     // TODO: Refactor for easier manipulation
     return Promise.all([
@@ -918,10 +918,10 @@
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "training_report.csv");
+    link.setAttribute("download", "lf-tc-mmdp-report.csv");
     window.frameElement.parentNode.appendChild(link); // Bypasses chrome sandboxed iframe restrictions
 
-    link.click(); // This will download the data file named "training_report.csv".
+    link.click(); // This will download the data file named "lf-tc-mmdp-report.csv".
   }
 
   /**
@@ -1093,7 +1093,7 @@
 
 <div class="p-1">
   <!-- HTML Markup to make up report -->
-  <h1>Training Summary</h1>
+  <h1>LF & Trachoma MMDP Summary</h1>
 
   <div class="mb-2">
     <div class="d-inline-block dropdown dropright">
