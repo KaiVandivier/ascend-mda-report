@@ -152,15 +152,18 @@
    */
   const columns = [
     {
-      name: "Indicator Value",
-      shortName: "Value",
+      name: "Lymphatic Filariasis",
+      shortName: "LF",
       subcategories: null,
     },
+    {
+      name: "Trachoma",
+      shortName: "Trachoma",
+      subcategories: null,
+    }
   ];
 
   const rows = [
-    // LF Section
-    { name: "Lymphatic Filariasis", type: rowTypes.CATEGORY },
     {
       name:
         "Number of health care providers providing morbidity management who received training on morbidity management (LF: Lymphoedema, Hydrocele; Trachoma: Trichiasis)",
@@ -169,6 +172,10 @@
         {
           dn:
             "LFMMDP - Health care providers providing morbidity management who received training on morbidity management_LF: Lymphoedema, Hydrocele; Trachoma: Trichiasis",
+        },
+        {
+          dn:
+            "TCMMDP - Health care providers providing morbidity management who received training on morbidity management_LF: Lymphoedema, Hydrocele; Trachoma: Trichiasis",
         },
       ],
     },
@@ -179,7 +186,24 @@
         {
           dn: "LFMMDP - Reduction in backlog of MMDP care required per IU",
         },
+        null
       ],
+    },
+    {
+      name: "Reduction in backlog of Trachoma cases requiring surgery per IU",
+      type: rowTypes.DATA,
+      cells: [
+        null,
+        {
+          dn:
+            "TCMMDP - Reduction in backlog of Trachoma cases requiring surgery per IU",
+        },
+      ],
+    },
+    {
+      name: "Reduction in Trachoma burden below 1/10.000",
+      type: rowTypes.DATA,
+      cells: [null, { value: "todo" }],
     },
     {
       name:
@@ -190,17 +214,17 @@
           dn:
             "LFMMDP - People in need of morbidity management and disability prevention activities who have received the required intervention for NTD",
         },
+        {
+          dn:
+            "TCMMDP - People in need of morbidity management and disability prevention activities who have received the required intervention for NTD",
+        },
       ],
     },
     {
       name:
         "Number of facilities in endemic IUs  with > 3 month stock of surgical supplies ",
       type: rowTypes.DATA,
-      cells: [
-        {
-          value: "todo",
-        },
-      ],
+      cells: [{ value: "todo" }, { value: "todo" }],
     },
     {
       name:
@@ -211,15 +235,20 @@
           dn:
             "LFMMDP - Facilities in NTD morbidity endemic areas, providing surgeries_including camps",
         },
+        {
+          dn:
+            "TCMMDP - Facilities in NTD morbidity endemic areas, providing surgeries_including camps",
+        },
       ],
     },
     {
-      name: "Number of  cases receiving MMDP care per IU",
+      name: "Number of cases receiving MMDP care per IU",
       type: rowTypes.DATA,
       cells: [
         {
           dn: "LFMMDP - Cases receiving MMDP care per IU",
         },
+        { value: "todo" }
       ],
     },
     {
@@ -229,6 +258,7 @@
         {
           dn: "LFMMDP - Facilities per IU which provide MMDP services",
         },
+        { value: "todo" },
       ],
     },
     {
@@ -240,105 +270,6 @@
           dn:
             "LFMMDP - IUs which receive funding/supply for MMDP_LF, VL, trachoma",
         },
-      ],
-    },
-    {
-      name:
-        "Number of people trained in mmdp care (for lymphoedema management, hydrocelectomy, TT surgery, VL treatment).",
-      type: rowTypes.DATA,
-      cells: [
-        {
-          dn:
-            "LFMMDP - People trained in MMDP care_for lymphoedema management, hydrocelectomy, TT surgery, VL treatment",
-        },
-      ],
-    },
-    {
-      name:
-        "Support provided to monitor and supervise lymphedema management, hydrocele surgery and VL diagnosis and treatment (y/n)",
-      type: rowTypes.DATA,
-      cells: [
-        {
-          value: "todo",
-        },
-      ],
-    },
-
-    // Trachoma
-    { name: "Trachoma", type: rowTypes.CATEGORY },
-    {
-      name:
-        "Number of health care providers providing morbidity management who received training on morbidity management (LF: Lymphoedema, Hydrocele; Trachoma: Trichiasis)",
-      type: rowTypes.DATA,
-      cells: [
-        {
-          dn:
-            "TCMMDP - Health care providers providing morbidity management who received training on morbidity management_LF: Lymphoedema, Hydrocele; Trachoma: Trichiasis",
-        },
-      ],
-    },
-    {
-      name: "Reduction in Trachoma burden below 1/10.000",
-      type: rowTypes.DATA,
-      cells: [{ value: "todo" }],
-    },
-    {
-      name: "Reduction in backlog of Trachoma cases requiring surgery per IU",
-      type: rowTypes.DATA,
-      cells: [
-        {
-          dn:
-            "TCMMDP - Reduction in backlog of Trachoma cases requiring surgery per IU",
-        },
-      ],
-    },
-    {
-      name:
-        "Number of people in need of morbidity management and disability prevention activities who have received the required intervention for NTD",
-      type: rowTypes.DATA,
-      cells: [
-        {
-          dn:
-            "TCMMDP - People in need of morbidity management and disability prevention activities who have received the required intervention for NTD",
-        },
-      ],
-    },
-    {
-      name:
-        "Number of facilities in endemic IUs  with > 3 month stock of surgical supplies ",
-      type: rowTypes.DATA,
-      cells: [{ value: "todo" }],
-    },
-    {
-      name:
-        "Number of facilities in NTD morbidity endemic areas, providing surgeries (including camps).",
-      type: rowTypes.DATA,
-      cells: [
-        {
-          dn:
-            "TCMMDP - Facilities in NTD morbidity endemic areas, providing surgeries_including camps",
-        },
-      ],
-    },
-    {
-      name: "Number of  cases receiving MMDP care per IU",
-      type: rowTypes.DATA,
-      cells: [{ value: "todo" }],
-    },
-    {
-      name: "Number of facilities per IU which provide MMDP services",
-      type: rowTypes.DATA,
-      cells: [
-        {
-          value: "todo",
-        },
-      ],
-    },
-    {
-      name:
-        "Number of IUs which receive funding/supply for mmdp (LF, VL, trachoma)",
-      type: rowTypes.DATA,
-      cells: [
         {
           dn:
             "TCMMDP - IUs which receive funding/supply for MMDP_LF, VL, trachoma",
@@ -352,6 +283,10 @@
       cells: [
         {
           dn:
+            "LFMMDP - People trained in MMDP care_for lymphoedema management, hydrocelectomy, TT surgery, VL treatment",
+        },
+        {
+          dn:
             "TCMMDP - People trained in MMDP care_for lymphoedema management, hydrocelectomy, TT surgery, VL treatment",
         },
       ],
@@ -361,9 +296,8 @@
         "Support provided to monitor and supervise lymphedema management, hydrocele surgery and VL diagnosis and treatment (y/n)",
       type: rowTypes.DATA,
       cells: [
-        {
-          value: "todo",
-        },
+        { value: "todo" },
+        { value: "todo" },
       ],
     },
   ];
