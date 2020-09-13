@@ -947,32 +947,16 @@
    */
   function setUpPeriodCheckboxes(startingYear) {
     // Populate period checkboxes, including "all years"
-    const currentYear = new state.currentYear;
+    const currentYear = state.currentYear;
 
     const allYears = [];
     for (let year = currentYear; year >= startingYear; year--) {
       allYears.push(year);
     }
     const allYearsString = allYears.join(";");
-    state = { ...state, period: allYearsString, allYears: allYearsString };
+    state = { ...state, allYears: allYearsString };
 
     const checkboxes = $("#periodCheckboxes");
-    checkboxes.append(`
-      <div class="form-check">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          value="${allYearsString}"
-          name="period"
-          id="${allYearsString}"
-          checked
-        />
-        <label class="form-check-label" for="${allYearsString}">
-          All Years
-        </label>
-      </div>
-    `);
-
     allYears.forEach((year) => {
       checkboxes.append(`
         <div class="form-check">
@@ -982,6 +966,7 @@
             value="${year}"
             name="period"
             id="${year}"
+            ${year == currentYear ? "checked" : ""}
           />
           <label class="form-check-label" for="${year}">
             ${year}
@@ -989,6 +974,21 @@
         </div>
       `);
     });
+
+    checkboxes.append(`
+      <div class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          value="${allYearsString}"
+          name="period"
+          id="${allYearsString}"
+        />
+        <label class="form-check-label" for="${allYearsString}">
+          All Years
+        </label>
+      </div>
+    `);
   }
 
   function setUpOrgUnitCheckboxes(maxLevel) {
