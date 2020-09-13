@@ -1236,8 +1236,8 @@
 
   // (Ideally, initial values would be set by the reports app parameters)
   // Initial period should get overwritten by `setUpPeriodSelect()`;
-  const initialPeriod =
-    "2020;2019;2018;2017;2016;2015;2014;2013;2012;2011;2010";
+  const currentYear = new Date().getFullYear();
+  const initialPeriod = currentYear;
   const initialOrgUnit = Object.keys(dhis2.report.organisationUnit).length
     ? dhis2.report.organisationUnit.id
     : "GdH306UQ8L8"; // This is the global org-unit
@@ -1255,6 +1255,7 @@
     );
 
   let state = {
+    currentYear: currentYear,
     period: initialPeriod,
     orgUnit: initialOrgUnit,
     numberFormat,
@@ -1295,7 +1296,7 @@
     const multipleYearsSelected = state.period.split(";").length > 1;
     if (multipleYearsSelected) {
       if (options.showOnlyCurrentYearIfMultipleSelected) {
-        filterPeriod = new Date().getFullYear();
+        filterPeriod = state.currentYear;
       }
     }
 
@@ -1794,7 +1795,7 @@
    */
   function setUpPeriodCheckboxes(startingYear) {
     // Populate period checkboxes, including "all years"
-    const currentYear = new Date().getFullYear();
+    const currentYear = state.currentYear;
 
     const allYears = [];
     for (let year = currentYear; year >= startingYear; year--) {
