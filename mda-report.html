@@ -409,12 +409,18 @@
         { dn: "STMDA - Total Population of IUs" },
         {
           customLogic: (cells, idx) =>
-            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+            uniqueRespondingIUs(cells, {
+              showOnlyCurrentYearIfMultipleSelected: true,
+            }).then(({ sumOfValues }) => sumOfValues),
           tooltips: [
             {
               type: tooltipTypes.INFO,
               message:
                 "IUs that participated in multiple MDAs are not double-counted here",
+            },
+            {
+              type: tooltipTypes.INFO,
+              message: "If multiple years are selected, this value reflects only the current year",
             },
           ],
         },
@@ -1276,7 +1282,7 @@
     return nums.reduce((sum, n) => sum + Number(n), 0);
   }
 
-  function uniqueRespondingIUs(cells) {
+  function uniqueRespondingIUs(cells, options = {}) {
     // This function counts all unique IUs with at least one value in this row
     // 1. Build dimensions list for query url
     const dimensions = cells
@@ -1284,11 +1290,20 @@
       .map((cell) => cell.dId)
       .join(";");
 
+    // 1.1 Figure out period for query filter
+    let filterPeriod = state.period;
+    const multipleYearsSelected = state.period.split(";").length > 1;
+    if (multipleYearsSelected) {
+      if (options.showOnlyCurrentYearIfMultipleSelected) {
+        filterPeriod = new Date().getFullYear();
+      }
+    }
+
     // 2. Query analytics:
     return $.get("../api/analytics", {
       // Second orgunit dimension is hardcoded to IU level
       dimension: `dx:${dimensions},ou:${state.orgUnit};LEVEL-iGO9aN3ZSSi`,
-      filter: `pe:${state.period}`,
+      filter: `pe:${filterPeriod}`,
       skipMeta: true,
     })
       .then((json) => {
@@ -1305,7 +1320,7 @@
             return;
           }
 
-          // Otherwise, set value
+          // Otherwise, set value in map
           uniqueOrgUnits.set(orgUnitId, value);
         });
 
@@ -1519,7 +1534,7 @@
                 } catch (err) {
                   // If error in custom logic, create alert
                   const message = `
-                      ${err.message || "Custom logic error"}: 
+                      ${err.message || "Custom logic error"}:
                       ${err.status || ""} ${err.statusText || ""}.
                       See console.
                     `;
@@ -1956,7 +1971,7 @@
         Filter Period and Org. Unit(s)
       </button>
       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <form id="filterForm" class="px-4 py-3 mb-0" style="min-width: 30rem;">
+        <form id="filterForm" class="px-4 py-3 mb-0" style="min-width: 30rem">
           <div class="row">
             <div class="col">
               <fieldset class="form-group">
@@ -1969,9 +1984,7 @@
 
             <div class="col-7">
               <fieldset class="form-group">
-                <legend class="pt-0">
-                  Organisation Unit:
-                </legend>
+                <legend class="pt-0">Organisation Unit:</legend>
                 <div id="orgUnitCheckboxes">
                   <!-- Populate by script -->
                 </div>
