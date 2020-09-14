@@ -340,6 +340,7 @@
         {
           customLogic: (cells, idx) =>
             uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          options: { omitIfMultipleYearsSelected: true },
           tooltips: [
             {
               type: tooltipTypes.INFO,
@@ -463,6 +464,7 @@
         {
           customLogic: (cells, idx) =>
             uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          options: { omitIfMultipleYearsSelected: true },
           tooltips: [
             {
               type: tooltipTypes.INFO,
@@ -525,6 +527,7 @@
         {
           customLogic: (cells, idx) =>
             uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          options: { omitIfMultipleYearsSelected: true },
           tooltips: [
             {
               type: tooltipTypes.INFO,
@@ -677,6 +680,7 @@
         {
           customLogic: (cells, idx) =>
             uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          options: { omitIfMultipleYearsSelected: true },
           tooltips: [
             {
               type: tooltipTypes.INFO,
@@ -883,6 +887,7 @@
         {
           dn:
             "MDA - Total People, in population eligible for treatment, not receiving MDA treatment",
+          options: { omitIfMultipleYearsSelected: true },
         },
       ],
     },
@@ -994,6 +999,7 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          options: { omitIfMultipleYearsSelected: true },
           tooltips: [
             {
               type: tooltipTypes.INFO,
@@ -1086,6 +1092,7 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          options: { omitIfMultipleYearsSelected: true },
           tooltips: [
             {
               type: tooltipTypes.INFO,
@@ -1150,6 +1157,7 @@
         {
           customLogic: (cells) =>
             uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          options: { omitIfMultipleYearsSelected: true },
           tooltips: [
             {
               type: tooltipTypes.INFO,
@@ -1216,6 +1224,7 @@
         {
           customLogic: (cells, idx) =>
             uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          options: { omitIfMultipleYearsSelected: true },
           tooltips: [
             {
               type: tooltipTypes.INFO,
@@ -1521,10 +1530,25 @@
           .reduce((prevTask, cell, idx, arr) => {
             return prevTask.then(async () => {
               if (!cell) return;
-              const { dId: dimensionId, customLogic } = cell;
+              const { dId: dimensionId, customLogic, options, tooltips } = cell;
 
-              // Handle cell defined by dimension ID
+              if (
+                options?.omitIfMultipleYearsSelected &&
+                multipleYearsSelected()
+              ) {
+                cell.value = "n/a";
+                const newTooltip = {
+                  type: tooltipTypes.INFO,
+                  message: "Value is omitted when multiple years are selected",
+                };
+                cell.tooltips = tooltips
+                  ? [...tooltips, newTooltip]
+                  : [newTooltip];
+                return;
+              }
+
               if (dimensionId) {
+                // Handle cell defined by dimension ID
                 const data = analyticsResults.get(dimensionId);
                 cell.value = data ?? "-";
                 return;
