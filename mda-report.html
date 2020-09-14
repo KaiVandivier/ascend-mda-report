@@ -1541,9 +1541,15 @@
                   type: tooltipTypes.INFO,
                   message: "Value is omitted when multiple years are selected",
                 };
-                cell.tooltips = tooltips
-                  ? [...tooltips, newTooltip]
-                  : [newTooltip];
+                if (
+                  !tooltips?.some(
+                    (tooltip) => tooltip.message === newTooltip.message
+                  )
+                ) {
+                  cell.tooltips = tooltips
+                    ? [...tooltips, newTooltip]
+                    : [newTooltip];
+                }
                 return;
               }
 
@@ -1667,6 +1673,7 @@
           ${dn ? `data-dimension-name="${dn}"` : ""}
           ${dId ? `data-dimension-id="${dId}"` : ""}
           ${customLogic ? `data-custom-logic="row-${rowIdx}-idx-${idx}"` : ""}
+          data-row-cell="${rowIdx}-${idx}"
         ></td>
       `);
 
