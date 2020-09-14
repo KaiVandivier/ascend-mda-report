@@ -1293,7 +1293,7 @@
 
     // 1.1 Figure out period for query filter
     let filterPeriod = state.period;
-    const multipleYearsSelected = state.period.split(";").length > 1;
+    const multipleYearsSelected = String(state.period).split(";").length > 1;
     if (multipleYearsSelected) {
       if (options.showOnlyCurrentYearIfMultipleSelected) {
         filterPeriod = state.currentYear;
