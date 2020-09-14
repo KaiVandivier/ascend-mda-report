@@ -247,8 +247,10 @@
         null,
         { dn: "STMDA - IUs in post-treatment surveillance" },
         {
-          customLogic: (cells) =>
-            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          customLogic: (cells, idx, rowIdx) =>
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(
+              ({ numUniqueIUs }) => numUniqueIUs
+            ),
           tooltips: [
             {
               type: tooltipTypes.INFO,
@@ -1344,11 +1346,25 @@
         });
         const numUniqueIUs = uniqueOrgUnits.size;
 
+        // Create a tooltip
+        const { rowIdx, idx } = options;
+        if (rowIdx && idx) {
+          state.alerts.push({
+            identifier: "custom-logic",
+            identifierValue: `row-${rowIdx}-idx-${idx}`,
+            tooltipType: tooltipTypes.INFO,
+            message:
+              "HELLO! IUs that participated in multiple MDAs are not double-counted here",
+          });
+        }
+
         return { numUniqueIUs, sumOfValues };
       })
       .catch((err) => {
         // Format error for later handling
-        return Promise.reject({ ...err, message: "Unique IUs error" });
+        const message =
+          "Unique IUs error" + (err.message ? ` - ${err.message}` : "");
+        return Promise.reject({ ...err, message });
       });
   }
 
@@ -1557,7 +1573,7 @@
               // Handle cell defined by custom logic
               if (customLogic) {
                 try {
-                  cell.value = await customLogic(arr, idx);
+                  cell.value = await customLogic(arr, idx, rowIdx);
                 } catch (err) {
                   // If error in custom logic, create alert
                   const message = `
