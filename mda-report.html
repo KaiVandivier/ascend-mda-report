@@ -420,7 +420,8 @@
             },
             {
               type: tooltipTypes.INFO,
-              message: "If multiple years are selected, this value reflects only the current year",
+              message:
+                "If multiple years are selected, this value reflects only the current year",
             },
           ],
         },
@@ -1283,6 +1284,10 @@
     return nums.reduce((sum, n) => sum + Number(n), 0);
   }
 
+  function multipleYearsSelected() {
+    return String(state.period).split(";").length > 1;
+  }
+
   function uniqueRespondingIUs(cells, options = {}) {
     // This function counts all unique IUs with at least one value in this row
     // 1. Build dimensions list for query url
@@ -1292,13 +1297,10 @@
       .join(";");
 
     // 1.1 Figure out period for query filter
-    let filterPeriod = state.period;
-    const multipleYearsSelected = String(state.period).split(";").length > 1;
-    if (multipleYearsSelected) {
-      if (options.showOnlyCurrentYearIfMultipleSelected) {
-        filterPeriod = state.currentYear;
-      }
-    }
+    const filterPeriod =
+      multipleYearsSelected() && options.showOnlyCurrentYearIfMultipleSelected
+        ? state.currentYear
+        : state.period;
 
     // 2. Query analytics:
     return $.get("../api/analytics", {
