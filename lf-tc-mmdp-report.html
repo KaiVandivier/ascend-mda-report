@@ -365,7 +365,7 @@
       .join(";");
 
     // 2. Query analytics:
-    return $.get("../api/analytics", {
+    return $.get("../api/34/analytics", {
       // Second orgunit dimension is hardcoded to IU level
       dimension: `dx:${dimensions},ou:${state.orgUnit};LEVEL-iGO9aN3ZSSi`,
       filter: `pe:${state.period}`,
@@ -417,10 +417,10 @@
     // TODO: Refactor for easier manipulation
     return Promise.all([
       $.get(
-        `../api/programIndicators.json?filter=displayName:like:${filter}&paging=false`
+        `../api/34/programIndicators.json?filter=displayName:like:${filter}&paging=false`
       ),
       $.get(
-        `../api/indicators.json?filter=displayName:like:${filter}&paging=false`
+        `../api/34/indicators.json?filter=displayName:like:${filter}&paging=false`
       ),
     ]).then((values) => {
       const [{ programIndicators }, { indicators }] = values;
@@ -497,7 +497,7 @@
     // Query analytics API for data (with one monolithic query)
     const { dimensionsToQuery, period, orgUnit } = state;
 
-    return $.get("../api/analytics", {
+    return $.get("../api/34/analytics", {
       dimension: `dx:${dimensionsToQuery.join(";")}`,
       filter: `ou:${orgUnit},pe:${period}`,
       skipMeta: true,
@@ -539,7 +539,7 @@
     return Promise.all(
       dimensionsToQuery.map((dimensionId) => {
         // Query individual cell contents
-        return $.get("../api/analytics", {
+        return $.get("../api/34/analytics", {
           dimension: `dx:${dimensionId},pe:${period}`,
           filter: `ou:${orgUnit}`,
           skipMeta: true,
@@ -917,7 +917,7 @@
   }
 
   function setUpOrgUnitCheckboxes(maxLevel) {
-    $.get("../api/organisationUnits.json", { maxLevel, paging: false })
+    $.get("../api/34/organisationUnits.json", { maxLevel, paging: false })
       .then(({ organisationUnits: orgUnits }) => {
         if (!orgUnits) return;
 
