@@ -276,7 +276,9 @@
         null,
         {
           customLogic: (cells, idx, rowIdx) =>
-            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ sumOfValues }) => sumOfValues),
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(
+              ({ sumOfValues }) => sumOfValues
+            ),
         },
       ],
     },
@@ -298,7 +300,9 @@
         { dn: "STMDA - IUs where NTD endemicity is unknown" },
         {
           customLogic: (cells, idx, rowIdx) =>
-            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ numUniqueIUs }) => numUniqueIUs),
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(
+              ({ numUniqueIUs }) => numUniqueIUs
+            ),
         },
       ],
     },
@@ -320,7 +324,9 @@
         { dn: "STMDA - Population in NTD affected IUs Total" },
         {
           customLogic: (cells, idx, rowIdx) =>
-            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ sumOfValues }) => sumOfValues),
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(
+              ({ sumOfValues }) => sumOfValues
+            ),
           options: { omitIfMultipleYearsSelected: true },
         },
       ],
@@ -432,7 +438,9 @@
         },
         {
           customLogic: (cells, idx, rowIdx) =>
-            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ sumOfValues }) => sumOfValues),
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(
+              ({ sumOfValues }) => sumOfValues
+            ),
           options: { omitIfMultipleYearsSelected: true },
         },
       ],
@@ -488,7 +496,9 @@
         },
         {
           customLogic: (cells, idx, rowIdx) =>
-            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ sumOfValues }) => sumOfValues),
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(
+              ({ sumOfValues }) => sumOfValues
+            ),
           options: { omitIfMultipleYearsSelected: true },
         },
       ],
@@ -634,7 +644,9 @@
         null,
         {
           customLogic: (cells, idx, rowIdx) =>
-            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ sumOfValues }) => sumOfValues),
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(
+              ({ sumOfValues }) => sumOfValues
+            ),
           options: { omitIfMultipleYearsSelected: true },
         },
       ],
@@ -804,7 +816,7 @@
         {
           dn:
             "OMDA - Total People, in population eligible for treatment, not receiving MDA treatment",
-          dId: "aMUoBNLJ21U", // Provided because duplicate name in Ind. and prog.Ind.
+          dxId: "aMUoBNLJ21U", // Provided because duplicate name in Ind. and prog.Ind.
         },
         {
           dn:
@@ -817,7 +829,7 @@
         {
           dn:
             "SCMDA - Total People, in population eligible for treatment, not receiving MDA treatment",
-          dId: "OAwgpaRCOvc",
+          dxId: "OAwgpaRCOvc",
         },
         {
           dn:
@@ -830,7 +842,7 @@
         {
           dn:
             "STMDA - Total People, in population eligible for treatment, not receiving MDA treatment",
-          dId: "c3F2W3YUOgT",
+          dxId: "c3F2W3YUOgT",
         },
         {
           dn:
@@ -946,7 +958,9 @@
         },
         {
           customLogic: (cells, idx, rowIdx) =>
-            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ numUniqueIUs }) => numUniqueIUs),
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(
+              ({ numUniqueIUs }) => numUniqueIUs
+            ),
           options: { omitIfMultipleYearsSelected: true },
         },
       ],
@@ -1032,7 +1046,9 @@
         },
         {
           customLogic: (cells, idx, rowIdx) =>
-            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ numUniqueIUs }) => numUniqueIUs),
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(
+              ({ numUniqueIUs }) => numUniqueIUs
+            ),
           options: { omitIfMultipleYearsSelected: true },
         },
       ],
@@ -1090,7 +1106,9 @@
         },
         {
           customLogic: (cells, idx, rowIdx) =>
-            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ numUniqueIUs }) => numUniqueIUs),
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(
+              ({ numUniqueIUs }) => numUniqueIUs
+            ),
           options: { omitIfMultipleYearsSelected: true },
         },
       ],
@@ -1150,7 +1168,9 @@
         },
         {
           customLogic: (cells, idx, rowIdx) =>
-            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ sumOfValues }) => sumOfValues),
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(
+              ({ sumOfValues }) => sumOfValues
+            ),
           options: { omitIfMultipleYearsSelected: true },
         },
       ],
@@ -1221,8 +1241,8 @@
     // This function counts all unique IUs with at least one value in this row
     // 1. Build dimensions list for query url
     const dimensions = cells
-      .filter((cell) => cell && cell.dId)
-      .map((cell) => cell.dId)
+      .filter((cell) => cell && cell.dxId)
+      .map((cell) => cell.dxId)
       .join(";");
 
     // 1.1 Figure out period for query filter
@@ -1330,7 +1350,7 @@
   }
 
   function populateCellDimensionIds(allDimensions) {
-    // Populates dimensionId (`dId`) on cells based on dimensionName
+    // Populates dimensionId (`dxId`) on cells based on dimensionName
     // Also populates `state.dimensionsToQuery` for analytics query
     const dimensionsToQuery = [];
 
@@ -1340,9 +1360,9 @@
 
       cells.forEach((cell) => {
         if (!cell) return;
-        if (cell.dId) {
+        if (cell.dxId) {
           // cell already has `dimensionId`; skip ID lookup
-          dimensionsToQuery.push(cell.dId);
+          dimensionsToQuery.push(cell.dxId);
           return;
         }
         if (!cell.dn) return;
@@ -1362,7 +1382,7 @@
 
         // Dimension found - add it to list to query and populate cell
         dimensionsToQuery.push(dimensionId);
-        cell.dId = dimensionId;
+        cell.dxId = dimensionId;
       });
     });
 
@@ -1465,7 +1485,12 @@
           .reduce((prevTask, cell, idx, arr) => {
             return prevTask.then(async () => {
               if (!cell) return;
-              const { dId: dimensionId, customLogic, options, tooltips } = cell;
+              const {
+                dxId: dimensionId,
+                customLogic,
+                options,
+                tooltips,
+              } = cell;
 
               if (
                 options?.omitIfMultipleYearsSelected &&
@@ -1478,7 +1503,7 @@
                   identifierValue: `${rowIdx}-${idx}`,
                   tooltipType: tooltipTypes.INFO,
                   message: "Value is omitted when multiple years are selected",
-                })
+                });
                 return;
               }
 
@@ -1596,11 +1621,11 @@
     cells.forEach((cell, idx) => {
       if (!cell) return htmlRow.append("<td></td>");
 
-      const { dn, dId, customLogic, value } = cell;
+      const { dn, dxId, customLogic, value } = cell;
       const newCell = $(`
         <td
           ${dn ? `data-dimension-name="${dn}"` : ""}
-          ${dId ? `data-dimension-id="${dId}"` : ""}
+          ${dxId ? `data-dimension-id="${dxId}"` : ""}
           data-row-cell="${rowIdx}-${idx}"
         ></td>
       `);
@@ -1642,7 +1667,7 @@
   }
 
   function clearAlerts() {
-    state.alerts = state.alerts.filter(alert => alert.persistAfterTableLoad)
+    state.alerts = state.alerts.filter((alert) => alert.persistAfterTableLoad);
   }
 
   /**

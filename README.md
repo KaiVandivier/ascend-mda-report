@@ -44,7 +44,7 @@ Row objects use these properties:
 
 Cells are defined by an array for each row. The array should be an appropriate size to fill the table, and the order of the cells should match the column definitions.
 
-Enter `null` to create an empty cell, or define the contents of the cell with an object. When defining the contents of a cell, you have several options: you can specify a dimension name (`dn`), a dimension ID (`dId`), custom logic (`customLogic`, a function), or a hard-coded value - see this example of a data row and explanations of each option below:
+Enter `null` to create an empty cell, or define the contents of the cell with an object. When defining the contents of a cell, you have several options: you can specify a dimension name (`dn`), a dimension ID (`dxId`), custom logic (`customLogic`, a function), or a hard-coded value - see this example of a data row and explanations of each option below:
 
 ```javascript
 const rows = [
@@ -54,7 +54,7 @@ const rows = [
     type: rowTypes.DATA,
     cells: [
       { dn: "TCMDA - IUs which reached the criteria to stop MDA", },
-      { dId: "d3AglBM9nF4", },
+      { dxId: "d3AglBM9nF4", },
       { value: "I will end up in the table!", }
       null,
       { dn: "OMDA - IUs which reached the criteria to stop MDA", },
@@ -86,15 +86,15 @@ const rows = [
 
   - To do so, set the value `dn` (short for "dimension name") property of the cell to the name of the dimension
   - Ex: `{ dn: "TCMDA - Epidemiological Coverage" }`
-  - The script will look up the dimension ID based on the name and populate the `dId` property on the cell
+  - The script will look up the dimension ID based on the name and populate the `dxId` property on the cell
   - The name must exactly match the name of the dimension in the database (it is case sensitive)
   - If the name is not found during the lookup, it will set a "Dimension not found" message as the value
-  - Note that if you _also_ manually set the `dId` property of the cell, the script will not perform the name->ID lookup; i.e., the dimension ID will take precedence.
+  - Note that if you _also_ manually set the `dxId` property of the cell, the script will not perform the name->ID lookup; i.e., the dimension ID will take precedence.
 
 - Using a dimension ID:
 
-  - Set the `dId` property (short for "dimension ID") of the cell
-  - Ex: `{ dId: "kTtjN2SNEDH" }`
+  - Set the `dxId` property (short for "dimension ID") of the cell
+  - Ex: `{ dxId: "kTtjN2SNEDH" }`
   - This has the benefits of avoiding string-matching sensitivity, being resilient to dimension name changes in the database, and the ability to correctly specify an indicator if there are duplicate names, but it may be tedious to look up IDs individually for many cells.
   - This will override the dimension name (`dn`) property if it is provided.
 

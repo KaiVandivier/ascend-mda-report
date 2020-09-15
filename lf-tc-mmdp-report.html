@@ -360,8 +360,8 @@
     // This function counts all unique IUs with at least one value in this row
     // 1. Build dimensions list for query url
     const dimensions = cells
-      .filter((cell) => cell && cell.dId)
-      .map((cell) => cell.dId)
+      .filter((cell) => cell && cell.dxId)
+      .map((cell) => cell.dxId)
       .join(";");
 
     // 2. Query analytics:
@@ -453,7 +453,7 @@
   }
 
   function populateCellDimensionIds(allDimensions) {
-    // Populates dimensionId (`dId`) on cells based on dimensionName
+    // Populates dimensionId (`dxId`) on cells based on dimensionName
     // Also populates `state.dimensionsToQuery` for analytics query
     const dimensionsToQuery = [];
 
@@ -463,9 +463,9 @@
 
       cells.forEach((cell) => {
         if (!cell) return;
-        if (cell.dId) {
+        if (cell.dxId) {
           // cell already has `dimensionId`; skip ID lookup
-          dimensionsToQuery.push(cell.dId);
+          dimensionsToQuery.push(cell.dxId);
           return;
         }
         if (!cell.dn) return;
@@ -485,7 +485,7 @@
 
         // Dimension found - add it to list to query and populate cell
         dimensionsToQuery.push(dimensionId);
-        cell.dId = dimensionId;
+        cell.dxId = dimensionId;
       });
     });
 
@@ -588,7 +588,7 @@
           .reduce((prevTask, cell, idx, arr) => {
             return prevTask.then(async () => {
               if (!cell) return;
-              const { dId: dimensionId, customLogic } = cell;
+              const { dxId: dimensionId, customLogic } = cell;
 
               // Handle cell defined by dimension ID
               if (dimensionId) {
@@ -712,11 +712,11 @@
     cells.forEach((cell, idx) => {
       if (!cell) return htmlRow.append("<td></td>");
 
-      const { dn, dId, customLogic, value } = cell;
+      const { dn, dxId, customLogic, value } = cell;
       const newCell = $(`
         <td
           ${dn ? `data-dimension-name="${dn}"` : ""}
-          ${dId ? `data-dimension-id="${dId}"` : ""}
+          ${dxId ? `data-dimension-id="${dxId}"` : ""}
           ${customLogic ? `data-custom-logic="row-${rowIdx}-idx-${idx}"` : ""}
         ></td>
       `);
