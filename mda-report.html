@@ -1272,7 +1272,7 @@
             identifierValue: `row-${rowIdx}-idx-${idx}`,
             tooltipType: tooltipTypes.INFO,
             message:
-              "HELLO! IUs that participated in multiple MDAs are not double-counted here",
+              "IUs that participated in multiple MDAs are not double-counted here",
           });
         }
 
@@ -1312,6 +1312,7 @@
             identifierValue: dimension.displayName,
             tooltipType: tooltipTypes.WARNING,
             message: `Duplicate dimension name found: '${dimension.displayName}'. You may not get the data you're looking for if this cell is queried by name.`,
+            persistAfterTableLoad: true,
           };
           state.alerts.push(alert);
 
@@ -1471,19 +1472,12 @@
                 multipleYearsSelected()
               ) {
                 cell.value = "n/a";
-                const newTooltip = {
-                  type: tooltipTypes.INFO,
+                state.alerts.push({
+                  identifier: "custom-logic",
+                  identifierValue: `row-${rowIdx}-idx-${idx}`,
+                  tooltipType: tooltipTypes.INFO,
                   message: "Value is omitted when multiple years are selected",
-                };
-                if (
-                  !tooltips?.some(
-                    (tooltip) => tooltip.message === newTooltip.message
-                  )
-                ) {
-                  cell.tooltips = tooltips
-                    ? [...tooltips, newTooltip]
-                    : [newTooltip];
-                }
+                })
                 return;
               }
 
@@ -1669,6 +1663,7 @@
       .then(populateCellValues)
       .then(populateHtmlTableBodyWithValues)
       .then(addAlertTooltips)
+      .then(clearAlerts)
       .then(() => {
         $("#downloadCSV").attr("disabled", false);
         $("#downloadCSV").removeClass("disabled");
