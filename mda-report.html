@@ -389,8 +389,10 @@
         null,
         { dn: "STMDA - Total Population of IUs" },
         {
-          customLogic: (cells, idx) =>
+          customLogic: (cells, idx, rowIdx) =>
             uniqueRespondingIUs(cells, {
+              idx,
+              rowIdx,
               showOnlyCurrentYearIfMultipleSelected: true,
             }).then(({ sumOfValues }) => sumOfValues),
           tooltips: [
