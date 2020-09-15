@@ -251,13 +251,6 @@
             uniqueRespondingIUs(cells, { rowIdx, idx }).then(
               ({ numUniqueIUs }) => numUniqueIUs
             ),
-          tooltips: [
-            {
-              type: tooltipTypes.INFO,
-              message:
-                "IUs that participated in multiple MDAs are not double-counted here",
-            },
-          ],
         },
       ],
     },
@@ -282,15 +275,8 @@
         null,
         null,
         {
-          customLogic: (cells, idx) =>
-            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
-          tooltips: [
-            {
-              type: tooltipTypes.INFO,
-              message:
-                "IUs that participated in multiple MDAs are not double-counted here",
-            },
-          ],
+          customLogic: (cells, idx, rowIdx) =>
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ sumOfValues }) => sumOfValues),
         },
       ],
     },
@@ -311,15 +297,8 @@
         null,
         { dn: "STMDA - IUs where NTD endemicity is unknown" },
         {
-          customLogic: (cells) =>
-            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
-          tooltips: [
-            {
-              type: tooltipTypes.INFO,
-              message:
-                "IUs that participated in multiple MDAs are not double-counted here",
-            },
-          ],
+          customLogic: (cells, idx, rowIdx) =>
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ numUniqueIUs }) => numUniqueIUs),
         },
       ],
     },
@@ -340,16 +319,9 @@
         { dn: "STMDA - Population in NTD affected IUs Round 2" },
         { dn: "STMDA - Population in NTD affected IUs Total" },
         {
-          customLogic: (cells, idx) =>
-            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          customLogic: (cells, idx, rowIdx) =>
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ sumOfValues }) => sumOfValues),
           options: { omitIfMultipleYearsSelected: true },
-          tooltips: [
-            {
-              type: tooltipTypes.INFO,
-              message:
-                "IUs that participated in multiple MDAs are not double-counted here",
-            },
-          ],
         },
       ],
     },
@@ -419,11 +391,6 @@
             {
               type: tooltipTypes.INFO,
               message:
-                "IUs that participated in multiple MDAs are not double-counted here",
-            },
-            {
-              type: tooltipTypes.INFO,
-              message:
                 "If multiple years are selected, this value reflects only the current year",
             },
           ],
@@ -464,16 +431,9 @@
           dn: "STMDA - Population eligible for MDA treatment Total",
         },
         {
-          customLogic: (cells, idx) =>
-            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          customLogic: (cells, idx, rowIdx) =>
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ sumOfValues }) => sumOfValues),
           options: { omitIfMultipleYearsSelected: true },
-          tooltips: [
-            {
-              type: tooltipTypes.INFO,
-              message:
-                "IUs that participated in multiple MDAs are not double-counted here",
-            },
-          ],
         },
       ],
     },
@@ -527,16 +487,9 @@
             "STMDA - Total Estimated size of populations with high risk of infection",
         },
         {
-          customLogic: (cells, idx) =>
-            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          customLogic: (cells, idx, rowIdx) =>
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ sumOfValues }) => sumOfValues),
           options: { omitIfMultipleYearsSelected: true },
-          tooltips: [
-            {
-              type: tooltipTypes.INFO,
-              message:
-                "IUs that participated in multiple MDAs are not double-counted here",
-            },
-          ],
         },
       ],
     },
@@ -680,16 +633,9 @@
         { dn: "STMDA - IUs where MDA treatment has been provided Round 2" },
         null,
         {
-          customLogic: (cells, idx) =>
-            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          customLogic: (cells, idx, rowIdx) =>
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ sumOfValues }) => sumOfValues),
           options: { omitIfMultipleYearsSelected: true },
-          tooltips: [
-            {
-              type: tooltipTypes.INFO,
-              message:
-                "IUs that participated in multiple MDAs are not double-counted here",
-            },
-          ],
         },
       ],
     },
@@ -999,16 +945,9 @@
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
-          customLogic: (cells) =>
-            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          customLogic: (cells, idx, rowIdx) =>
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ numUniqueIUs }) => numUniqueIUs),
           options: { omitIfMultipleYearsSelected: true },
-          tooltips: [
-            {
-              type: tooltipTypes.INFO,
-              message:
-                "IUs that participated in multiple MDAs are not double-counted here",
-            },
-          ],
         },
       ],
     },
@@ -1092,16 +1031,9 @@
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
-          customLogic: (cells) =>
-            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          customLogic: (cells, idx, rowIdx) =>
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ numUniqueIUs }) => numUniqueIUs),
           options: { omitIfMultipleYearsSelected: true },
-          tooltips: [
-            {
-              type: tooltipTypes.INFO,
-              message:
-                "IUs that participated in multiple MDAs are not double-counted here",
-            },
-          ],
         },
       ],
     },
@@ -1157,16 +1089,9 @@
             greatestOf(cells[idx - 1].value, cells[idx - 2].value),
         },
         {
-          customLogic: (cells) =>
-            uniqueRespondingIUs(cells).then(({ numUniqueIUs }) => numUniqueIUs),
+          customLogic: (cells, idx, rowIdx) =>
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ numUniqueIUs }) => numUniqueIUs),
           options: { omitIfMultipleYearsSelected: true },
-          tooltips: [
-            {
-              type: tooltipTypes.INFO,
-              message:
-                "IUs that participated in multiple MDAs are not double-counted here",
-            },
-          ],
         },
       ],
     },
@@ -1224,16 +1149,9 @@
             "STMDA - Total People from marginalized groups (LNOB) receiving NTD MDA treatment",
         },
         {
-          customLogic: (cells, idx) =>
-            uniqueRespondingIUs(cells).then(({ sumOfValues }) => sumOfValues),
+          customLogic: (cells, idx, rowIdx) =>
+            uniqueRespondingIUs(cells, { rowIdx, idx }).then(({ sumOfValues }) => sumOfValues),
           options: { omitIfMultipleYearsSelected: true },
-          tooltips: [
-            {
-              type: tooltipTypes.INFO,
-              message:
-                "IUs that participated in multiple MDAs are not double-counted here",
-            },
-          ],
         },
       ],
     },
@@ -1720,6 +1638,10 @@
       if (!targetCell.length) return;
       addTooltipToCell(targetCell, { type: tooltipType, message });
     });
+  }
+
+  function clearAlerts() {
+    state.alerts = state.alerts.filter(alert => alert.persistAfterTableLoad)
   }
 
   /**
