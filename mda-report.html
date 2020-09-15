@@ -1268,8 +1268,8 @@
         const { rowIdx, idx } = options;
         if (rowIdx && idx) {
           state.alerts.push({
-            identifier: "custom-logic",
-            identifierValue: `row-${rowIdx}-idx-${idx}`,
+            identifier: "row-cell",
+            identifierValue: `${rowIdx}-${idx}`,
             tooltipType: tooltipTypes.INFO,
             message:
               "IUs that participated in multiple MDAs are not double-counted here",
@@ -1473,8 +1473,9 @@
               ) {
                 cell.value = "n/a";
                 state.alerts.push({
-                  identifier: "custom-logic",
-                  identifierValue: `row-${rowIdx}-idx-${idx}`,
+                  // identifier: "custom-logic",
+                  identifier: "row-cell",
+                  identifierValue: `${rowIdx}-${idx}`,
                   tooltipType: tooltipTypes.INFO,
                   message: "Value is omitted when multiple years are selected",
                 })
@@ -1500,8 +1501,8 @@
                       See console.
                     `;
                   state.alerts.push({
-                    identifier: "custom-logic",
-                    identifierValue: `row-${rowIdx}-idx-${idx}`,
+                    identifier: "row-cell",
+                    identifierValue: `${rowIdx}-${idx}`,
                     tooltipType: tooltipTypes.ERROR,
                     message,
                   });
@@ -1600,7 +1601,6 @@
         <td
           ${dn ? `data-dimension-name="${dn}"` : ""}
           ${dId ? `data-dimension-id="${dId}"` : ""}
-          ${customLogic ? `data-custom-logic="row-${rowIdx}-idx-${idx}"` : ""}
           data-row-cell="${rowIdx}-${idx}"
         ></td>
       `);
